@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         [LSS] 02 - Erweiterungs-Manager
+// @name         [LSS] Erweiterungs-Manager
 // @namespace    http://tampermonkey.net/
-// @version      1.2
-// @description  Listet Wachen auf, bei denen Erweiterungen fehlen und ermöglicht das hinzufügen dieser Erweiterungen.
+// @version      1.3
+// @description  Ermöglicht das einfache Verwalten und Hinzufügen von fehlenden Erweiterungen und Lagerräumen für deine Wachen und Gebäude.
 // @author       Caddy21
 // @match        https://www.leitstellenspiel.de/
 // @grant        GM_xmlhttpRequest
@@ -292,7 +292,7 @@
             { id: 9, name: 'Fachruppe Schwere Bergung', cost: 200000, coins: 25 },
             { id: 10, name: 'Fachgruppe Elektroversorgung', cost: 200000, coins: 25 },
             { id: 11, name: 'Ortsverband-Mannschaftstransportwagen', cost: 50000, coins: 15 },
-            { id: 12, name: 'Trupp Unbenannte Luftfahrtsysteme', cost: 50000, coins: 15 },
+            { id: 12, name: 'Trupp Unbemannte Luftfahrtsysteme', cost: 50000, coins: 15 },
             { id: 13, name: 'Fachzug Führung und Kommunikation', cost: 300000, coins: 25 },
         ],
 
@@ -492,13 +492,23 @@
 
         // Beschreibung
         const description = document.createElement('div');
+        description.style.marginBottom = '20px';
+
         const descHeading = document.createElement('h4');
-        descHeading.style.marginBottom = '10px';
-        descHeading.textContent = '🛠️ Hier könnt ihr festlegen, welche Erweiterungen und Lagerräume pro Wachen-Typ angezeigt werden sollen.';
+        Object.assign(descHeading.style, {
+            marginBottom: '10px',
+            fontSize: '1.2em',
+            lineHeight: '1.4',
+        });
+        descHeading.textContent = '🛠️ Erweiterungen & Lagerräume anpassen';
+
         description.appendChild(descHeading);
 
         const descText = document.createElement('p');
-        descText.textContent = 'Die Auswahl wird gespeichert und beim nächsten Besuch übernommen.';
+        descText.textContent = 'Gestalte deine Wachen individuell: Bestimme, welche Erweiterungen und Lagerräume du je Gebäude-Typ sehen möchtest. Deine Einstellungen werden gespeichert und beibehalten!';
+        descText.style.lineHeight = '1.6';
+        descText.style.margin = '0';
+
         description.appendChild(descText);
         panel.appendChild(description);
 
@@ -670,6 +680,28 @@
                 content.style.gap = '8px';
                 content.style.padding = '8px 0';
 
+                // Alle an-/abwählen Checkbox
+                const allLabel = document.createElement('label');
+                allLabel.style.gridColumn = '1 / -1';
+                allLabel.style.display = 'flex';
+                allLabel.style.alignItems = 'center';
+                allLabel.style.gap = '6px';
+                allLabel.style.fontWeight = '500';
+
+                const selectAllCheckbox = document.createElement('input');
+                selectAllCheckbox.type = 'checkbox';
+
+                const selectAllText = document.createElement('span');
+                selectAllText.textContent = 'Alle Lagerräume an-/abwählen';
+                selectAllText.style.fontWeight = 'bold';
+                selectAllText.style.color = 'var(--primary-color, #007bff)';
+
+                allLabel.appendChild(selectAllCheckbox);
+                allLabel.appendChild(selectAllText);
+                content.appendChild(allLabel);
+
+                const checkboxes = [];
+
                 manualStorageRooms[category].forEach(room => {
                     const key = `${category}_storage_${room.name.replace(/\s+/g, '_')}`;
                     const label = document.createElement('label');
@@ -684,11 +716,22 @@
 
                     checkbox.addEventListener('change', () => {
                         settings[key] = checkbox.checked;
+                        const allChecked = checkboxes.every(cb => cb.checked);
+                        selectAllCheckbox.checked = allChecked;
                     });
 
                     label.appendChild(checkbox);
                     label.append(` ${room.name}`);
                     content.appendChild(label);
+                    checkboxes.push(checkbox);
+                });
+
+                selectAllCheckbox.checked = checkboxes.every(cb => cb.checked);
+                selectAllCheckbox.addEventListener('change', () => {
+                    checkboxes.forEach(cb => {
+                        cb.checked = selectAllCheckbox.checked;
+                        settings[cb.dataset.key] = cb.checked;
+                    });
                 });
 
                 legend.addEventListener('click', () => {
@@ -1124,7 +1167,7 @@
         return leitstelle ? leitstelle.caption : 'Unbekannt';
     }
 
-    // Funktion um die aktuelle Credits und Coins des USERS abzurufen
+    // Funktion um die aktuelle Credits und Coins des Users abzurufen
     async function getUserCredits() {
         try {
             const response = await fetch('https://www.leitstellenspiel.de/api/userinfo');
@@ -1143,6 +1186,7 @@
         }
     }
 
+    // Funktion um fehlende Lagererweiterungen für eine Gebäudegruppe zu ermitteln
     function prepareStorageGroup(groupKey, group, settings) {
         if (!storageGroups[groupKey]) storageGroups[groupKey] = [];
 
@@ -1151,7 +1195,7 @@
             const options = manualStorageRooms[baseKey];
             if (!options) return;
 
-            const current = new Set((building.storageUpgrades || []).map(u => Object.keys(u)[0]));
+            const current = new Set((building.storage_upgrades || []).map(u => u.type_id));
             const missingExtensions = [];
 
             options.forEach(opt => {
@@ -1196,16 +1240,18 @@
         buildings.forEach(building => {
             const baseKey = `${building.building_type}_${building.small_building ? 'small' : 'normal'}`;
             const extensions = manualExtensions[baseKey];
-            if (!extensions) return;
+            const storageOptions = manualStorageRooms[baseKey];
+            if (!extensions && !storageOptions) return;
 
-            const existing = new Set(building.extensions.map(e => e.type_id));
+            const existingExtensions = new Set(building.extensions.map(e => e.type_id));
+            const existingStorages = new Set((building.storage_upgrades || []).map(u => Object.keys(u)[0]));
 
-            const allowed = extensions.filter(ext => {
+            const allowedExtensions = (extensions || []).filter(ext => {
                 const key = `${baseKey}_${ext.id}`;
                 if (!settings[key] || isExtensionLimitReached(building, ext.id)) return false;
 
                 const isForbidden = (forbiddenIds) =>
-                forbiddenIds.some(id => existing.has(id)) && !forbiddenIds.includes(ext.id);
+                forbiddenIds.some(id => existingExtensions.has(id)) && !forbiddenIds.includes(ext.id);
 
                 if (building.building_type === 6 && building.small_building) {
                     return !isForbidden([10, 11, 12, 13]);
@@ -1215,24 +1261,22 @@
                     return !isForbidden([0, 6, 8, 13, 14, 16, 18, 19, 25]);
                 }
 
-                return !existing.has(ext.id);
+                return !existingExtensions.has(ext.id);
             });
 
-            const hasEnabledStorage = (() => {
-                const options = manualStorageRooms[baseKey];
-                if (!options) return false;
+            const enabledStorages = (storageOptions || []).filter(opt => {
+                const key = `${baseKey}_storage_${opt.name.replace(/\s+/g, '_')}`;
+                return settings[key] !== false && !existingStorages.has(opt.id.toString());
+            });
 
-                return options.some(opt => {
-                    const key = `${baseKey}_storage_${opt.name.replace(/\s+/g, '_')}`;
-                    return settings[key] !== false;
-                });
-            })();
+            // Nur Gebäude einfügen, wenn Erweiterungen oder Lager fehlen
+            if (allowedExtensions.length === 0 && enabledStorages.length === 0) return;
 
-            if (allowed.length > 0 || hasEnabledStorage) {
-                buildingGroups[baseKey] = buildingGroups[baseKey] || [];
-                buildingGroups[baseKey].push({ building, missingExtensions: allowed });
+            buildingGroups[baseKey] = buildingGroups[baseKey] || [];
+            buildingGroups[baseKey].push({ building, missingExtensions: allowedExtensions });
 
-                // Lagergruppen vorbereiten
+            // Lagergruppen vorbereiten
+            if (enabledStorages.length > 0) {
                 prepareStorageGroup(baseKey, [{ building }], settings);
             }
         });
@@ -1333,11 +1377,11 @@
 
         }
 
-        const buildSelectedButton = createButton('Ausgewählte Erweiterungen bauen', ['btn', 'build-selected-button']);
+        const buildSelectedButton = createButton('Ausgewählte Erweiterungen/Lager bauen', ['btn', 'build-selected-button']);
         buildSelectedButton.disabled = true;
         buildSelectedButton.onclick = () => buildSelectedExtensions();
 
-        const buildAllButton = createButton('Sämtliche Erweiterungen bei allen Wachen bauen', ['btn', 'build-all-button']);
+        const buildAllButton = createButton('Sämtliche Erweiterungen/Lager bei allen Wachen bauen', ['btn', 'build-all-button']);
         buildAllButton.onclick = () => showCurrencySelectionForAll(groupKey);
 
         [spoilerButton, lagerButton, buildSelectedButton, buildAllButton]
@@ -1438,6 +1482,32 @@
             if (!builtStorages.includes(storageList[i].id)) {
 
                 return false;
+            }
+        }
+
+        return true;
+    }
+    function canBuildAllSelectedInOrder(selectedStorages, buildingType, builtStorages) {
+        const storageList = manualStorageRooms[buildingType];
+        if (!storageList) return true;
+
+        const allBuilt = new Set(builtStorages);
+
+        for (let i = 0; i < storageList.length; i++) {
+            const currentStorageId = storageList[i].id;
+
+            if (selectedStorages.includes(currentStorageId)) {
+                // Prüfe: sind alle vorherigen gebaut?
+                for (let j = 0; j < i; j++) {
+                    const prevStorageId = storageList[j].id;
+                    if (!allBuilt.has(prevStorageId)) {
+                        // Nicht erlaubt, weil vorherige Lager fehlen
+                        return false;
+                    }
+                }
+
+                // Temporär als "gebaut" markieren, um Reihenfolge in dieser Session zu tracken
+                allBuilt.add(currentStorageId);
             }
         }
 
@@ -1623,10 +1693,10 @@
         return table;
     }
     function createLagerTable(group, userInfo, buildSelectedButton, currentGroupKey) {
-    const settings = getExtensionSettings();
+        const settings = getExtensionSettings();
 
-    const table = document.createElement('table');
-    table.innerHTML = `
+        const table = document.createElement('table');
+        table.innerHTML = `
         <thead style="background-color: #f2f2f2; font-weight: bold; border-bottom: 2px solid #ccc;">
             <tr>
                 <th style="padding: 10px; text-align: center;">Alle An- / Abwählen</th>
@@ -1641,254 +1711,233 @@
         <tbody></tbody>
     `;
 
-    const tbody = table.querySelector('tbody');
-    const filters = {};
-    const filterElements = {};
-    const filterRow = document.createElement('tr');
+        const tbody = table.querySelector('tbody');
+        const filters = {};
+        const filterElements = {};
+        const filterRow = document.createElement('tr');
 
-    const selectAllCell = document.createElement('th');
-    const selectAllCheckbox = document.createElement('input');
-    selectAllCheckbox.type = 'checkbox';
-    selectAllCheckbox.className = 'select-all-checkbox-lager';
-    selectAllCell.appendChild(selectAllCheckbox);
-    filterRow.appendChild(selectAllCell);
+        const selectAllCell = document.createElement('th');
+        const selectAllCheckbox = document.createElement('input');
+        selectAllCheckbox.type = 'checkbox';
+        selectAllCheckbox.className = 'select-all-checkbox-lager';
+        selectAllCell.appendChild(selectAllCheckbox);
+        filterRow.appendChild(selectAllCell);
 
-    function createDropdownFilter(options, placeholder, colIndex) {
-        const th = document.createElement('th');
-        const select = document.createElement('select');
-        select.innerHTML = `<option value="">🔽 ${placeholder}</option>`;
-        [...new Set(options)].sort().forEach(opt => {
-            const option = document.createElement('option');
-            option.value = opt;
-            option.textContent = opt;
-            select.appendChild(option);
+        function createDropdownFilter(options, placeholder, colIndex) {
+            const th = document.createElement('th');
+            const select = document.createElement('select');
+            select.innerHTML = `<option value="">🔽 ${placeholder}</option>`;
+            [...new Set(options)].sort().forEach(opt => {
+                const option = document.createElement('option');
+                option.value = opt;
+                option.textContent = opt;
+                select.appendChild(option);
+            });
+
+            select.addEventListener('change', () => {
+                filters[colIndex] = select.value || undefined;
+                applyAllFilters();
+                updateSelectAllCheckboxState();
+            });
+
+            filterElements[colIndex] = select;
+            th.appendChild(select);
+            return th;
+        }
+
+        const leitstellen = [];
+        const wachen = [];
+        const lagerArten = [];
+
+        group.forEach(({ building }) => {
+            const baseKey = `${building.building_type}_${building.small_building ? 'small' : 'normal'}`;
+            const options = manualStorageRooms[baseKey];
+            if (!options) return;
+
+            const current = new Set((building.storage_upgrades || []).map(u => u.type_id));
+
+            options.forEach(opt => {
+                const id = opt.id;
+
+                if (current.has(id)) return;
+                const storageKey = `${baseKey}_storage_${opt.name.replace(/\s+/g, '_')}`;
+                if (settings[storageKey] === false) return;
+
+                leitstellen.push(getLeitstelleName(building));
+                wachen.push(building.caption);
+                lagerArten.push(opt.name);
+
+                const row = document.createElement('tr');
+                row.classList.add(`storage-row-${building.id}-${id}`);
+
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.className = 'storage-checkbox';
+                checkbox.dataset.buildingId = building.id;
+                checkbox.dataset.storageType = id;
+                checkbox.disabled = userInfo.credits < opt.cost && userInfo.coins < opt.coins;
+                checkbox.addEventListener('change', () => {
+                    updateBuildSelectedButton();
+                });
+
+                const checkboxCell = document.createElement('td');
+                checkboxCell.appendChild(checkbox);
+                row.appendChild(checkboxCell);
+
+                [getLeitstelleName(building), building.caption, opt.name, `+${opt.additionalStorage}`].forEach(text => {
+                    const td = document.createElement('td');
+                    td.textContent = text;
+                    row.appendChild(td);
+                });
+
+                const creditCell = document.createElement('td');
+                const creditBtn = document.createElement('button');
+                creditBtn.textContent = `${formatNumber(opt.cost)} Credits`;
+                creditBtn.classList.add('btn', 'btn-xl', 'credit-button');
+                creditBtn.style.backgroundColor = '#28a745';
+                creditBtn.style.color = 'white';
+                creditBtn.disabled = userInfo.credits < opt.cost;
+                creditBtn.onclick = () => {
+                    const baseKey = `${building.building_type}_${building.small_building ? 'small' : 'normal'}`;
+                    const built = (building.storage_upgrades || []).map(u => Object.keys(u)[0]);
+
+                    if (!canBuildStorageInOrder(id, baseKey, built)) {
+                        alert("Bitte beachte: Die Lagerräume müssen in der vorgegebenen Reihenfolge gebaut werden.\n\nReihenfolge:\n1. Lagerraum\n2. 1te zusätzlicher Lagerraum\n3. 2te zusätzlicher Lagerraum\n4. 3te zusätzlicher Lagerraum\n5. 4te zusätzlicher Lagerraum\n6. 5te zusätzlicher Lagerraum.\n7. 6te zusätzlicher Lagerraum\n8. 7te zusätzlicher Lagerraum");
+
+                        return;
+                    }
+
+                    buildStorage(building, id, 'credits', opt.cost, row);
+                };
+                creditCell.appendChild(creditBtn);
+                row.appendChild(creditCell);
+
+                const coinsCell = document.createElement('td');
+                const coinBtn = document.createElement('button');
+                coinBtn.textContent = `${opt.coins} Coins`;
+                coinBtn.classList.add('btn', 'btn-xl', 'coins-button');
+                coinBtn.style.backgroundColor = '#dc3545';
+                coinBtn.style.color = 'white';
+                coinBtn.disabled = userInfo.coins < opt.coins;
+                coinBtn.onclick = () => {
+                    const baseKey = `${building.building_type}_${building.small_building ? 'small' : 'normal'}`;
+                    const built = (building.storage_upgrades || []).map(u => Object.keys(u)[0]);
+
+                    if (!canBuildStorageInOrder(id, baseKey, built)) {
+                        alert("Bitte beachte: Die Lagerräume müssen in der vorgegebenen Reihenfolge gebaut werden.\n\nReihenfolge:\n1. Lagerraum\n2. 1te zusätzlicher Lagerraum\n3. 2te zusätzlicher Lagerraum\n4. 3te zusätzlicher Lagerraum\n5. 4te zusätzlicher Lagerraum\n6. 5te zusätzlicher Lagerraum\nusw.");
+
+                        return;
+                    }
+
+                    buildStorage(building, id, 'coins', opt.coins, row);
+                };
+                coinsCell.appendChild(coinBtn);
+                row.appendChild(coinsCell);
+
+                tbody.appendChild(row);
+            });
         });
 
-        select.addEventListener('change', () => {
-            filters[colIndex] = select.value || undefined;
+        // Filterzeile ergänzen
+        filterRow.appendChild(createDropdownFilter(leitstellen, 'Leitstelle', 1));
+        filterRow.appendChild(createDropdownFilter(wachen, 'Wache', 2));
+        filterRow.appendChild(createDropdownFilter(lagerArten, 'Lager', 3));
+
+        const resetCell = document.createElement('th');
+        const resetBtn = document.createElement('button');
+        resetBtn.textContent = 'Filter zurücksetzen';
+        resetBtn.classList.add('btn', 'btn-sm', 'btn-primary');
+        resetBtn.style.padding = '2px 6px';
+        resetBtn.style.fontSize = '0.8em';
+        resetBtn.onclick = () => {
+            Object.values(filterElements).forEach(select => select.selectedIndex = 0);
+            Object.keys(filters).forEach(k => delete filters[k]);
             applyAllFilters();
             updateSelectAllCheckboxState();
+        };
+        resetCell.appendChild(resetBtn);
+        filterRow.appendChild(resetCell);
+        filterRow.appendChild(document.createElement('th')); // Coins-Spalte leer lassen
+
+        table.querySelector('thead').appendChild(filterRow);
+
+        selectAllCheckbox.addEventListener('change', () => {
+            const rows = tbody.querySelectorAll('tr');
+            rows.forEach(row => {
+                if (row.style.display !== 'none') {
+                    const cb = row.querySelector('.storage-checkbox');
+                    if (cb && !cb.disabled) cb.checked = selectAllCheckbox.checked;
+                }
+            });
+            updateSelectAllCheckboxState()
+            updateBuildSelectedButton();
         });
 
-        filterElements[colIndex] = select;
-        th.appendChild(select);
-        return th;
-    }
+        function applyAllFilters() {
+            const rows = tbody.querySelectorAll('tr');
+            rows.forEach(row => {
+                let visible = true;
+                Object.entries(filters).forEach(([i, val]) => {
+                    const text = row.children[i]?.textContent.toLowerCase().trim();
+                    if (val && text !== val.toLowerCase()) visible = false;
+                });
+                row.style.display = visible ? '' : 'none';
+            });
+        }
 
-    const leitstellen = [];
-    const wachen = [];
-    const lagerArten = [];
-
-    group.forEach(({ building }) => {
-        const baseKey = `${building.building_type}_${building.small_building ? 'small' : 'normal'}`;
-        const options = manualStorageRooms[baseKey];
-        if (!options) return;
-
-        const current = new Set((building.storageUpgrades || []).map(u => Object.keys(u)[0]));
-
-        options.forEach(opt => {
-            const id = opt.id;
-
-            // Hier prüfen, ob Lager schon gebaut wurde
-            const isBuilt = current.has(id);
-
-            const storageKey = `${baseKey}_storage_${opt.name.replace(/\s+/g, '_')}`;
-            if (settings[storageKey] === false) return;
-
-            leitstellen.push(getLeitstelleName(building));
-            wachen.push(building.caption);
-            lagerArten.push(opt.name);
-
-            const row = document.createElement('tr');
-            row.classList.add(`storage-row-${building.id}-${id}`);
-
-            // Wenn gebaut, markiere und verstecke die Zeile direkt
-            if (isBuilt) {
-                row.classList.add('built');
-                row.style.display = 'none';
+        function updateSelectAllCheckboxState() {
+            const visibleRows = [...tbody.querySelectorAll('tr')].filter(row => row.style.display !== 'none');
+            if (visibleRows.length === 0) {
+                selectAllCheckbox.checked = false;
+                selectAllCheckbox.indeterminate = false;
+                selectAllCheckbox.disabled = true;
+                return;
             }
+            selectAllCheckbox.disabled = false;
+            const allChecked = visibleRows.every(row => row.querySelector('.storage-checkbox').checked || row.querySelector('.storage-checkbox').disabled);
+            const noneChecked = visibleRows.every(row => !row.querySelector('.storage-checkbox').checked);
+            selectAllCheckbox.checked = allChecked;
+            selectAllCheckbox.indeterminate = !allChecked && !noneChecked;
+        }
 
-            const checkbox = document.createElement('input');
-            checkbox.type = 'checkbox';
-            checkbox.className = 'storage-checkbox';
-            checkbox.dataset.buildingId = building.id;
-            checkbox.dataset.storageType = id;
-            checkbox.disabled = userInfo.credits < opt.cost && userInfo.coins < opt.coins;
-            checkbox.addEventListener('change', () => {
-                updateBuildSelectedButton();
-            });
-
-            const checkboxCell = document.createElement('td');
-            checkboxCell.appendChild(checkbox);
-            row.appendChild(checkboxCell);
-
-            [getLeitstelleName(building), building.caption, opt.name, `+${opt.additionalStorage}`].forEach(text => {
-                const td = document.createElement('td');
-                td.textContent = text;
-                row.appendChild(td);
-            });
-
-            const creditCell = document.createElement('td');
-            const creditBtn = document.createElement('button');
-            creditBtn.textContent = `${formatNumber(opt.cost)} Credits`;
-            creditBtn.classList.add('btn', 'btn-xl', 'credit-button');
-            creditBtn.style.backgroundColor = '#28a745';
-            creditBtn.style.color = 'white';
-            creditBtn.disabled = userInfo.credits < opt.cost;
-            creditBtn.onclick = () => {
-                const baseKey = `${building.building_type}_${building.small_building ? 'small' : 'normal'}`;
-                const built = (building.storageUpgrades || []).map(u => Object.keys(u)[0]);
-
-                if (!canBuildStorageInOrder(id, baseKey, built)) {
-                    alert("Bitte beachte: Die Lagerräume müssen in der vorgegebenen Reihenfolge gebaut werden.\n\nReihenfolge:\n1. Lagerraum\n2. 1te zusätzlicher Lagerraum\n3. 2te zusätzlicher Lagerraum\n4. 3te zusätzlicher Lagerraum\n5. 4te zusätzlicher Lagerraum\n6. 5te zusätzlicher Lagerraum.\n7. 6te zusätzlicher Lagerraum\n8. 7te zusätzlicher Lagerraum");
-
-                    return;
-                }
-
-                buildStorage(building, id, 'credits', opt.cost, row);
-            };
-            creditCell.appendChild(creditBtn);
-            row.appendChild(creditCell);
-
-            const coinsCell = document.createElement('td');
-            const coinBtn = document.createElement('button');
-            coinBtn.textContent = `${opt.coins} Coins`;
-            coinBtn.classList.add('btn', 'btn-xl', 'coins-button');
-            coinBtn.style.backgroundColor = '#dc3545';
-            coinBtn.style.color = 'white';
-            coinBtn.disabled = userInfo.coins < opt.coins;
-            coinBtn.onclick = () => {
-                const baseKey = `${building.building_type}_${building.small_building ? 'small' : 'normal'}`;
-                const built = (building.storageUpgrades || []).map(u => Object.keys(u)[0]);
-
-                if (!canBuildStorageInOrder(id, baseKey, built)) {
-                    alert("Bitte beachte: Die Lagerräume müssen in der vorgegebenen Reihenfolge gebaut werden.\n\nReihenfolge:\n1. Lagerraum\n2. 1te zusätzlicher Lagerraum\n3. 2te zusätzlicher Lagerraum\n4. 3te zusätzlicher Lagerraum\n5. 4te zusätzlicher Lagerraum\n6. 5te zusätzlicher Lagerraum\nusw.");
-
-                    return;
-                }
-
-                buildStorage(building, id, 'coins', opt.coins, row);
-            };
-            coinsCell.appendChild(coinBtn);
-            row.appendChild(coinsCell);
-
-            tbody.appendChild(row);
-        });
-    });
-
-    // Filterzeile ergänzen
-    filterRow.appendChild(createDropdownFilter(leitstellen, 'Leitstelle', 1));
-    filterRow.appendChild(createDropdownFilter(wachen, 'Wache', 2));
-    filterRow.appendChild(createDropdownFilter(lagerArten, 'Erweiterung', 3));
-
-    const resetCell = document.createElement('th');
-    const resetBtn = document.createElement('button');
-    resetBtn.textContent = 'Filter zurücksetzen';
-    resetBtn.classList.add('btn', 'btn-sm', 'btn-primary');
-    resetBtn.style.padding = '2px 6px';
-    resetBtn.style.fontSize = '0.8em';
-    resetBtn.onclick = () => {
-        Object.values(filterElements).forEach(select => select.selectedIndex = 0);
-        Object.keys(filters).forEach(k => delete filters[k]);
-        applyAllFilters();
         updateSelectAllCheckboxState();
-    };
-    resetCell.appendChild(resetBtn);
-    filterRow.appendChild(resetCell);
-    filterRow.appendChild(document.createElement('th')); // Coins-Spalte leer lassen
 
-    table.querySelector('thead').appendChild(filterRow);
+        // Speichere die Lagerdaten für die Bau-Funktion
+        if (!storageGroups[currentGroupKey]) storageGroups[currentGroupKey] = [];
 
-    selectAllCheckbox.addEventListener('change', () => {
-        const rows = tbody.querySelectorAll('tr');
-        rows.forEach(row => {
-            if (row.style.display !== 'none') {
-                const cb = row.querySelector('.storage-checkbox');
-                if (cb && !cb.disabled) cb.checked = selectAllCheckbox.checked;
+        group.forEach(({ building }) => {
+            const baseKey = `${building.building_type}_${building.small_building ? 'small' : 'normal'}`;
+            const options = manualStorageRooms[baseKey];
+            if (!options) return;
+
+            const current = new Set((building.storage_upgrades || []).map(u => Object.keys(u)[0]));
+
+            const missingExtensions = [];
+
+            options.forEach(opt => {
+                const id = opt.id;
+                if (current.has(id)) return;
+
+                const storageKey = `${baseKey}_storage_${opt.name.replace(/\s+/g, '_')}`;
+                if (getExtensionSettings()[storageKey] === false) return;
+
+                missingExtensions.push({
+                    id,
+                    cost: opt.cost,
+                    coins: opt.coins,
+                    isStorage: true // <- Markiere es als Lager
+                });
+            });
+
+            if (missingExtensions.length > 0) {
+                storageGroups[currentGroupKey].push({ building, missingExtensions });
             }
         });
-        updateSelectAllCheckboxState()
-        updateBuildSelectedButton();
-    });
 
-    function applyAllFilters() {
-        const rows = tbody.querySelectorAll('tr');
-        rows.forEach(row => {
-            let visible = true;
-            Object.entries(filters).forEach(([i, val]) => {
-                const text = row.children[i]?.textContent.toLowerCase().trim();
-                if (val && text !== val.toLowerCase()) visible = false;
-            });
-            row.style.display = visible ? '' : 'none';
-        });
+        return table;
     }
 
-    function updateSelectAllCheckboxState() {
-        const visibleRows = [...tbody.querySelectorAll('tr')].filter(row => row.style.display !== 'none');
-        if (visibleRows.length === 0) {
-            selectAllCheckbox.checked = false;
-            selectAllCheckbox.indeterminate = false;
-            selectAllCheckbox.disabled = true;
-            return;
-        }
-        selectAllCheckbox.disabled = false;
-        const allChecked = visibleRows.every(row => row.querySelector('.storage-checkbox').checked || row.querySelector('.storage-checkbox').disabled);
-        const noneChecked = visibleRows.every(row => !row.querySelector('.storage-checkbox').checked);
-        selectAllCheckbox.checked = allChecked;
-        selectAllCheckbox.indeterminate = !allChecked && !noneChecked;
-    }
-
-    updateSelectAllCheckboxState();
-
-    // Speichere die Lagerdaten für die Bau-Funktion
-    if (!storageGroups[currentGroupKey]) storageGroups[currentGroupKey] = [];
-
-    group.forEach(({ building }) => {
-        const baseKey = `${building.building_type}_${building.small_building ? 'small' : 'normal'}`;
-        const options = manualStorageRooms[baseKey];
-        if (!options) return;
-
-        const current = new Set((building.storageUpgrades || []).map(u => Object.keys(u)[0]));
-
-        const missingExtensions = [];
-
-        options.forEach(opt => {
-            const id = opt.id;
-            if (current.has(id)) return;
-
-            const storageKey = `${baseKey}_storage_${opt.name.replace(/\s+/g, '_')}`;
-            if (getExtensionSettings()[storageKey] === false) return;
-
-            missingExtensions.push({
-                id,
-                cost: opt.cost,
-                coins: opt.coins,
-                isStorage: true // <- Markiere es als Lager
-            });
-        });
-
-        if (missingExtensions.length > 0) {
-            storageGroups[currentGroupKey].push({ building, missingExtensions });
-        }
-    });
-
-    return table;
-}
-
-    // Schließen-Button-Funktionalität
-    document.getElementById('close-extension-helper').addEventListener('click', () => {
-        const lightbox = document.getElementById('extension-lightbox');
-        lightbox.style.display = 'none';
-
-        // Setze die globalen Variablen zurück
-        buildingGroups = {};
-        buildingsData = [];
-    });
-
-    // Initial den Button hinzufügen
-    addMenuButton();
-
-    // Filterfunktion
+    // Filterfunktion über Dropdowns
     function filterTableByDropdown(table, columnIndex, filterValue) {
         const tbody = table.querySelector('tbody');
         const rows = tbody.querySelectorAll('tr');
@@ -2028,6 +2077,19 @@
 
         return false;
     }
+
+    // Schließen-Button-Funktionalität
+    document.getElementById('close-extension-helper').addEventListener('click', () => {
+        const lightbox = document.getElementById('extension-lightbox');
+        lightbox.style.display = 'none';
+
+        // Setze die globalen Variablen zurück
+        buildingGroups = {};
+        buildingsData = [];
+    });
+
+    // Initial den Button hinzufügen
+    addMenuButton();
 
     // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -2256,6 +2318,22 @@
             }
         }
 
+        // Prüfung Lagerreihenfolge
+        for (const [buildingId, selectedStorageTypes] of Object.entries(selectedStoragesByBuilding)) {
+            const building = buildingsData.find(b => String(b.id) === String(buildingId));
+            if (!building) continue;
+
+            const buildingTypeKey = `${building.building_type}_${building.small_building ? 'small' : 'normal'}`;
+            const builtStorages = building.extensions || [];
+
+            if (!canBuildAllSelectedInOrder(selectedStorageTypes, buildingTypeKey, builtStorages)) {
+                showError(`Bitte beachte: Die Lagerräume müssen in der vorgegebenen Reihenfolge für das Gebäude ${getBuildingCaption(buildingId)} gebaut werden.\n\nReihenfolge:\n1. Lagerraum\n2. 1te zusätzlicher Lagerraum\n3. 2te zusätzlicher Lagerraum\n4. 3te zusätzlicher Lagerraum\n5. 4te zusätzlicher Lagerraum\n6. 5te zusätzlicher Lagerraum.\n7. 6te zusätzlicher Lagerraum\n8. 7te zusätzlicher Lagerraum'
+`);
+                updateBuildSelectedButton();
+                return;
+            }
+        }
+
         const userInfo = await getUserCredits();
         if (!user_premium) {
             for (const [buildingId, extensions] of Object.entries(selectedExtensionsByBuilding)) {
@@ -2312,7 +2390,6 @@
             });
         }
 
-
         // Zeige Coin/Credit-Auswahl inkl. Lager
         showCurrencySelection(selectedExtensionsByBuilding, userInfo, selectedStoragesByBuilding);
 
@@ -2323,9 +2400,9 @@
             });
 
             document.querySelectorAll('.select-all-checkbox, .select-all-checkbox-lager').forEach(checkbox => {
-    checkbox.checked = false;
-    checkbox.dispatchEvent(new Event('change'));
-});
+                checkbox.checked = false;
+                checkbox.dispatchEvent(new Event('change'));
+            });
 
             updateBuildSelectedButton();
         }, 100);
