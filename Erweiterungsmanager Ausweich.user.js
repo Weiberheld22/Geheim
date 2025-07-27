@@ -116,6 +116,7 @@
         #extension-lightbox .spoiler-button          { background-color: green; }
         #extension-lightbox .lager-button            { background-color: var(--warning-color); }
         #extension-lightbox .lager-button:hover:enabled { background-color: var(--warning-hover); }
+        #extension-lightbox .level-button            { background-color: brown; }
 
         #extension-lightbox .build-selected-button:hover:enabled,
         #extension-lightbox .build-all-button:hover:enabled {
@@ -410,6 +411,89 @@
             { id: 'initial_containers', name: 'Lagerraum', cost: 25000, coins: 10, additionalStorage: 40 },
         ],
     };
+
+    const manualLevels = {
+        '0_normal': [
+            { id: 0, name: 'Level 0', cost: 10000, coins: 10 },
+            { id: 1, name: 'Level 1', cost: 50000, coins: 15 },
+            { id: 2, name: 'Level 2', cost: 100000, coins: 20 },
+            { id: 3, name: 'Level 3', cost: 100000, coins: 20 },
+            { id: 4, name: 'Level 4', cost: 100000, coins: 20 },
+            { id: 5, name: 'Level 5', cost: 100000, coins: 20 },
+            { id: 6, name: 'Level 6', cost: 100000, coins: 20 },
+            { id: 7, name: 'Level 7', cost: 100000, coins: 20 },
+            { id: 8, name: 'Level 8', cost: 100000, coins: 20 },
+            { id: 9, name: 'Level 9', cost: 100000, coins: 20 },
+            { id: 10, name: 'Level 10', cost: 100000, coins: 20 },
+            { id: 11, name: 'Level 11', cost: 100000, coins: 20 },
+            { id: 12, name: 'Level 12', cost: 100000, coins: 20 },
+            { id: 13, name: 'Level 13', cost: 100000, coins: 20 },
+            { id: 14, name: 'Level 14', cost: 100000, coins: 20 },
+            { id: 15, name: 'Level 15', cost: 100000, coins: 20 },
+            { id: 16, name: 'Level 16', cost: 100000, coins: 20 },
+            { id: 17, name: 'Level 17', cost: 100000, coins: 20 },
+            { id: 18, name: 'Level 18', cost: 100000, coins: 20 },
+        ],
+
+        '0_small': [
+            { id: 0, name: 'Level 0', cost: 10000, coins: 10 },
+            { id: 1, name: 'Level 1', cost: 50000, coins: 15 },
+            { id: 2, name: 'Level 2', cost: 100000, coins: 20 },
+            { id: 3, name: 'Level 3', cost: 100000, coins: 20 },
+            { id: 4, name: 'Level 4', cost: 100000, coins: 20 },
+
+        ],
+
+        '4_normal': [
+            { id: 0, name: 'Level 0', cost: 19000, coins: 11 },
+            { id: 1, name: 'Level 1', cost: 19000, coins: 11 },
+            { id: 2, name: 'Level 2', cost: 19000, coins: 11 },
+            { id: 3, name: 'Level 3', cost: 19000, coins: 11 },
+            { id: 4, name: 'Level 4', cost: 19000, coins: 11 },
+            { id: 5, name: 'Level 5', cost: 19000, coins: 11 },
+            { id: 6, name: 'Level 6', cost: 19000, coins: 11 },
+            { id: 7, name: 'Level 7', cost: 19000, coins: 11 },
+            { id: 8, name: 'Level 8', cost: 19000, coins: 11 },
+            { id: 9, name: 'Level 9', cost: 19000, coins: 11 },
+            { id: 10, name: 'Level 10', cost: 19000, coins: 11 },
+            { id: 11, name: 'Level 11', cost: 19000, coins: 11 },
+            { id: 12, name: 'Level 12', cost: 19000, coins: 11 },
+            { id: 13, name: 'Level 13', cost: 19000, coins: 11 },
+            { id: 14, name: 'Level 14', cost: 19000, coins: 11 },
+            { id: 15, name: 'Level 15', cost: 19000, coins: 11 },
+            { id: 16, name: 'Level 16', cost: 19000, coins: 11 },
+            { id: 17, name: 'Level 17', cost: 19000, coins: 11 },
+            { id: 18, name: 'Level 18', cost: 19000, coins: 11 },
+            { id: 19, name: 'Level 19', cost: 19000, coins: 11 },
+        ],
+
+        '6_normal': [
+            { id: 0, name: 'Level 0', cost: 10000, coins: 10 },
+            { id: 1, name: 'Level 1', cost: 50000, coins: 15 },
+            { id: 2, name: 'Level 2', cost: 100000, coins: 20 },
+            { id: 3, name: 'Level 3', cost: 100000, coins: 20 },
+            { id: 4, name: 'Level 4', cost: 100000, coins: 20 },
+            { id: 5, name: 'Level 5', cost: 100000, coins: 20 },
+            { id: 6, name: 'Level 6', cost: 100000, coins: 20 },
+            { id: 7, name: 'Level 7', cost: 100000, coins: 20 },
+            { id: 8, name: 'Level 8', cost: 100000, coins: 20 },
+            { id: 9, name: 'Level 9', cost: 100000, coins: 20 },
+            { id: 10, name: 'Level 10', cost: 100000, coins: 20 },
+            { id: 11, name: 'Level 11', cost: 100000, coins: 20 },
+            { id: 12, name: 'Level 12', cost: 100000, coins: 20 },
+            { id: 13, name: 'Level 13', cost: 100000, coins: 20 },
+        ],
+
+        '6_small': [
+            { id: 0, name: 'Level 0', cost: 10000, coins: 10 },
+            { id: 1, name: 'Level 1', cost: 50000, coins: 15 },
+            { id: 2, name: 'Level 2', cost: 100000, coins: 20 },
+            { id: 3, name: 'Level 3', cost: 100000, coins: 20 },
+            { id: 4, name: 'Level 4', cost: 100000, coins: 20 },
+
+        ],
+    };
+    
     const buildingTypeNames = {
         '0_normal': 'Feuerwache (Normal)',
         '0_small': 'Feuerwache (Kleinwache)',
