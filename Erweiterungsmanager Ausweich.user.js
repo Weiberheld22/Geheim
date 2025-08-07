@@ -31,6 +31,7 @@
         --credits-color: #28a745;
         --coins-color: #dc3545;
         --cancel-color: #6c757d;
+
         }
 
         #extension-lightbox {
@@ -411,89 +412,85 @@
             { id: 'initial_containers', name: 'Lagerraum', cost: 25000, coins: 10, additionalStorage: 40 },
         ],
     };
-
     const manualLevels = {
         '0_normal': [
-            { id: 0, name: 'Level 0', cost: 10000, coins: 10 },
-            { id: 1, name: 'Level 1', cost: 50000, coins: 15 },
-            { id: 2, name: 'Level 2', cost: 100000, coins: 20 },
-            { id: 3, name: 'Level 3', cost: 100000, coins: 20 },
-            { id: 4, name: 'Level 4', cost: 100000, coins: 20 },
-            { id: 5, name: 'Level 5', cost: 100000, coins: 20 },
-            { id: 6, name: 'Level 6', cost: 100000, coins: 20 },
-            { id: 7, name: 'Level 7', cost: 100000, coins: 20 },
-            { id: 8, name: 'Level 8', cost: 100000, coins: 20 },
-            { id: 9, name: 'Level 9', cost: 100000, coins: 20 },
-            { id: 10, name: 'Level 10', cost: 100000, coins: 20 },
-            { id: 11, name: 'Level 11', cost: 100000, coins: 20 },
-            { id: 12, name: 'Level 12', cost: 100000, coins: 20 },
-            { id: 13, name: 'Level 13', cost: 100000, coins: 20 },
-            { id: 14, name: 'Level 14', cost: 100000, coins: 20 },
-            { id: 15, name: 'Level 15', cost: 100000, coins: 20 },
-            { id: 16, name: 'Level 16', cost: 100000, coins: 20 },
-            { id: 17, name: 'Level 17', cost: 100000, coins: 20 },
-            { id: 18, name: 'Level 18', cost: 100000, coins: 20 },
+            { id: 0, name: 'Stufe 0', cost: 10000, coins: 10 },
+            { id: 1, name: 'Stufe 1', cost: 50000, coins: 15 },
+            { id: 2, name: 'Stufe 2', cost: 100000, coins: 20 },
+            { id: 3, name: 'Stufe 3', cost: 100000, coins: 20 },
+            { id: 4, name: 'Stufe 4', cost: 100000, coins: 20 },
+            { id: 5, name: 'Stufe 5', cost: 100000, coins: 20 },
+            { id: 6, name: 'Stufe 6', cost: 100000, coins: 20 },
+            { id: 7, name: 'Stufe 7', cost: 100000, coins: 20 },
+            { id: 8, name: 'Stufe 8', cost: 100000, coins: 20 },
+            { id: 9, name: 'Stufe 9', cost: 100000, coins: 20 },
+            { id: 10, name: 'Stufe 10', cost: 100000, coins: 20 },
+            { id: 11, name: 'Stufe 11', cost: 100000, coins: 20 },
+            { id: 12, name: 'Stufe 12', cost: 100000, coins: 20 },
+            { id: 13, name: 'Stufe 13', cost: 100000, coins: 20 },
+            { id: 14, name: 'Stufe 14', cost: 100000, coins: 20 },
+            { id: 15, name: 'Stufe 15', cost: 100000, coins: 20 },
+            { id: 16, name: 'Stufe 16', cost: 100000, coins: 20 },
+            { id: 17, name: 'Stufe 17', cost: 100000, coins: 20 },
+            { id: 18, name: 'Stufe 18', cost: 100000, coins: 20 },
         ],
 
         '0_small': [
-            { id: 0, name: 'Level 0', cost: 10000, coins: 10 },
-            { id: 1, name: 'Level 1', cost: 50000, coins: 15 },
-            { id: 2, name: 'Level 2', cost: 100000, coins: 20 },
-            { id: 3, name: 'Level 3', cost: 100000, coins: 20 },
-            { id: 4, name: 'Level 4', cost: 100000, coins: 20 },
-
+            { id: 0, name: 'Stufe 0', cost: 10000, coins: 10 },
+            { id: 1, name: 'Stufe 1', cost: 50000, coins: 15 },
+            { id: 2, name: 'Stufe 2', cost: 100000, coins: 20 },
+            { id: 3, name: 'Stufe 3', cost: 100000, coins: 20 },
+            { id: 4, name: 'Stufe 4', cost: 100000, coins: 20 },
         ],
 
         '4_normal': [
-            { id: 0, name: 'Level 0', cost: 19000, coins: 11 },
-            { id: 1, name: 'Level 1', cost: 19000, coins: 11 },
-            { id: 2, name: 'Level 2', cost: 19000, coins: 11 },
-            { id: 3, name: 'Level 3', cost: 19000, coins: 11 },
-            { id: 4, name: 'Level 4', cost: 19000, coins: 11 },
-            { id: 5, name: 'Level 5', cost: 19000, coins: 11 },
-            { id: 6, name: 'Level 6', cost: 19000, coins: 11 },
-            { id: 7, name: 'Level 7', cost: 19000, coins: 11 },
-            { id: 8, name: 'Level 8', cost: 19000, coins: 11 },
-            { id: 9, name: 'Level 9', cost: 19000, coins: 11 },
-            { id: 10, name: 'Level 10', cost: 19000, coins: 11 },
-            { id: 11, name: 'Level 11', cost: 19000, coins: 11 },
-            { id: 12, name: 'Level 12', cost: 19000, coins: 11 },
-            { id: 13, name: 'Level 13', cost: 19000, coins: 11 },
-            { id: 14, name: 'Level 14', cost: 19000, coins: 11 },
-            { id: 15, name: 'Level 15', cost: 19000, coins: 11 },
-            { id: 16, name: 'Level 16', cost: 19000, coins: 11 },
-            { id: 17, name: 'Level 17', cost: 19000, coins: 11 },
-            { id: 18, name: 'Level 18', cost: 19000, coins: 11 },
-            { id: 19, name: 'Level 19', cost: 19000, coins: 11 },
+            { id: 0, name: 'Stufe 0', cost: 19000, coins: 11 },
+            { id: 1, name: 'Stufe 1', cost: 19000, coins: 11 },
+            { id: 2, name: 'Stufe 2', cost: 19000, coins: 11 },
+            { id: 3, name: 'Stufe 3', cost: 19000, coins: 11 },
+            { id: 4, name: 'Stufe 4', cost: 19000, coins: 11 },
+            { id: 5, name: 'Stufe 5', cost: 19000, coins: 11 },
+            { id: 6, name: 'Stufe 6', cost: 19000, coins: 11 },
+            { id: 7, name: 'Stufe 7', cost: 19000, coins: 11 },
+            { id: 8, name: 'Stufe 8', cost: 19000, coins: 11 },
+            { id: 9, name: 'Stufe 9', cost: 19000, coins: 11 },
+            { id: 10, name: 'Stufe 10', cost: 19000, coins: 11 },
+            { id: 11, name: 'Stufe 11', cost: 19000, coins: 11 },
+            { id: 12, name: 'Stufe 12', cost: 19000, coins: 11 },
+            { id: 13, name: 'Stufe 13', cost: 19000, coins: 11 },
+            { id: 14, name: 'Stufe 14', cost: 19000, coins: 11 },
+            { id: 15, name: 'Stufe 15', cost: 19000, coins: 11 },
+            { id: 16, name: 'Stufe 16', cost: 19000, coins: 11 },
+            { id: 17, name: 'Stufe 17', cost: 19000, coins: 11 },
+            { id: 18, name: 'Stufe 18', cost: 19000, coins: 11 },
+            { id: 19, name: 'Stufe 19', cost: 19000, coins: 11 },
         ],
 
         '6_normal': [
-            { id: 0, name: 'Level 0', cost: 10000, coins: 10 },
-            { id: 1, name: 'Level 1', cost: 50000, coins: 15 },
-            { id: 2, name: 'Level 2', cost: 100000, coins: 20 },
-            { id: 3, name: 'Level 3', cost: 100000, coins: 20 },
-            { id: 4, name: 'Level 4', cost: 100000, coins: 20 },
-            { id: 5, name: 'Level 5', cost: 100000, coins: 20 },
-            { id: 6, name: 'Level 6', cost: 100000, coins: 20 },
-            { id: 7, name: 'Level 7', cost: 100000, coins: 20 },
-            { id: 8, name: 'Level 8', cost: 100000, coins: 20 },
-            { id: 9, name: 'Level 9', cost: 100000, coins: 20 },
-            { id: 10, name: 'Level 10', cost: 100000, coins: 20 },
-            { id: 11, name: 'Level 11', cost: 100000, coins: 20 },
-            { id: 12, name: 'Level 12', cost: 100000, coins: 20 },
-            { id: 13, name: 'Level 13', cost: 100000, coins: 20 },
+            { id: 0, name: 'Stufe 0', cost: 10000, coins: 10 },
+            { id: 1, name: 'Stufe 1', cost: 50000, coins: 15 },
+            { id: 2, name: 'Stufe 2', cost: 100000, coins: 20 },
+            { id: 3, name: 'Stufe 3', cost: 100000, coins: 20 },
+            { id: 4, name: 'Stufe 4', cost: 100000, coins: 20 },
+            { id: 5, name: 'Stufe 5', cost: 100000, coins: 20 },
+            { id: 6, name: 'Stufe 6', cost: 100000, coins: 20 },
+            { id: 7, name: 'Stufe 7', cost: 100000, coins: 20 },
+            { id: 8, name: 'Stufe 8', cost: 100000, coins: 20 },
+            { id: 9, name: 'Stufe 9', cost: 100000, coins: 20 },
+            { id: 10, name: 'Stufe 10', cost: 100000, coins: 20 },
+            { id: 11, name: 'Stufe 11', cost: 100000, coins: 20 },
+            { id: 12, name: 'Stufe 12', cost: 100000, coins: 20 },
+            { id: 13, name: 'Stufe 13', cost: 100000, coins: 20 },
         ],
 
         '6_small': [
-            { id: 0, name: 'Level 0', cost: 10000, coins: 10 },
-            { id: 1, name: 'Level 1', cost: 50000, coins: 15 },
-            { id: 2, name: 'Level 2', cost: 100000, coins: 20 },
-            { id: 3, name: 'Level 3', cost: 100000, coins: 20 },
-            { id: 4, name: 'Level 4', cost: 100000, coins: 20 },
-
+            { id: 0, name: 'Stufe 0', cost: 10000, coins: 10 },
+            { id: 1, name: 'Stufe 1', cost: 50000, coins: 15 },
+            { id: 2, name: 'Stufe 2', cost: 100000, coins: 20 },
+            { id: 3, name: 'Stufe 3', cost: 100000, coins: 20 },
+            { id: 4, name: 'Stufe 4', cost: 100000, coins: 20 },
         ],
     };
-    
     const buildingTypeNames = {
         '0_normal': 'Feuerwache (Normal)',
         '0_small': 'Feuerwache (Kleinwache)',
@@ -669,97 +666,97 @@
         }
 
         function createExtensionForm() {
-    const form = document.createElement('form');
+            const form = document.createElement('form');
 
-    for (const category in manualExtensions) {
-        const fieldset = document.createElement('fieldset');
-        fieldset.style.marginBottom = '12px';
+            for (const category in manualExtensions) {
+                const fieldset = document.createElement('fieldset');
+                fieldset.style.marginBottom = '12px';
 
-        const { legend, arrow } = createSpoilerLegend(buildingTypeNames[category] || category);
+                const { legend, arrow } = createSpoilerLegend(buildingTypeNames[category] || category);
 
-        const content = document.createElement('div');
-        content.style.display = 'none';
-        content.style.gridTemplateColumns = 'repeat(auto-fill, minmax(150px, 1fr))';
-        content.style.gap = '8px';
-        content.style.padding = '8px 0';
+                const content = document.createElement('div');
+                content.style.display = 'none';
+                content.style.gridTemplateColumns = 'repeat(auto-fill, minmax(150px, 1fr))';
+                content.style.gap = '8px';
+                content.style.padding = '8px 0';
 
-        const allLabel = document.createElement('label');
-        allLabel.style.gridColumn = '1 / -1';
-        allLabel.style.display = 'flex';
-        allLabel.style.alignItems = 'center';
-        allLabel.style.gap = '6px';
-        allLabel.style.fontWeight = '500';
+                const allLabel = document.createElement('label');
+                allLabel.style.gridColumn = '1 / -1';
+                allLabel.style.display = 'flex';
+                allLabel.style.alignItems = 'center';
+                allLabel.style.gap = '6px';
+                allLabel.style.fontWeight = '500';
 
-        const selectAllCheckbox = document.createElement('input');
-        selectAllCheckbox.type = 'checkbox';
+                const selectAllCheckbox = document.createElement('input');
+                selectAllCheckbox.type = 'checkbox';
 
-        const selectAllText = document.createElement('span');
-        selectAllText.textContent = 'Alle Erweiterungen an-/abwählen';
-        selectAllText.style.fontWeight = 'bold';
-        selectAllText.style.color = 'var(--primary-color, #007bff)';
+                const selectAllText = document.createElement('span');
+                selectAllText.textContent = 'Alle Erweiterungen an-/abwählen';
+                selectAllText.style.fontWeight = 'bold';
+                selectAllText.style.color = 'var(--primary-color, #007bff)';
 
-        allLabel.appendChild(selectAllCheckbox);
-        allLabel.appendChild(selectAllText);
-        content.appendChild(allLabel);
+                allLabel.appendChild(selectAllCheckbox);
+                allLabel.appendChild(selectAllText);
+                content.appendChild(allLabel);
 
-        const checkboxes = [];
+                const checkboxes = [];
 
-        manualExtensions[category]
-            .slice()
-            .sort((a, b) => {
-                const aAlpha = /^[A-Za-z]/.test(a.name);
-                const bAlpha = /^[A-Za-z]/.test(b.name);
+                manualExtensions[category]
+                    .slice()
+                    .sort((a, b) => {
+                    const aAlpha = /^[A-Za-z]/.test(a.name);
+                    const bAlpha = /^[A-Za-z]/.test(b.name);
 
-                if (aAlpha && !bAlpha) return -1;
-                if (!aAlpha && bAlpha) return 1;
+                    if (aAlpha && !bAlpha) return -1;
+                    if (!aAlpha && bAlpha) return 1;
 
-                return a.name.localeCompare(b.name, 'de', { numeric: true });
-            })
-            .forEach(ext => {
-                const key = `${category}_${ext.id}`;
-                const label = document.createElement('label');
-                label.style.display = 'flex';
-                label.style.alignItems = 'center';
-                label.style.gap = '6px';
+                    return a.name.localeCompare(b.name, 'de', { numeric: true });
+                })
+                    .forEach(ext => {
+                    const key = `${category}_${ext.id}`;
+                    const label = document.createElement('label');
+                    label.style.display = 'flex';
+                    label.style.alignItems = 'center';
+                    label.style.gap = '6px';
 
-                const checkbox = document.createElement('input');
-                checkbox.type = 'checkbox';
-                checkbox.checked = settings[key];
-                checkbox.dataset.key = key;
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.checked = settings[key];
+                    checkbox.dataset.key = key;
 
-                checkbox.addEventListener('change', () => {
-                    settings[key] = checkbox.checked;
-                    const allChecked = checkboxes.every(cb => cb.checked);
-                    selectAllCheckbox.checked = allChecked;
+                    checkbox.addEventListener('change', () => {
+                        settings[key] = checkbox.checked;
+                        const allChecked = checkboxes.every(cb => cb.checked);
+                        selectAllCheckbox.checked = allChecked;
+                    });
+
+                    label.appendChild(checkbox);
+                    label.append(` ${ext.name}`);
+                    content.appendChild(label);
+                    checkboxes.push(checkbox);
                 });
 
-                label.appendChild(checkbox);
-                label.append(` ${ext.name}`);
-                content.appendChild(label);
-                checkboxes.push(checkbox);
-            });
+                selectAllCheckbox.checked = checkboxes.every(cb => cb.checked);
+                selectAllCheckbox.addEventListener('change', () => {
+                    checkboxes.forEach(cb => {
+                        cb.checked = selectAllCheckbox.checked;
+                        settings[cb.dataset.key] = cb.checked;
+                    });
+                });
 
-        selectAllCheckbox.checked = checkboxes.every(cb => cb.checked);
-        selectAllCheckbox.addEventListener('change', () => {
-            checkboxes.forEach(cb => {
-                cb.checked = selectAllCheckbox.checked;
-                settings[cb.dataset.key] = cb.checked;
-            });
-        });
+                legend.addEventListener('click', () => {
+                    const open = content.style.display === 'grid';
+                    content.style.display = open ? 'none' : 'grid';
+                    arrow.textContent = open ? '▶' : '▼';
+                });
 
-        legend.addEventListener('click', () => {
-            const open = content.style.display === 'grid';
-            content.style.display = open ? 'none' : 'grid';
-            arrow.textContent = open ? '▶' : '▼';
-        });
+                fieldset.appendChild(legend);
+                fieldset.appendChild(content);
+                form.appendChild(fieldset);
+            }
 
-        fieldset.appendChild(legend);
-        fieldset.appendChild(content);
-        form.appendChild(fieldset);
-    }
-
-    return form;
-}
+            return form;
+        }
 
 
         function createStorageForm() {
@@ -1247,8 +1244,24 @@
             return response.json();
         })
             .then(data => {
-            buildingsData = data; // Speichern der Gebäudedaten in einer globalen Variablen
-            renderMissingExtensions(data); // Weiterverarbeiten der abgerufenen Daten
+            buildingsData = data;
+
+            data.forEach(building => {
+                const levelInfo = getBuildingLevelInfo(building);
+                if (levelInfo) {
+                    console.log(`Gebäude #${building.id}`);
+                    console.log(`Aktuelles Level: ${levelInfo.current?.name}`);
+                    if (levelInfo.next) {
+                        console.log(`Nächstes Level: ${levelInfo.next.name}, Kosten: ${levelInfo.next.cost} Credits`);
+                    } else {
+                        console.log('Maximales Level erreicht');
+                    }
+                } else {
+                    console.log(`Kein Level-Datensatz für Typ ${building.building_type}`);
+                }
+            });
+
+            renderMissingExtensions(data);
         })
             .catch(error => {
             const list = document.getElementById('extension-list');
@@ -1262,6 +1275,20 @@
 
         const leitstelle = buildingsData.find(b => b.id === building.leitstelle_building_id);
         return leitstelle ? leitstelle.caption : 'Unbekannt';
+    }
+
+    function getBuildingLevelInfo(building) {
+        const type = building.building_type;
+        const size = building.small_building ? 'small' : 'normal';
+        const key = `${type}_${size}`;
+        const levelData = manualLevels[key];
+        if (!levelData) return null;
+
+        const currentLevel = building.level;
+        const current = levelData.find(l => l.id === currentLevel);
+        const next = levelData.find(l => l.id === currentLevel + 1);
+
+        return { current, next };
     }
 
     // Funktion um die aktuelle Credits und Coins des Users abzurufen
@@ -1408,7 +1435,6 @@
                 }
             }
 
-            // Erweiterungen prüfen
             const hasExtensions = group.some(({ missingExtensions }) => missingExtensions.length > 0);
 
             if (buttons.spoilerButton) {
@@ -1420,7 +1446,6 @@
                 }
             }
 
-            // Spoiler-Wrapper erzeugen (analog Lager-Wrapper)
             const spoilerWrapper = hasExtensions
             ? createSpoilerContentWrapper(buttons.spoilerButton)
             : null;
@@ -1434,21 +1459,48 @@
             ? createLagerContentWrapper(buttons.lagerButton, group, userInfo, buttons.buildSelectedButton)
             : null;
 
+            // NEU: Level-Upgrades prüfen
+            const hasLevelUpgrades = group.some(({ building }) => {
+                const levelInfo = getBuildingLevelInfo(building);
+                return levelInfo?.next;
+            });
+
+            let levelWrapper = null;
+            if (buttons.levelButton) {
+                buttons.levelButton.disabled = !hasLevelUpgrades;
+                buttons.levelButton.style.opacity = hasLevelUpgrades ? '1' : '0.5';
+                buttons.levelButton.style.cursor = hasLevelUpgrades ? 'pointer' : 'not-allowed';
+
+                if (!hasLevelUpgrades) {
+                    buttons.levelButton.title = 'Keine weiteren Ausbaustufen verfügbar';
+                } else {
+                    levelWrapper = createSpoilerContentWrapper(buttons.levelButton);
+                    const table = createLevelTable(group, userInfo);
+                    levelWrapper.appendChild(table);
+                }
+            }
+
+            // Buttons + Header einfügen
             list.append(header, buttons.container);
+            if (spoilerWrapper) list.appendChild(spoilerWrapper);
+            if (lagerWrapper) list.appendChild(lagerWrapper);
+            if (levelWrapper) list.appendChild(levelWrapper);
 
-            if (spoilerWrapper) {
-                list.appendChild(spoilerWrapper);
-            }
-
-            if (lagerWrapper) {
-                list.appendChild(lagerWrapper);
-            }
-
+            // Wrapper gegenseitig referenzieren
             if (spoilerWrapper && lagerWrapper) {
                 spoilerWrapper.otherWrapper = lagerWrapper;
                 lagerWrapper.otherWrapper = spoilerWrapper;
             }
+            if (spoilerWrapper && levelWrapper) {
+                spoilerWrapper.otherWrapper = levelWrapper;
+                levelWrapper.otherWrapper = spoilerWrapper;
+            }
+            if (lagerWrapper && levelWrapper) {
+                lagerWrapper.otherWrapper = levelWrapper;
+                levelWrapper.otherWrapper = lagerWrapper;
+            }
         });
+
     }
 
     // Funktion um den TabellenHeader zu erstellen
@@ -1465,6 +1517,8 @@
         container.classList.add('button-container');
 
         const spoilerButton = createButton('Erweiterungen anzeigen', ['btn', 'spoiler-button']);
+
+        const levelButton = createButton('Ausbaustufen anzeigen', ['btn', 'level-button']);
 
         const canBuildStorage = group.some(({ building }) => {
             const key = `${building.building_type}_${building.small_building ? 'small' : 'normal'}`;
@@ -1484,13 +1538,14 @@
         const buildAllButton = createButton('Sämtliche Erweiterungen/Lager bei allen Wachen bauen', ['btn', 'build-all-button']);
         buildAllButton.onclick = () => showCurrencySelectionForAll(groupKey);
 
-        [spoilerButton, lagerButton, buildSelectedButton, buildAllButton]
+        [spoilerButton, lagerButton, levelButton, buildSelectedButton, buildAllButton]
             .filter(Boolean)
             .forEach(btn => container.appendChild(btn));
 
         return {
             container,
             spoilerButton,
+            levelButton,
             lagerButton,
             buildSelectedButton
         };
@@ -1516,7 +1571,7 @@
             // Erst alle anderen Wrapper schließen, wenn vorhanden
             if (wrapper.otherWrapper) {
                 wrapper.otherWrapper.style.display = 'none';
-             
+                const otherButton = wrapper.otherWrapper.associatedButton;
             }
 
             wrapper.style.display = show ? 'block' : 'none';
@@ -1549,7 +1604,7 @@
             // Erst anderen Wrapper schließen, falls vorhanden
             if (wrapper.otherWrapper) {
                 wrapper.otherWrapper.style.display = 'none';
-                
+                const otherButton = wrapper.otherWrapper.associatedButton;
             }
 
             wrapper.style.display = show ? 'block' : 'none';
@@ -1564,6 +1619,40 @@
 
         // Referenz speichern
         wrapper.associatedButton = lagerButton;
+
+        return wrapper;
+    }
+    function createLevelContentWrapper(levelButton, group, userInfo, buildSelectedButton) {
+        const wrapper = document.createElement('div');
+        wrapper.classList.add('level-wrapper');
+        wrapper.style.display = 'none';
+        wrapper.style.marginTop = '10px';
+
+        const levelTable = createLevelTable(group, userInfo);
+        wrapper.appendChild(levelTable);
+
+        levelButton.addEventListener('click', () => {
+            const show = wrapper.style.display !== 'block';
+
+            // Anderen Wrapper schließen, falls vorhanden
+            if (wrapper.otherWrapper) {
+                wrapper.otherWrapper.style.display = 'none';
+                const otherButton = wrapper.otherWrapper.associatedButton;
+                if (otherButton) otherButton.textContent = 'Ausbaustufen anzeigen';
+            }
+
+            wrapper.style.display = show ? 'block' : 'none';
+            levelButton.textContent = show ? 'Ausbaustufen ausblenden' : 'Ausbaustufen anzeigen';
+            levelButton.classList.toggle('active-button', show);
+
+            // Gegenstück-Button zurücksetzen
+            if (wrapper.otherWrapper && wrapper.otherWrapper.associatedButton) {
+                wrapper.otherWrapper.associatedButton.classList.remove('active-button');
+            }
+        });
+
+        // Button speichern
+        wrapper.associatedButton = levelButton;
 
         return wrapper;
     }
@@ -2034,6 +2123,170 @@
 
         return table;
     }
+    function createLevelTable(group, userInfo) {
+        const table = document.createElement('table');
+        table.style.width = '100%';
+        table.style.borderCollapse = 'collapse';
+
+        table.innerHTML = `
+        <thead style="background-color: #f2f2f2; font-weight: bold; border-bottom: 2px solid #ccc;">
+            <tr>
+                <th style="padding: 10px; text-align: center;">Leitstelle</th>
+                <th style="padding: 10px; text-align: center;">Wache</th>
+                <th style="padding: 10px; text-align: center;">Ausbaustufe</th>
+                <th style="padding: 10px; text-align: center;">Stufenausbau wählen</th>
+                <th style="padding: 10px; text-align: center;">Bauen mit Credits</th>
+                <th style="padding: 10px; text-align: center;">Bauen mit Coins</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    `;
+
+        const tbody = table.querySelector('tbody');
+
+        group.forEach(({ building }) => {
+            const levelInfo = getBuildingLevelInfo(building);
+            if (!levelInfo || !levelInfo.next) return;
+
+            const leitstelleName = getLeitstelleName(building);
+            const wache = building.caption || '-';
+            const currentLevelName = levelInfo.current?.name || 'Stufe 0';
+            const nextLevelNumber = levelInfo.next.name.match(/\d+/)?.[0];
+            const currentLevelId = parseInt(currentLevelName.match(/\d+/)?.[0] || '0', 10);
+
+            // 🔍 Typ erkennen für Lookup in manualLevels
+            const key = `${building.building_type}_${building.small_building ? 'small' : 'normal'}`;
+            const levelList = manualLevels[key];
+            if (!levelList) return; // keine Ausbaustufen bekannt
+
+            const row = document.createElement('tr');
+            row.style.borderBottom = '1px solid #ddd';
+
+            // Leitstelle
+            const leitstelleCell = document.createElement('td');
+            leitstelleCell.style.padding = '8px';
+            leitstelleCell.style.textAlign = 'center';
+            leitstelleCell.textContent = leitstelleName;
+
+            // Wache
+            const wacheCell = document.createElement('td');
+            wacheCell.style.padding = '8px';
+            wacheCell.style.textAlign = 'center';
+            wacheCell.textContent = wache;
+
+            // Aktuelle Ausbaustufe
+            const currentLevelCell = document.createElement('td');
+            currentLevelCell.style.padding = '8px';
+            currentLevelCell.style.textAlign = 'center';
+            currentLevelCell.textContent = currentLevelName;
+
+            // Buttons für wählbare Stufen
+            const levelChoiceCell = document.createElement('td');
+            levelChoiceCell.style.padding = '8px';
+            levelChoiceCell.style.textAlign = 'center';
+
+            levelList.forEach(stufe => {
+                if (stufe.id > currentLevelId) {
+                    const lvlBtn = document.createElement('button');
+                    lvlBtn.textContent = stufe.id.toString();
+                    lvlBtn.className = 'expand_direct';
+                    lvlBtn.setAttribute('level', stufe.id.toString());
+
+                    // Kompaktes, minimales Button-Styling
+                    lvlBtn.style.display = 'inline-block';
+                    lvlBtn.style.padding = '0px 4px';
+                    lvlBtn.style.margin = '0 2px';
+                    lvlBtn.style.fontSize = '11px';
+                    lvlBtn.style.lineHeight = '1.2';
+                    lvlBtn.style.borderRadius = '3px';
+                    lvlBtn.style.cursor = 'pointer';
+                    lvlBtn.style.minWidth = 'auto';
+                    lvlBtn.style.height = 'auto';
+
+
+                    lvlBtn.onclick = () => {
+                        const buildingElement = document.querySelector(`#building_${building.id}`);
+                        if (!buildingElement) {
+                            alert(`Gebäude #${building.id} nicht gefunden.`);
+                            return;
+                        }
+
+                        const levelButton = buildingElement.querySelector(`.expand_direct[level="${stufe.id}"]`);
+                        if (levelButton) {
+                            levelButton.click();
+                        } else {
+                            alert(`Kein Button für Stufe ${stufe.id} gefunden.`);
+                        }
+                    };
+
+                    levelChoiceCell.appendChild(lvlBtn);
+                }
+            });
+
+            // Credits
+            const creditCell = document.createElement('td');
+            creditCell.style.textAlign = 'center';
+            const creditBtn = document.createElement('button');
+            creditBtn.textContent = `${levelInfo.next.cost.toLocaleString()} Credits`;
+            creditBtn.classList.add('btn', 'btn-sm');
+            creditBtn.style.backgroundColor = '#28a745';
+            creditBtn.style.color = 'white';
+            creditBtn.disabled = userInfo.credits < levelInfo.next.cost;
+            creditBtn.onclick = () => {
+                const buildingElement = document.querySelector(`#building_${building.id}`);
+                if (!buildingElement) {
+                    alert(`Gebäude #${building.id} nicht gefunden.`);
+                    return;
+                }
+
+                const levelButton = buildingElement.querySelector(`.expand_direct[level="${nextLevelNumber}"]`);
+                if (levelButton) {
+                    levelButton.click();
+                } else {
+                    alert(`Kein Button für Stufe ${nextLevelNumber} gefunden.`);
+                }
+            };
+            creditCell.appendChild(creditBtn);
+
+            // Coins
+            const coinCell = document.createElement('td');
+            coinCell.style.textAlign = 'center';
+            const coinBtn = document.createElement('button');
+            coinBtn.textContent = `${levelInfo.next.coins.toLocaleString()} Coins`;
+            coinBtn.classList.add('btn', 'btn-sm');
+            coinBtn.style.backgroundColor = '#dc3545';
+            coinBtn.style.color = 'white';
+            coinBtn.disabled = userInfo.coins < levelInfo.next.coins;
+            coinBtn.onclick = () => {
+                const buildingElement = document.querySelector(`#building_${building.id}`);
+                if (!buildingElement) {
+                    alert(`Gebäude #${building.id} nicht gefunden.`);
+                    return;
+                }
+
+                const levelButton = buildingElement.querySelector(`.expand_direct[level="${nextLevelNumber}"]`);
+                if (levelButton) {
+                    levelButton.click();
+                } else {
+                    alert(`Kein Button für Stufe ${nextLevelNumber} gefunden.`);
+                }
+            };
+            coinCell.appendChild(coinBtn);
+
+            // Zeile zusammensetzen
+            row.appendChild(leitstelleCell);
+            row.appendChild(wacheCell);
+            row.appendChild(currentLevelCell);
+            row.appendChild(levelChoiceCell);
+            row.appendChild(creditCell);
+            row.appendChild(coinCell);
+
+            tbody.appendChild(row);
+        });
+
+        return table;
+    }
+
 
     // Filterfunktion über Dropdowns
     function filterTableByDropdown(table, columnIndex, filterValue) {
