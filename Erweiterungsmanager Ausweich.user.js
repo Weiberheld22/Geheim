@@ -1516,8 +1516,7 @@
             // Erst alle anderen Wrapper schließen, wenn vorhanden
             if (wrapper.otherWrapper) {
                 wrapper.otherWrapper.style.display = 'none';
-                const otherButton = wrapper.otherWrapper.associatedButton;
-                if (otherButton) otherButton.textContent = 'Lager anzeigen';
+             
             }
 
             wrapper.style.display = show ? 'block' : 'none';
@@ -1550,8 +1549,7 @@
             // Erst anderen Wrapper schließen, falls vorhanden
             if (wrapper.otherWrapper) {
                 wrapper.otherWrapper.style.display = 'none';
-                const otherButton = wrapper.otherWrapper.associatedButton;
-                if (otherButton) otherButton.textContent = 'Erweiterungen anzeigen';
+                
             }
 
             wrapper.style.display = show ? 'block' : 'none';
