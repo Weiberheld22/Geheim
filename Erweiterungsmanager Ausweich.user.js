@@ -31,7 +31,6 @@
         --credits-color: #28a745;
         --coins-color: #dc3545;
         --cancel-color: #6c757d;
-
         }
 
         #extension-lightbox {
@@ -45,29 +44,36 @@
         z-index: 10000;
         }
 
+        #extension-lightbox-header {
+        background: var(--background-color);
+        padding: 10px;
+        border-bottom: 1px solid var(--border-color);
+        text-align: right;
+        z-index: 2;
+        }
+
         #extension-lightbox-content {
         background: var(--background-color);
         color: var(--text-color);
         border: 1px solid var(--border-color);
         padding: 20px;
-        width: 80%;
+        width: 100%;
         max-width: 1500px;
         max-height: 90vh;
         overflow-y: auto;
         position: relative;
         text-align: center;
-        border-radius: 10px;
         }
 
-        #close-extension-helper {
-        position: absolute;
-        top: 10px; right: 10px;
-        background: red;
+        #extension-lightbox-header #close-extension-helper {
+        font-weight: 600;
+        background-color: #ff4d4d;
         color: white;
         border: none;
-        padding: 5px 10px;
+        padding: 6px 14px;
+        border-radius: 5px;
         cursor: pointer;
-        border-radius: 4px;
+        transition: background-color 0.3s ease;
         }
 
         #extension-lightbox table {
@@ -512,6 +518,99 @@
         '25_normal': 'Bergrettungswache',
         '27_normal': 'Schule für Seefahrt und Seenotrettung',
     };
+
+    // Wende den Modus an, wenn das DOM bereit ist
+    window.addEventListener('load', () => {
+        applyMode();
+        observeLightbox(); // Beobachtet dynamische Änderungen
+    });
+
+    // Fügt die Stile hinzu
+    const styleElement = document.createElement('style');
+    styleElement.innerHTML = styles;
+    document.head.appendChild(styleElement);
+
+    const lightbox = document.createElement('div');
+    lightbox.id = 'extension-lightbox';
+    lightbox.style.display = 'none';
+    lightbox.innerHTML = `
+      <div id="extension-lightbox-modal">
+        <div id="extension-lightbox-header" style="display:flex; justify-content:space-between; align-items:center;">
+          <div id="user-balance" style="text-align:left; display: flex; gap: 20px;">
+            <div>
+              <div>Aktuelle Credits: <span id="current-credits" style="color: var(--credits-color); font-weight: bold;">...</span></div>
+              <div>Aktuelle Coins: <span id="current-coins" style="color: var(--coins-color); font-weight: bold;">...</span></div>
+            </div>
+            <div>
+              <div>Ausgewählte Credits: <span id="selected-credits" style="color: var(--credits-color); font-weight: bold;">0</span></div>
+              <div>Ausgewählte Coins: <span id="selected-coins" style="color: var(--coins-color); font-weight: bold;">0</span></div>
+            </div>
+          </div>
+          <button id="close-extension-helper">Schließen</button>
+        </div>
+        <div id="extension-lightbox-content">
+          <h3>🚒🏗️ <strong>Herzlich willkommen beim ultimativen Ausbau-Assistenten für eure Wachen!</strong> 🚒🏗️</h3>
+          <h2><br>Dem Erweiterungs-Manager</h2>
+          <h5>
+            <br><br>Dieses kleine Helferlein zeigt euch genau, wo noch Platz in euren Wachen ist: Welche <strong>Erweiterungen</strong> und <strong>Lagerräume</strong> noch möglich sind – und mit nur ein paar Klicks geht’s direkt in den Ausbau. Einfacher wird’s nicht!
+            <br><br>Und das Beste: Über den
+            <button id="open-extension-settings" style="
+              font-weight: 600;
+              color: #fff;
+              background-color: var(--primary-color, #007bff);
+              border: none;
+              padding: 6px 14px;
+              border-radius: 5px;
+              cursor: pointer;
+              transition: background-color 0.3s ease;
+              margin: 0 5px;
+            ">
+              Einstellungen
+            </button>
+            -Button könnt ihr festlegen, welche Erweiterungen und Lagerräume euch pro Wachen-Typ angezeigt werden – ganz nach eurem Geschmack. Einmal gespeichert, für immer gemerkt.
+            <br><br>Kleiner Hinweis am Rande: Feedback, Verbesserungsvorschläge oder Kritik zum Skript sind jederzeit im
+            <a href="https://forum.leitstellenspiel.de/index.php?thread/27856-script-erweiterungs-manager/" target="_blank" style="color:#007bff; text-decoration:none;">
+              <strong>Forum</strong>
+            </a> willkommen. 💌
+            <br><br><br>Und nun viel Spaß beim Credits oder Coins ausgeben!
+            <br><br>
+            <div id="extension-list">
+              Einen Moment Geduld bitte …
+              <br><br>
+              Gebäudedaten werden geladen, Kaffee kocht – gleich geht's los!
+            </div>
+          </h5>
+        </div>
+      </div>
+    `;
+
+    // Werte nur aktualisieren, nicht die komplette HTML-Struktur ersetzen
+    getUserCredits().then(({ credits, coins }) => {
+        document.getElementById('current-credits').textContent = credits.toLocaleString();
+        document.getElementById('current-coins').textContent = coins.toLocaleString();
+
+        // Beispielhafte initiale Werte für "Ausgewählte" (später dynamisch anpassen)
+        updateSelectedAmounts();
+    }).catch(() => {
+        // Optional: Fehleranzeige bei Ladeproblemen
+        document.getElementById('current-credits').textContent = 'Fehler';
+        document.getElementById('current-coins').textContent = 'Fehler';
+    });
+
+    document.body.appendChild(lightbox);
+
+    const openBtn = document.getElementById('open-extension-settings');
+    const lightboxContent = lightbox.querySelector('#extension-lightbox-content');
+
+    openBtn.addEventListener('mouseenter', () => {
+        openBtn.style.backgroundColor = '#0056b3'; // dunkleres Blau beim Hover
+    });
+    openBtn.addEventListener('mouseleave', () => {
+        openBtn.style.backgroundColor = 'var(--primary-color, #007bff)';
+    });
+    openBtn.addEventListener('click', () => {
+        openExtensionSettingsOverlay();
+    });
 
     // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -988,80 +1087,6 @@
         observer.observe(lightboxContainer, { childList: true, subtree: true });
     }
 
-    // Wende den Modus an, wenn das DOM bereit ist
-    window.addEventListener('load', () => {
-        applyMode();
-        observeLightbox(); // Beobachtet dynamische Änderungen
-    });
-
-    // Fügt die Stile hinzu
-    const styleElement = document.createElement('style');
-    styleElement.innerHTML = styles;
-    document.head.appendChild(styleElement);
-
-    const lightbox = document.createElement('div');
-    lightbox.id = 'extension-lightbox';
-    lightbox.style.display = 'none';
-    lightbox.innerHTML = `
-        <div id="extension-lightbox-content">
-        <button id="close-extension-helper">Schließen</button>
-        <h3>🚒🏗️ <strong>Herzlich willkommen beim ultimativen Ausbau-Assistenten für eure Wachen!</strong> 🚒🏗️</h3>
-        <h2>
-        <br>Dem Erweiterungs-Manager
-        </h2>
-        <h5>
-        <br>
-        <br>Dieses kleine Helferlein zeigt euch genau, wo noch Platz in euren Wachen ist: Welche <strong>Erweiterungen</strong> und <strong>Lagerräume</strong> noch möglich sind – und mit nur ein paar Klicks geht’s direkt in den Ausbau. Einfacher wird’s nicht!
-        <br>
-        <br>Und das Beste: Über den
-        <button id="open-extension-settings" style="
-        font-weight: 600;
-        color: #fff;
-        background-color: var(--primary-color, #007bff);
-        border: none;
-        padding: 6px 14px;
-        border-radius: 5px;
-        cursor: pointer;
-        transition: background-color 0.3s ease;
-        margin: 0 5px;
-        ">
-        Einstellungen
-        </button>
-        -Button könnt ihr festlegen, welche Erweiterungen und Lagerräume euch pro Wachen-Typ angezeigt werden – ganz nach eurem Geschmack. Einmal gespeichert, für immer gemerkt.
-        <br>
-        <br>Kleiner Hinweis am Rande: Feedback, Verbesserungsvorschläge oder Kritik zum Skript sind jederzeit im
-        <a href="https://forum.leitstellenspiel.de/index.php?thread/27856-script-erweiterungs-manager/" target="_blank" style="color:#007bff; text-decoration:none;">
-        <strong>Forum</strong>
-        </a> willkommen. 💌
-        <br>
-        <br>
-        <br>Und nun viel Spaß beim Credits oder Coins ausgeben!
-        <br>
-        <br>
-        <div id="extension-list">
-        Einen Moment Geduld bitte …
-        <br><br>
-        Gebäudedaten werden geladen, Kaffee kocht – gleich geht's los!
-        </div>
-        </h5>
-        </div>
-        `;
-
-    document.body.appendChild(lightbox);
-
-    const openBtn = document.getElementById('open-extension-settings');
-    const lightboxContent = lightbox.querySelector('#extension-lightbox-content');
-
-    openBtn.addEventListener('mouseenter', () => {
-        openBtn.style.backgroundColor = '#0056b3'; // dunkleres Blau beim Hover
-    });
-    openBtn.addEventListener('mouseleave', () => {
-        openBtn.style.backgroundColor = 'var(--primary-color, #007bff)';
-    });
-    openBtn.addEventListener('click', () => {
-        openExtensionSettingsOverlay();
-    });
-
     // Darkmode oder Whitemode anwenden
     function applyTheme() {
         const isDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -1277,6 +1302,7 @@
         return leitstelle ? leitstelle.caption : 'Unbekannt';
     }
 
+    // Funktion um die Ausbaustufen zu beziehen
     function getBuildingLevelInfo(building) {
         const type = building.building_type;
         const size = building.small_building ? 'small' : 'normal';
@@ -1474,9 +1500,7 @@
                 if (!hasLevelUpgrades) {
                     buttons.levelButton.title = 'Keine weiteren Ausbaustufen verfügbar';
                 } else {
-                    levelWrapper = createSpoilerContentWrapper(buttons.levelButton);
-                    const table = createLevelTable(group, userInfo);
-                    levelWrapper.appendChild(table);
+                    levelWrapper = createLevelContentWrapper(buttons.levelButton, group, userInfo);
                 }
             }
 
@@ -1486,19 +1510,11 @@
             if (lagerWrapper) list.appendChild(lagerWrapper);
             if (levelWrapper) list.appendChild(levelWrapper);
 
-            // Wrapper gegenseitig referenzieren
-            if (spoilerWrapper && lagerWrapper) {
-                spoilerWrapper.otherWrapper = lagerWrapper;
-                lagerWrapper.otherWrapper = spoilerWrapper;
-            }
-            if (spoilerWrapper && levelWrapper) {
-                spoilerWrapper.otherWrapper = levelWrapper;
-                levelWrapper.otherWrapper = spoilerWrapper;
-            }
-            if (lagerWrapper && levelWrapper) {
-                lagerWrapper.otherWrapper = levelWrapper;
-                levelWrapper.otherWrapper = lagerWrapper;
-            }
+            // Wrapper gegenseitig referenzieren als Array (otherWrappers)
+            const wrappers = [spoilerWrapper, lagerWrapper, levelWrapper].filter(Boolean);
+            wrappers.forEach(wrapper => {
+                wrapper.otherWrappers = wrappers.filter(w => w !== wrapper);
+            });
         });
 
     }
@@ -1559,7 +1575,17 @@
         return btn;
     }
 
-    // Funktion um die Spoiler-Inhalte zu erstellen (Erweiterung/Lager)
+    // Funktion um die Spoiler-Inhalte zu erstellen (Erweiterung/Lager/Stufenausbau)
+    function resetButtonText(wrapper) {
+        if (!wrapper.associatedButton) return;
+        if (wrapper.classList.contains('spoiler-content')) {
+            wrapper.associatedButton.textContent = 'Erweiterungen anzeigen';
+        } else if (wrapper.classList.contains('lager-wrapper')) {
+            wrapper.associatedButton.textContent = 'Lager anzeigen';
+        } else if (wrapper.classList.contains('level-wrapper')) {
+            wrapper.associatedButton.textContent = 'Ausbaustufen anzeigen';
+        }
+    }
     function createSpoilerContentWrapper(spoilerButton) {
         const wrapper = document.createElement('div');
         wrapper.className = 'spoiler-content';
@@ -1568,25 +1594,22 @@
         spoilerButton.addEventListener('click', () => {
             const show = wrapper.style.display !== 'block';
 
-            // Erst alle anderen Wrapper schließen, wenn vorhanden
-            if (wrapper.otherWrapper) {
-                wrapper.otherWrapper.style.display = 'none';
-                const otherButton = wrapper.otherWrapper.associatedButton;
+            if (wrapper.otherWrappers) {
+                wrapper.otherWrappers.forEach(other => {
+                    other.style.display = 'none';
+                    if (other.associatedButton) {
+                        other.associatedButton.classList.remove('active-button');
+                        resetButtonText(other);
+                    }
+                });
             }
 
             wrapper.style.display = show ? 'block' : 'none';
             spoilerButton.textContent = show ? 'Erweiterungen ausblenden' : 'Erweiterungen anzeigen';
             spoilerButton.classList.toggle('active-button', show);
-
-            // Gegenstück deaktivieren, falls vorhanden
-            if (wrapper.otherWrapper && wrapper.otherWrapper.associatedButton) {
-                wrapper.otherWrapper.associatedButton.classList.remove('active-button');
-            }
         });
 
-        // Referenz für später (zum Rücksetzen anderer Buttons)
         wrapper.associatedButton = spoilerButton;
-
         return wrapper;
     }
     function createLagerContentWrapper(lagerButton, group, userInfo, buildSelectedButton) {
@@ -1601,25 +1624,22 @@
         lagerButton.addEventListener('click', () => {
             const show = wrapper.style.display !== 'block';
 
-            // Erst anderen Wrapper schließen, falls vorhanden
-            if (wrapper.otherWrapper) {
-                wrapper.otherWrapper.style.display = 'none';
-                const otherButton = wrapper.otherWrapper.associatedButton;
+            if (wrapper.otherWrappers) {
+                wrapper.otherWrappers.forEach(other => {
+                    other.style.display = 'none';
+                    if (other.associatedButton) {
+                        other.associatedButton.classList.remove('active-button');
+                        resetButtonText(other);
+                    }
+                });
             }
 
             wrapper.style.display = show ? 'block' : 'none';
             lagerButton.textContent = show ? 'Lager ausblenden' : 'Lager anzeigen';
             lagerButton.classList.toggle('active-button', show);
-
-            // Gegenstück deaktivieren, falls vorhanden
-            if (wrapper.otherWrapper && wrapper.otherWrapper.associatedButton) {
-                wrapper.otherWrapper.associatedButton.classList.remove('active-button');
-            }
         });
 
-        // Referenz speichern
         wrapper.associatedButton = lagerButton;
-
         return wrapper;
     }
     function createLevelContentWrapper(levelButton, group, userInfo, buildSelectedButton) {
@@ -1634,26 +1654,22 @@
         levelButton.addEventListener('click', () => {
             const show = wrapper.style.display !== 'block';
 
-            // Anderen Wrapper schließen, falls vorhanden
-            if (wrapper.otherWrapper) {
-                wrapper.otherWrapper.style.display = 'none';
-                const otherButton = wrapper.otherWrapper.associatedButton;
-                if (otherButton) otherButton.textContent = 'Ausbaustufen anzeigen';
+            if (wrapper.otherWrappers) {
+                wrapper.otherWrappers.forEach(other => {
+                    other.style.display = 'none';
+                    if (other.associatedButton) {
+                        other.associatedButton.classList.remove('active-button');
+                        resetButtonText(other);
+                    }
+                });
             }
 
             wrapper.style.display = show ? 'block' : 'none';
             levelButton.textContent = show ? 'Ausbaustufen ausblenden' : 'Ausbaustufen anzeigen';
             levelButton.classList.toggle('active-button', show);
-
-            // Gegenstück-Button zurücksetzen
-            if (wrapper.otherWrapper && wrapper.otherWrapper.associatedButton) {
-                wrapper.otherWrapper.associatedButton.classList.remove('active-button');
-            }
         });
 
-        // Button speichern
         wrapper.associatedButton = levelButton;
-
         return wrapper;
     }
 
@@ -1793,6 +1809,7 @@
             });
             updateBuildSelectedButton();
             updateSelectAllCheckboxState();
+            updateSelectedAmounts();
         });
 
         group.forEach(({ building, missingExtensions }) => {
@@ -1807,9 +1824,13 @@
                 checkbox.className = 'extension-checkbox';
                 checkbox.dataset.buildingId = building.id;
                 checkbox.dataset.extensionId = extension.id;
+                checkbox.dataset.creditCost = extension.cost;
+                checkbox.dataset.coinCost = extension.coins;
+
                 checkbox.disabled = userInfo.credits < extension.cost && userInfo.coins < extension.coins;
                 checkbox.addEventListener('change', () => {
                     updateBuildSelectedButton();
+                    updateSelectedAmounts();
                 });
 
                 row.innerHTML = `
@@ -1962,9 +1983,12 @@
                 checkbox.className = 'storage-checkbox';
                 checkbox.dataset.buildingId = building.id;
                 checkbox.dataset.storageType = id;
+                checkbox.dataset.creditCost = opt.cost;
+                checkbox.dataset.coinCost = opt.coins;
                 checkbox.disabled = userInfo.credits < opt.cost && userInfo.coins < opt.coins;
                 checkbox.addEventListener('change', () => {
                     updateBuildSelectedButton();
+                    updateSelectedAmounts();
                 });
 
                 const checkboxCell = document.createElement('td');
@@ -2056,8 +2080,9 @@
                     if (cb && !cb.disabled) cb.checked = selectAllCheckbox.checked;
                 }
             });
-            updateSelectAllCheckboxState()
+            updateSelectAllCheckboxState();
             updateBuildSelectedButton();
+            updateSelectedAmounts();
         });
 
         function applyAllFilters() {
@@ -2287,6 +2312,27 @@
         return table;
     }
 
+    // Funktion um Kosten anzuzeigen
+    function updateSelectedAmounts() {
+        let totalCredits = 0;
+        let totalCoins = 0;
+
+        // Alle extension-checkboxen auswählen
+        document.querySelectorAll('.extension-checkbox:checked').forEach(cb => {
+            totalCredits += Number(cb.dataset.creditCost) || 0;
+            totalCoins += Number(cb.dataset.coinCost) || 0;
+        });
+
+        // Alle storage-checkboxen auswählen
+        document.querySelectorAll('.storage-checkbox:checked').forEach(cb => {
+            totalCredits += Number(cb.dataset.creditCost) || 0;
+            totalCoins += Number(cb.dataset.coinCost) || 0;
+        });
+
+        // Anzeige aktualisieren
+        document.getElementById('selected-credits').textContent = totalCredits.toLocaleString();
+        document.getElementById('selected-coins').textContent = totalCoins.toLocaleString();
+    }
 
     // Filterfunktion über Dropdowns
     function filterTableByDropdown(table, columnIndex, filterValue) {
