@@ -633,7 +633,7 @@
             { id: 3, name: '3', cost: 100000, coins: 20 },
             { id: 4, name: '4', cost: 100000, coins: 20 },
         ], // Seenotrettungswache
-    };
+    };              // Ausbaustufen
     const buildingTypeNames = {
         '0_normal': 'Feuerwache (Normal)',
         '0_small': 'Feuerwache (Kleinwache)',
@@ -916,7 +916,6 @@
             return form;
         }
 
-
         function createStorageForm() {
             const form = document.createElement('form');
 
@@ -1196,6 +1195,10 @@
         // Verhalten wie bei einem normalen Menü-Eintrag
         link.addEventListener('click', (e) => {
             e.preventDefault(); // verhindert Navigation
+
+            document.getElementById('selected-credits').textContent = "0";
+            document.getElementById('selected-coins').textContent = "0";
+
             checkPremiumAndShowHint(); // deine Funktion
         });
 
@@ -1362,6 +1365,7 @@
         return leitstelle ? leitstelle.caption : 'Unbekannt';
     }
 
+    // Funktion um die Ausbaustufen zu ermitteln
     function getBuildingLevelInfo(building) {
         const type = building.building_type;
         const size = building.small_building ? 'small' : 'normal';
@@ -1918,7 +1922,7 @@
 
             updateBuildSelectedButton();
             updateSelectAllCheckboxState();
-            updateSelectedAmounts();
+            updateSelectedAmounts(group, userInfo);
         });
 
 
@@ -1940,7 +1944,7 @@
                 checkbox.disabled = userInfo.credits < extension.cost && userInfo.coins < extension.coins;
                 checkbox.addEventListener('change', () => {
                     updateBuildSelectedButton();
-                    updateSelectedAmounts();
+                    updateSelectedAmounts(group, userInfo);
                 });
 
                 row.innerHTML = `
@@ -2108,7 +2112,7 @@
                 checkbox.disabled = userInfo.credits < opt.cost && userInfo.coins < opt.coins;
                 checkbox.addEventListener('change', () => {
                     updateBuildSelectedButton();
-                    updateSelectedAmounts();
+                    updateSelectedAmounts(group, userInfo);
                 });
 
                 const checkboxCell = document.createElement('td');
@@ -2245,7 +2249,7 @@
 
             updateSelectAllCheckboxState();
             updateBuildSelectedButton();
-            updateSelectedAmounts();
+            updateSelectedAmounts(group, userInfo);
         });
 
 
@@ -2315,8 +2319,6 @@
     function createLevelTable(group, userInfo) {
 
         function updateBuildButtons(building, selectedLevelId, creditCell, coinCell, levelList, currentLevel) {
-            console.info(`updateBuildButtons für Building ID ${building.id}`);
-            console.info(`Aktueller Level: ${currentLevel}, Gewählter Level: ${selectedLevelId}`);
 
             let totalCredits = 0;
             let totalCoins = 0;
@@ -2635,30 +2637,44 @@
     // Diese Funktion dann beim Laden der Seite aufrufen
     initUserCredits();
 
-    // Funktion zur Gesamtkostenberechnung
     function updateSelectedAmounts(group, userInfo) {
+        if (!Array.isArray(group)) {
+            // Wenn group nicht definiert oder kein Array ist, einfach abbrechen oder leeres Array setzen
+            console.warn('updateSelectedAmounts: group ist kein Array:', group);
+            return;
+            Alternativ: group = [];
+        }
+
         let totalCredits = 0;
         let totalCoins = 0;
 
-        // Kosten aus Checkboxen
+        // Kosten der Erweiterungen und Lager
         document.querySelectorAll('.extension-checkbox:checked, .storage-checkbox:checked').forEach(cb => {
             totalCredits += Number(cb.dataset.creditCost) || 0;
             totalCoins += Number(cb.dataset.coinCost) || 0;
         });
 
-        // Kosten aus ausgewählten Levelbuttons
-        for (const { building } of group) {
-            const buildingId = building.id;
-            const selectedLevelId = selectedLevels[buildingId];
-            if (selectedLevelId === undefined) continue;
+        // Kosten der Level
+        group.forEach(({ building }) => {
+            console.log('Building:', building.id, building.building_type, building.small_building);
 
-            const levelInfo = getBuildingLevelInfo(building);
-            if (!levelInfo) continue;
-
-            const currentLevel = levelInfo.currentLevel;
             const key = `${building.building_type}_${building.small_building ? 'small' : 'normal'}`;
+            console.log('Key:', key);
+
             const levelList = manualLevels[key];
-            if (!levelList) continue;
+            if (!levelList) {
+                console.warn('Kein LevelList für Key:', key);
+                return;
+            }
+
+            const currentLevel = getBuildingLevelInfo(building)?.currentLevel ?? -1;
+            const selectedLevelId = selectedLevels[building.id] ?? currentLevel;
+            console.log('currentLevel:', currentLevel, 'selectedLevelId:', selectedLevelId);
+
+            if (selectedLevelId === currentLevel) {
+                console.log('Keine Änderung bei', building.id);
+                return;
+            }
 
             if (currentLevel === -1) {
                 for (let i = 0; i <= selectedLevelId; i++) {
@@ -2675,14 +2691,9 @@
                     totalCoins += stufe.coins || 0;
                 }
             } else if (selectedLevelId < currentLevel) {
-                for (let i = selectedLevelId + 1; i <= currentLevel; i++) {
-                    const stufe = levelList[i];
-                    if (!stufe) continue;
-                    totalCredits += stufe.cost || 0;
-                    totalCoins += stufe.coins || 0;
-                }
+                // Downgrade, hier evtl. anders behandeln
             }
-        }
+        });
 
         document.getElementById('selected-credits').textContent = totalCredits.toLocaleString();
         document.getElementById('selected-coins').textContent = totalCoins.toLocaleString();
@@ -2977,7 +2988,6 @@
             alert(`Bau fehlgeschlagen: ${err.message}`);
         });
     }
-
 
     fetchBuildingsAndRender();
 
@@ -3470,7 +3480,7 @@
                 event.preventDefault(); // Verhindert das Ändern der Checkbox
             } else {
                 // Nach dem Klick die Anzeige aktualisieren
-                setTimeout(updateSelectedAmounts, 0);
+                setTimeout(() => updateSelectedAmounts(), 0);
                 updateBuildSelectedButton();
             }
         }
