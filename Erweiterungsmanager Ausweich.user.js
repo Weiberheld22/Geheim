@@ -120,6 +120,7 @@
         #extension-lightbox .level-button            { background-color: brown; }
         #extension-lightbox .build-selected-button   { background-color: blue; }
         #extension-lightbox .build-all-button        { background-color: red; }
+        #extension-lightbox .build-selected-levels-button { background-color: purple; }
 
         #extension-lightbox .build-selected-button:hover:enabled,
         #extension-lightbox .build-all-button:hover:enabled {
@@ -638,7 +639,7 @@
         '0_normal': 'Feuerwache (Normal)',
         '0_small': 'Feuerwache (Kleinwache)',
         '1_normal': 'Feuerwehrschule',
-        '2_normal': 'Rettungswache',
+        '2_normal': 'Rettungswache (Normal)',
         '2_small': 'Rettungswache (Kleinwache)',
         '3_normal': 'Rettungsschule',
         '4_normal': 'Krankenhaus',
@@ -1324,38 +1325,28 @@
 
     // Funktion zum Abrufen der Gebäudedaten
     function fetchBuildingsAndRender() {
-        fetch('https://www.leitstellenspiel.de/api/buildings')
-            .then(response => {
+    fetch('https://www.leitstellenspiel.de/api/buildings')
+        .then(response => {
             if (!response.ok) {
                 throw new Error('Fehler beim Abrufen der Daten');
             }
             return response.json();
         })
-            .then(data => {
+        .then(data => {
             buildingsData = data;
 
             data.forEach(building => {
                 const levelInfo = getBuildingLevelInfo(building);
-                if (levelInfo) {
-                    console.log(`Gebäude #${building.id}`);
-                    console.log(`Aktuelles Level: ${levelInfo.current?.name}`);
-                    if (levelInfo.next) {
-                        console.log(`Nächstes Level: ${levelInfo.next.name}, Kosten: ${levelInfo.next.cost} Credits`);
-                    } else {
-                        console.log('Maximales Level erreicht');
-                    }
-                } else {
-                    console.log(`Kein Level-Datensatz für Typ ${building.building_type}`);
-                }
+
             });
 
             renderMissingExtensions(data);
         })
-            .catch(error => {
+        .catch(error => {
             const list = document.getElementById('extension-list');
             list.innerHTML = 'Fehler beim Laden der Gebäudedaten.';
         });
-    }
+}
 
     // Funktion, um den Namen der zugehörigen Leitstelle zu ermitteln
     function getLeitstelleName(building) {
@@ -1511,7 +1502,7 @@
             const buildingType = buildingTypeNames[groupKey] || 'Unbekannt';
 
             const header = createHeader(buildingType);
-            const buttons = createButtonContainer(groupKey, group);
+            const buttons = createButtonContainer(groupKey, group, userInfo);
 
             const hasEnabledStorage = group.some(({ building }) => {
                 const baseKey = `${building.building_type}_${building.small_building ? 'small' : 'normal'}`;
@@ -1599,53 +1590,56 @@
     }
 
     // Funktion um den ButtonContainer zu erstellen
-    function createButtonContainer(groupKey, group) {
-        const container = document.createElement('div');
-        container.classList.add('button-container');
+    function createButtonContainer(groupKey, group, userInfo) {
+    const container = document.createElement('div');
+    container.classList.add('button-container');
 
-        const spoilerButton = createButton('Erweiterungen anzeigen', ['btn', 'spoiler-button']);
+    const spoilerButton = createButton('Erweiterungen anzeigen', ['btn', 'spoiler-button']);
 
-        // Prüfen, ob Ausbaustufen-Button angezeigt werden soll
-        const showLevelButton = group.some(({ building }) => {
-            const key = `${building.building_type}_${building.small_building ? 'small' : 'normal'}`;
-            return allowedBuildings.has(key);
-        });
+    const showLevelButton = group.some(({ building }) => {
+        const key = `${building.building_type}_${building.small_building ? 'small' : 'normal'}`;
+        return allowedBuildings.has(key);
+    });
 
-        let levelButton = null;
-        if (showLevelButton) {
-            levelButton = createButton('Ausbaustufen anzeigen', ['btn', 'level-button']);
-        }
-
-        const canBuildStorage = group.some(({ building }) => {
-            const key = `${building.building_type}_${building.small_building ? 'small' : 'normal'}`;
-            return manualStorageRooms.hasOwnProperty(key);
-        });
-
-        let lagerButton = null;
-        if (canBuildStorage) {
-            lagerButton = createButton('Lager anzeigen', ['btn','lager-button']);
-
-        }
-
-        const buildSelectedButton = createButton('Ausgewählte Erweiterungen/Lager bauen', ['btn', 'build-selected-button']);
-        buildSelectedButton.disabled = true;
-        buildSelectedButton.onclick = () => buildSelectedExtensions();
-
-        const buildAllButton = createButton('Sämtliche Erweiterungen/Lager bei allen Wachen bauen', ['btn', 'build-all-button']);
-        buildAllButton.onclick = () => showCurrencySelectionForAll(groupKey);
-
-        [spoilerButton, lagerButton, levelButton, buildSelectedButton, buildAllButton]
-            .filter(Boolean)
-            .forEach(btn => container.appendChild(btn));
-
-        return {
-            container,
-            spoilerButton,
-            levelButton,
-            lagerButton,
-            buildSelectedButton
-        };
+    let levelButton = null;
+    if (showLevelButton) {
+        levelButton = createButton('Ausbaustufen anzeigen', ['btn', 'level-button']);
     }
+
+    const canBuildStorage = group.some(({ building }) => {
+        const key = `${building.building_type}_${building.small_building ? 'small' : 'normal'}`;
+        return manualStorageRooms.hasOwnProperty(key);
+    });
+
+    let lagerButton = null;
+    if (canBuildStorage) {
+        lagerButton = createButton('Lager anzeigen', ['btn', 'lager-button']);
+    }
+
+    const buildSelectedButton = createButton('Ausgewählte Erweiterungen/Lager bauen', ['btn', 'build-selected-button']);
+    buildSelectedButton.disabled = true;
+    buildSelectedButton.onclick = () => buildSelectedExtensions();
+
+    const buildAllButton = createButton('Sämtliche Erweiterungen/Lager bei allen Wachen bauen', ['btn', 'build-all-button']);
+    buildAllButton.onclick = () => showCurrencySelectionForAll(groupKey);
+
+    // Neuer Button "Ausgewählte Stufen bauen"
+    const buildSelectedLevelsButton = createButton('Ausgewählte Stufen bauen', ['btn', 'build-selected-levels-button']);
+    buildSelectedLevelsButton.onclick = () => buildSelectedLevels(group, userInfo);
+
+    [spoilerButton, lagerButton, levelButton, buildSelectedButton, buildAllButton, buildSelectedLevelsButton]
+        .filter(Boolean)
+        .forEach(btn => container.appendChild(btn));
+
+    return {
+        container,
+        spoilerButton,
+        levelButton,
+        lagerButton,
+        buildSelectedButton,
+        buildSelectedLevelsButton
+    };
+}
 
     // Funktion um die Buttons zu erstellen
     function createButton(text, classes = []) {
@@ -2318,74 +2312,86 @@
     }
     function createLevelTable(group, userInfo) {
 
-        function updateBuildButtons(building, selectedLevelId, creditCell, coinCell, levelList, currentLevel) {
+    function updateBuildButtons(building, selectedLevelId, creditCell, coinCell, levelList, currentLevel) {
 
-            let totalCredits = 0;
-            let totalCoins = 0;
+        let totalCredits = 0;
+        let totalCoins = 0;
 
-            if (currentLevel === -1) {
-                for (let i = 0; i <= selectedLevelId; i++) {
-                    const stufe = levelList[i];
-                    if (!stufe) continue;
-                    totalCredits += stufe.cost || 0;
-                    totalCoins += stufe.coins || 0;
-                }
-            } else if (selectedLevelId > currentLevel) {
-                for (let i = currentLevel + 1; i <= selectedLevelId; i++) {
-                    const stufe = levelList[i];
-                    if (!stufe) continue;
-                    totalCredits += stufe.cost || 0;
-                    totalCoins += stufe.coins || 0;
-                }
-            } else if (selectedLevelId < currentLevel) {
-                for (let i = selectedLevelId + 1; i <= currentLevel; i++) {
-                    const stufe = levelList[i];
-                    if (!stufe) continue;
-                    totalCredits += stufe.cost || 0;
-                    totalCoins += stufe.coins || 0;
-                }
-            } else {
-                totalCredits = 0;
-                totalCoins = 0;
+        if (currentLevel === -1) {
+            for (let i = 0; i <= selectedLevelId; i++) {
+                const stufe = levelList[i];
+                if (!stufe) continue;
+                totalCredits += stufe.cost || 0;
+                totalCoins += stufe.coins || 0;
             }
-
-            console.info(`Berechnete Kosten: ${totalCredits} Credits, ${totalCoins} Coins`);
-
-            creditCell.innerHTML = '';
-            coinCell.innerHTML = '';
-
-            const creditBtn = document.createElement('button');
-            creditBtn.textContent = `${totalCredits.toLocaleString()} Credits`;
-            creditBtn.classList.add('btn', 'btn-sm');
-            creditBtn.style.backgroundColor = '#28a745';
-            creditBtn.style.color = 'white';
-            creditBtn.disabled = userInfo.credits < totalCredits || totalCredits === 0;
-            creditBtn.onclick = () => {
-                if (userInfo.credits < totalCredits) {
-                    alert('Nicht genug Credits!');
-                    return;
-                }
-                console.info(`Baue mit Credits: Gebäude ${building.id}, Stufe ${selectedLevelId}`);
-                buildLevel(building.id, 'credits', selectedLevelId);
-            };
-            creditCell.appendChild(creditBtn);
-
-            const coinBtn = document.createElement('button');
-            coinBtn.textContent = `${totalCoins.toLocaleString()} Coins`;
-            coinBtn.classList.add('btn', 'btn-sm');
-            coinBtn.style.backgroundColor = '#dc3545';
-            coinBtn.style.color = 'white';
-            coinBtn.disabled = userInfo.coins < totalCoins || totalCoins === 0;
-            coinBtn.onclick = () => {
-                if (userInfo.coins < totalCoins) {
-                    alert('Nicht genug Coins!');
-                    return;
-                }
-                console.info(`Baue mit Coins: Gebäude ${building.id}, Stufe ${selectedLevelId}`);
-                buildLevel(building.id, 'coins', selectedLevelId);
-            };
-            coinCell.appendChild(coinBtn);
+        } else if (selectedLevelId > currentLevel) {
+            for (let i = currentLevel + 1; i <= selectedLevelId; i++) {
+                const stufe = levelList[i];
+                if (!stufe) continue;
+                totalCredits += stufe.cost || 0;
+                totalCoins += stufe.coins || 0;
+            }
+        } else if (selectedLevelId < currentLevel) {
+            for (let i = selectedLevelId + 1; i <= currentLevel; i++) {
+                const stufe = levelList[i];
+                if (!stufe) continue;
+                totalCredits += stufe.cost || 0;
+                totalCoins += stufe.coins || 0;
+            }
+        } else {
+            totalCredits = 0;
+            totalCoins = 0;
         }
+
+        console.info(`Berechnete Kosten: ${totalCredits} Credits, ${totalCoins} Coins`);
+
+        creditCell.innerHTML = '';
+        coinCell.innerHTML = '';
+
+        const creditBtn = document.createElement('button');
+        creditBtn.textContent = `${totalCredits.toLocaleString()} Credits`;
+        creditBtn.classList.add('btn', 'btn-sm');
+        creditBtn.style.backgroundColor = '#28a745';
+        creditBtn.style.color = 'white';
+        creditBtn.disabled = userInfo.credits < totalCredits || totalCredits === 0;
+        creditBtn.onclick = async () => {
+            if (userInfo.credits < totalCredits) {
+                alert('Nicht genug Credits!');
+                return;
+            }
+            console.info(`Baue mit Credits: Gebäude ${building.id}, Stufe ${selectedLevelId}`);
+            try {
+                await buildLevel(building.id, 'credits', selectedLevelId);
+                alert('Ausbau mit Credits erfolgreich!');
+                // Optional: Seite neu laden oder UI aktualisieren
+            } catch (e) {
+                alert('Fehler beim Bauen mit Credits.');
+            }
+        };
+        creditCell.appendChild(creditBtn);
+
+        const coinBtn = document.createElement('button');
+        coinBtn.textContent = `${totalCoins.toLocaleString()} Coins`;
+        coinBtn.classList.add('btn', 'btn-sm');
+        coinBtn.style.backgroundColor = '#dc3545';
+        coinBtn.style.color = 'white';
+        coinBtn.disabled = userInfo.coins < totalCoins || totalCoins === 0;
+        coinBtn.onclick = async () => {
+            if (userInfo.coins < totalCoins) {
+                alert('Nicht genug Coins!');
+                return;
+            }
+            console.info(`Baue mit Coins: Gebäude ${building.id}, Stufe ${selectedLevelId}`);
+            try {
+                await buildLevel(building.id, 'coins', selectedLevelId);
+                alert('Ausbau mit Coins erfolgreich!');
+                // Optional: Seite neu laden oder UI aktualisieren
+            } catch (e) {
+                alert('Fehler beim Bauen mit Coins.');
+            }
+        };
+        coinCell.appendChild(coinBtn);
+    }
 
         const table = document.createElement('table');
         table.style.width = '100%';
@@ -2620,6 +2626,7 @@
     let currentCredits = 0;
     let currentCoins = 0;
 
+    // Funktion um aktuelle Credtis/Coins in den Header einzufügen
     async function initUserCredits() {
         try {
             const data = await getUserCredits();
@@ -2637,6 +2644,7 @@
     // Diese Funktion dann beim Laden der Seite aufrufen
     initUserCredits();
 
+    // Funktion zur Gesamtkostenberechnung
     function updateSelectedAmounts(group, userInfo) {
         if (!Array.isArray(group)) {
             // Wenn group nicht definiert oder kein Array ist, einfach abbrechen oder leeres Array setzen
@@ -2656,10 +2664,8 @@
 
         // Kosten der Level
         group.forEach(({ building }) => {
-            console.log('Building:', building.id, building.building_type, building.small_building);
 
             const key = `${building.building_type}_${building.small_building ? 'small' : 'normal'}`;
-            console.log('Key:', key);
 
             const levelList = manualLevels[key];
             if (!levelList) {
@@ -2672,7 +2678,6 @@
             console.log('currentLevel:', currentLevel, 'selectedLevelId:', selectedLevelId);
 
             if (selectedLevelId === currentLevel) {
-                console.log('Keine Änderung bei', building.id);
                 return;
             }
 
@@ -2969,25 +2974,59 @@
             });
         });
     }
-    function buildLevel(buildingId, method, level) {
+    async function buildLevel(buildingId, currency, level) {
+    const csrfToken = getCSRFToken();
+    const initialUrl = `https://www.leitstellenspiel.de/buildings/${buildingId}/expand_do/${currency}?level=${level}`;
 
-        const url = `/buildings/${buildingId}/expand_do/${method}?level=${level}`;
-
-        fetch(url, { method: 'POST' })
-            .then(response => {
-            if (!response.ok) {
-                throw new Error(`Fehler beim Bauen: ${response.statusText}`);
-            }
-            return response.json();
-        })
-            .then(data => {
-            alert(`Gebäude erfolgreich auf Stufe ${level} ausgebaut!`);
-
-        })
-            .catch(err => {
-            alert(`Bau fehlgeschlagen: ${err.message}`);
+    // Hilfsfunktion: GET-Request per GM_xmlhttpRequest, gibt Promise mit Antwort
+    function doGetRequest(url) {
+        return new Promise((resolve, reject) => {
+            GM_xmlhttpRequest({
+                method: 'GET',
+                url: url,
+                withCredentials: true,
+                headers: {
+                    'X-CSRF-Token': csrfToken,
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                onload: (response) => resolve(response),
+                onerror: (error) => reject(error)
+            });
         });
     }
+
+    try {
+        const response1 = await doGetRequest(initialUrl);
+
+        if (response1.status === 302) {
+            // Redirect URL auslesen
+            const locationHeader = (response1.responseHeaders.match(/location:\s*(.+)/i) || [])[1];
+            if (!locationHeader) throw new Error('Redirect ohne Location-Header');
+
+            const redirectUrl = locationHeader.trim();
+
+            // Zweite Anfrage an Redirect-URL
+            const response2 = await doGetRequest(redirectUrl);
+
+            if (response2.status >= 200 && response2.status < 400) {
+                console.info(`Gebäude ${buildingId} auf Stufe ${level} mit ${currency} ausgebaut (nach Redirect).`);
+                // Hier kannst du die UI updaten (z.B. Status in Tabelle, Credits anpassen etc.)
+                return response2;
+            } else {
+                throw new Error(`Fehler nach Redirect: Status ${response2.status}`);
+            }
+        } else if (response1.status >= 200 && response1.status < 400) {
+            console.info(`Gebäude ${buildingId} auf Stufe ${level} mit ${currency} ausgebaut.`);
+            // UI updaten
+            return response1;
+        } else {
+            throw new Error(`Fehler beim Ausbau: Status ${response1.status}`);
+        }
+    } catch (err) {
+        console.error(err);
+        throw err;
+    }
+}
 
     fetchBuildingsAndRender();
 
@@ -3487,6 +3526,71 @@
     });
 
     // Ende der Funktion für * Bau von ausgewählten Erweiterungen *
+
+    async function buildSelectedLevels(group, userInfo) {
+    for (const { building } of group) {
+        const level = selectedLevels[building.id];
+        if (level === undefined || level === null) continue; // keine Auswahl
+
+        const key = `${building.building_type}_${building.small_building ? 'small' : 'normal'}`;
+        const levelList = manualLevels[key];
+        if (!levelList) continue;
+
+        const currentLevel = getBuildingLevelInfo(building)?.currentLevel ?? -1;
+
+        let totalCredits = 0;
+        let totalCoins = 0;
+
+        if (currentLevel === -1) {
+            for (let i = 0; i <= level; i++) {
+                const stufe = levelList[i];
+                if (!stufe) continue;
+                totalCredits += stufe.cost || 0;
+                totalCoins += stufe.coins || 0;
+            }
+        } else if (level > currentLevel) {
+            for (let i = currentLevel + 1; i <= level; i++) {
+                const stufe = levelList[i];
+                if (!stufe) continue;
+                totalCredits += stufe.cost || 0;
+                totalCoins += stufe.coins || 0;
+            }
+        } else if (level < currentLevel) {
+            for (let i = level + 1; i <= currentLevel; i++) {
+                const stufe = levelList[i];
+                if (!stufe) continue;
+                totalCredits += stufe.cost || 0;
+                totalCoins += stufe.coins || 0;
+            }
+        } else {
+            continue; // keine Änderung
+        }
+
+        if (userInfo.credits >= totalCredits && totalCredits > 0) {
+            try {
+                await buildLevel(building.id, 'credits', level);
+                userInfo.credits -= totalCredits; // optional
+                console.log(`Gebäude ${building.id} mit Credits auf Stufe ${level} gebaut`);
+            } catch (e) {
+                alert(`Fehler beim Ausbau von Gebäude ${building.id} mit Credits.`);
+            }
+        } else if (userInfo.coins >= totalCoins && totalCoins > 0) {
+            try {
+                await buildLevel(building.id, 'coins', level);
+                userInfo.coins -= totalCoins; // optional
+                console.log(`Gebäude ${building.id} mit Coins auf Stufe ${level} gebaut`);
+            } catch (e) {
+                alert(`Fehler beim Ausbau von Gebäude ${building.id} mit Coins.`);
+            }
+        } else {
+            alert(`Nicht genug Credits oder Coins für Gebäude ${building.id} Stufe ${level}`);
+        }
+    }
+
+    alert('Ausgewählte Stufen gebaut!');
+}
+
+
 
     // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
