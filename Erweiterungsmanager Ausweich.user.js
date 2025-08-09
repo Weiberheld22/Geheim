@@ -490,131 +490,150 @@
     };        // Lagerräume
     const manualLevels = {
         '0_normal': [
-            { id: 0, name: '1', cost: 10000, coins: 10 },
-            { id: 1, name: '2', cost: 50000, coins: 15 },
-            { id: 2, name: '3', cost: 100000, coins: 20 },
-            { id: 3, name: '4', cost: 100000, coins: 20 },
-            { id: 4, name: '5', cost: 100000, coins: 20 },
-            { id: 5, name: '6', cost: 100000, coins: 20 },
-            { id: 6, name: '7', cost: 100000, coins: 20 },
-            { id: 7, name: '8', cost: 100000, coins: 20 },
-            { id: 8, name: '9', cost: 100000, coins: 20 },
-            { id: 9, name: '10', cost: 100000, coins: 20 },
-            { id: 10, name: '11', cost: 100000, coins: 20 },
-            { id: 11, name: '12', cost: 100000, coins: 20 },
-            { id: 12, name: '13', cost: 100000, coins: 20 },
-            { id: 13, name: '14', cost: 100000, coins: 20 },
-            { id: 14, name: '15', cost: 100000, coins: 20 },
-            { id: 15, name: '16', cost: 100000, coins: 20 },
-            { id: 16, name: '17', cost: 100000, coins: 20 },
-            { id: 17, name: '18', cost: 100000, coins: 20 },
-            { id: 18, name: '19', cost: 100000, coins: 20 },
+            { id: 0, name: '0', cost: 0, coins: 0 },
+            { id: 1, name: '1', cost: 10000, coins: 10 },
+            { id: 2, name: '2', cost: 50000, coins: 15 },
+            { id: 3, name: '3', cost: 100000, coins: 20 },
+            { id: 4, name: '4', cost: 100000, coins: 20 },
+            { id: 5, name: '5', cost: 100000, coins: 20 },
+            { id: 6, name: '6', cost: 100000, coins: 20 },
+            { id: 7, name: '7', cost: 100000, coins: 20 },
+            { id: 8, name: '8', cost: 100000, coins: 20 },
+            { id: 9, name: '9', cost: 100000, coins: 20 },
+            { id: 10, name: '10', cost: 100000, coins: 20 },
+            { id: 11, name: '11', cost: 100000, coins: 20 },
+            { id: 12, name: '12', cost: 100000, coins: 20 },
+            { id: 13, name: '13', cost: 100000, coins: 20 },
+            { id: 14, name: '14', cost: 100000, coins: 20 },
+            { id: 15, name: '15', cost: 100000, coins: 20 },
+            { id: 16, name: '16', cost: 100000, coins: 20 },
+            { id: 17, name: '17', cost: 100000, coins: 20 },
+            { id: 18, name: '18', cost: 100000, coins: 20 },
+            { id: 19, name: '19', cost: 100000, coins: 20 },
         ],  // Feuerwache (Normal)
+
         '0_small': [
-            { id: 0, name: '1', cost: 10000, coins: 10 },
-            { id: 1, name: '2', cost: 50000, coins: 15 },
-            { id: 2, name: '3', cost: 100000, coins: 20 },
-            { id: 3, name: '4', cost: 100000, coins: 20 },
-            { id: 4, name: '5', cost: 100000, coins: 20 },
+            { id: 0, name: '0', cost: 0, coins: 0 },
+            { id: 1, name: '1', cost: 10000, coins: 10 },
+            { id: 2, name: '2', cost: 50000, coins: 15 },
+            { id: 3, name: '3', cost: 100000, coins: 20 },
+            { id: 4, name: '4', cost: 100000, coins: 20 },
+            { id: 5, name: '5', cost: 100000, coins: 20 },
         ],   // Feuerwache (Kleinwache)
+
         '2_normal': [
-            { id: 0, name: '1', cost: 10000, coins: 10 },
-            { id: 1, name: '2', cost: 50000, coins: 15 },
-            { id: 2, name: '3', cost: 100000, coins: 20 },
-            { id: 3, name: '4', cost: 100000, coins: 20 },
-            { id: 4, name: '5', cost: 100000, coins: 20 },
-            { id: 5, name: '6', cost: 100000, coins: 20 },
-            { id: 6, name: '7', cost: 100000, coins: 20 },
-            { id: 7, name: '8', cost: 100000, coins: 20 },
-            { id: 8, name: '9', cost: 100000, coins: 20 },
-            { id: 9, name: '10', cost: 100000, coins: 20 },
-            { id: 10, name: '11', cost: 100000, coins: 20 },
-            { id: 11, name: '12', cost: 100000, coins: 20 },
-            { id: 12, name: '13', cost: 100000, coins: 20 },
-            { id: 13, name: '14', cost: 100000, coins: 20 },
+            { id: 0, name: '0', cost: 0, coins: 0 },
+            { id: 1, name: '1', cost: 10000, coins: 10 },
+            { id: 2, name: '2', cost: 50000, coins: 15 },
+            { id: 3, name: '3', cost: 100000, coins: 20 },
+            { id: 4, name: '4', cost: 100000, coins: 20 },
+            { id: 5, name: '5', cost: 100000, coins: 20 },
+            { id: 6, name: '6', cost: 100000, coins: 20 },
+            { id: 7, name: '7', cost: 100000, coins: 20 },
+            { id: 8, name: '8', cost: 100000, coins: 20 },
+            { id: 9, name: '9', cost: 100000, coins: 20 },
+            { id: 10, name: '10', cost: 100000, coins: 20 },
+            { id: 11, name: '11', cost: 100000, coins: 20 },
+            { id: 12, name: '12', cost: 100000, coins: 20 },
+            { id: 13, name: '13', cost: 100000, coins: 20 },
+            { id: 14, name: '14', cost: 100000, coins: 20 },
         ],  // Rettungswache (Normal)
+
         '2_small': [
-            { id: 0, name: '1', cost: 10000, coins: 10 },
-            { id: 1, name: '2', cost: 50000, coins: 15 },
-            { id: 2, name: '3', cost: 100000, coins: 20 },
-            { id: 3, name: '4', cost: 100000, coins: 20 },
-            { id: 4, name: '5', cost: 100000, coins: 20 },
+            { id: 0, name: '0', cost: 0, coins: 0 },
+            { id: 1, name: '1', cost: 10000, coins: 10 },
+            { id: 2, name: '2', cost: 50000, coins: 15 },
+            { id: 3, name: '3', cost: 100000, coins: 20 },
+            { id: 4, name: '4', cost: 100000, coins: 20 },
+            { id: 5, name: '5', cost: 100000, coins: 20 },
         ],   // Rettungswache (Kleinwache)
+
         '4_normal': [
-            { id: 0, name: '1', cost: 19000, coins: 11 },
-            { id: 1, name: '2', cost: 19000, coins: 11 },
-            { id: 2, name: '3', cost: 19000, coins: 11 },
-            { id: 3, name: '4', cost: 19000, coins: 11 },
-            { id: 4, name: '5', cost: 19000, coins: 11 },
-            { id: 5, name: '6', cost: 19000, coins: 11 },
-            { id: 6, name: '7', cost: 19000, coins: 11 },
-            { id: 7, name: '8', cost: 19000, coins: 11 },
-            { id: 8, name: '9', cost: 19000, coins: 11 },
-            { id: 9, name: '10', cost: 19000, coins: 11 },
-            { id: 10, name: '11', cost: 19000, coins: 11 },
-            { id: 11, name: '12', cost: 19000, coins: 11 },
-            { id: 12, name: '13', cost: 19000, coins: 11 },
-            { id: 13, name: '14', cost: 19000, coins: 11 },
-            { id: 14, name: '15', cost: 19000, coins: 11 },
-            { id: 15, name: '16', cost: 19000, coins: 11 },
-            { id: 16, name: '17', cost: 19000, coins: 11 },
-            { id: 17, name: '18', cost: 19000, coins: 11 },
-            { id: 18, name: '19', cost: 19000, coins: 11 },
-            { id: 19, name: '20', cost: 19000, coins: 11 },
+            { id: 0, name: '0', cost: 0, coins: 0 },
+            { id: 1, name: '1', cost: 19000, coins: 11 },
+            { id: 2, name: '2', cost: 19000, coins: 11 },
+            { id: 3, name: '3', cost: 19000, coins: 11 },
+            { id: 4, name: '4', cost: 19000, coins: 11 },
+            { id: 5, name: '5', cost: 19000, coins: 11 },
+            { id: 6, name: '6', cost: 19000, coins: 11 },
+            { id: 7, name: '7', cost: 19000, coins: 11 },
+            { id: 8, name: '8', cost: 19000, coins: 11 },
+            { id: 9, name: '9', cost: 19000, coins: 11 },
+            { id: 10, name: '10', cost: 19000, coins: 11 },
+            { id: 11, name: '11', cost: 19000, coins: 11 },
+            { id: 12, name: '12', cost: 19000, coins: 11 },
+            { id: 13, name: '13', cost: 19000, coins: 11 },
+            { id: 14, name: '14', cost: 19000, coins: 11 },
+            { id: 15, name: '15', cost: 19000, coins: 11 },
+            { id: 16, name: '16', cost: 19000, coins: 11 },
+            { id: 17, name: '17', cost: 19000, coins: 11 },
+            { id: 18, name: '18', cost: 19000, coins: 11 },
+            { id: 19, name: '19', cost: 19000, coins: 11 },
+            { id: 20, name: '20', cost: 19000, coins: 11 },
         ],  // Krankenhaus
+
         '6_normal': [
-            { id: 0, name: '1', cost: 10000, coins: 10 },
-            { id: 1, name: '2', cost: 50000, coins: 15 },
-            { id: 2, name: '3', cost: 100000, coins: 20 },
-            { id: 3, name: '4', cost: 100000, coins: 20 },
-            { id: 4, name: '5', cost: 100000, coins: 20 },
-            { id: 5, name: '6', cost: 100000, coins: 20 },
-            { id: 6, name: '7', cost: 100000, coins: 20 },
-            { id: 7, name: '8', cost: 100000, coins: 20 },
-            { id: 8, name: '9', cost: 100000, coins: 20 },
-            { id: 9, name: '10', cost: 100000, coins: 20 },
-            { id: 10, name: '11', cost: 100000, coins: 20 },
-            { id: 11, name: '12', cost: 100000, coins: 20 },
-            { id: 12, name: '13', cost: 100000, coins: 20 },
-            { id: 13, name: '14', cost: 100000, coins: 20 },
+            { id: 0, name: '0', cost: 0, coins: 0 },
+            { id: 1, name: '1', cost: 10000, coins: 10 },
+            { id: 2, name: '2', cost: 50000, coins: 15 },
+            { id: 3, name: '3', cost: 100000, coins: 20 },
+            { id: 4, name: '4', cost: 100000, coins: 20 },
+            { id: 5, name: '5', cost: 100000, coins: 20 },
+            { id: 6, name: '6', cost: 100000, coins: 20 },
+            { id: 7, name: '7', cost: 100000, coins: 20 },
+            { id: 8, name: '8', cost: 100000, coins: 20 },
+            { id: 9, name: '9', cost: 100000, coins: 20 },
+            { id: 10, name: '10', cost: 100000, coins: 20 },
+            { id: 11, name: '11', cost: 100000, coins: 20 },
+            { id: 12, name: '12', cost: 100000, coins: 20 },
+            { id: 13, name: '13', cost: 100000, coins: 20 },
+            { id: 14, name: '14', cost: 100000, coins: 20 },
         ],  // Polizeiwache (Normal)
+
         '6_small': [
-            { id: 0, name: '1', cost: 10000, coins: 10 },
-            { id: 1, name: '2', cost: 50000, coins: 15 },
-            { id: 2, name: '3', cost: 100000, coins: 20 },
-            { id: 3, name: '4', cost: 100000, coins: 20 },
-            { id: 4, name: '5', cost: 100000, coins: 20 },
-        ],   // Poilzeiwache (Kleinwache)
+            { id: 0, name: '0', cost: 0, coins: 0 },
+            { id: 1, name: '1', cost: 10000, coins: 10 },
+            { id: 2, name: '2', cost: 50000, coins: 15 },
+            { id: 3, name: '3', cost: 100000, coins: 20 },
+            { id: 4, name: '4', cost: 100000, coins: 20 },
+            { id: 5, name: '5', cost: 100000, coins: 20 },
+        ],   // Polizeiwache (Kleinwache)
+
         '15_normal': [
-            { id: 0, name: '1', cost: 10000, coins: 10 },
-            { id: 1, name: '2', cost: 50000, coins: 15 },
-            { id: 2, name: '3', cost: 100000, coins: 20 },
-            { id: 3, name: '4', cost: 100000, coins: 20 },
-            { id: 4, name: '5', cost: 100000, coins: 20 },
+            { id: 0, name: '0', cost: 0, coins: 0 },
+            { id: 1, name: '1', cost: 10000, coins: 10 },
+            { id: 2, name: '2', cost: 50000, coins: 15 },
+            { id: 3, name: '3', cost: 100000, coins: 20 },
+            { id: 4, name: '4', cost: 100000, coins: 20 },
+            { id: 5, name: '5', cost: 100000, coins: 20 },
         ], // Wasserrettung
+
         '25_normal': [
-            { id: 0, name: '1', cost: 10000, coins: 10 },
-            { id: 1, name: '2', cost: 50000, coins: 15 },
-            { id: 2, name: '3', cost: 100000, coins: 20 },
-            { id: 3, name: '4', cost: 100000, coins: 20 },
-            { id: 4, name: '5', cost: 100000, coins: 20 },
-            { id: 5, name: '6', cost: 100000, coins: 20 },
-            { id: 6, name: '7', cost: 100000, coins: 20 },
-            { id: 7, name: '8', cost: 100000, coins: 20 },
-            { id: 8, name: '9', cost: 100000, coins: 20 },
-            { id: 9, name: '10', cost: 100000, coins: 20 },
-            { id: 10, name: '11', cost: 100000, coins: 20 },
-            { id: 11, name: '12', cost: 100000, coins: 20 },
-            { id: 12, name: '13', cost: 100000, coins: 20 },
-            { id: 13, name: '14', cost: 100000, coins: 20 },
+            { id: 0, name: '0', cost: 0, coins: 0 },
+            { id: 1, name: '1', cost: 10000, coins: 10 },
+            { id: 2, name: '2', cost: 50000, coins: 15 },
+            { id: 3, name: '3', cost: 100000, coins: 20 },
+            { id: 4, name: '4', cost: 100000, coins: 20 },
+            { id: 5, name: '5', cost: 100000, coins: 20 },
+            { id: 6, name: '6', cost: 100000, coins: 20 },
+            { id: 7, name: '7', cost: 100000, coins: 20 },
+            { id: 8, name: '8', cost: 100000, coins: 20 },
+            { id: 9, name: '9', cost: 100000, coins: 20 },
+            { id: 10, name: '10', cost: 100000, coins: 20 },
+            { id: 11, name: '11', cost: 100000, coins: 20 },
+            { id: 12, name: '12', cost: 100000, coins: 20 },
+            { id: 13, name: '13', cost: 100000, coins: 20 },
+            { id: 14, name: '14', cost: 100000, coins: 20 },
         ], // Bergrettungswache
+
         '26_normal': [
-            { id: 0, name: '1', cost: 10000, coins: 10 },
-            { id: 1, name: '2', cost: 50000, coins: 15 },
-            { id: 2, name: '3', cost: 100000, coins: 20 },
-            { id: 3, name: '4', cost: 100000, coins: 20 },
+            { id: 0, name: '0', cost: 0, coins: 0 },
+            { id: 1, name: '1', cost: 10000, coins: 10 },
+            { id: 2, name: '2', cost: 50000, coins: 15 },
+            { id: 3, name: '3', cost: 100000, coins: 20 },
+            { id: 4, name: '4', cost: 100000, coins: 20 },
         ], // Seenotrettungswache
-    };              // Stufenausbau
+    };
     const buildingTypeNames = {
         '0_normal': 'Feuerwache (Normal)',
         '0_small': 'Feuerwache (Kleinwache)',
@@ -1298,6 +1317,7 @@
     let buildingsData = []; // Globale Variable, um die abgerufenen Gebäudedaten zu speichern
     let buildingGroups = {}; // Globale Definition
     const storageGroups = {};
+    const selectedLevels = {};
 
     // Funktion zum Abrufen der Gebäudedaten
     function fetchBuildingsAndRender() {
@@ -1342,7 +1362,6 @@
         return leitstelle ? leitstelle.caption : 'Unbekannt';
     }
 
-    // Funktion um die Ausbaustufen zu beziehen
     function getBuildingLevelInfo(building) {
         const type = building.building_type;
         const size = building.small_building ? 'small' : 'normal';
@@ -1350,11 +1369,15 @@
         const levelData = manualLevels[key];
         if (!levelData) return null;
 
-        const currentLevel = building.level;
-        const current = levelData.find(l => l.id === currentLevel);
-        const next = levelData.find(l => l.id === currentLevel + 1);
+        // currentLevel ist das Level im Gebäude-Objekt, >=0
+        const currentLevel = (typeof building.level === 'number' && building.level >= 0) ? building.level : -1;
 
-        return { current, next };
+        // current = Stufe mit id == currentLevel, oder null falls Level -1
+        const current = currentLevel >= 0 ? levelData.find(l => l.id === currentLevel) : null;
+        // next = Level mit id currentLevel + 1, oder erstes Level wenn currentLevel -1 (noch kein Gebäude)
+        const next = currentLevel >= 0 ? levelData.find(l => l.id === currentLevel + 1) : levelData[0];
+
+        return { current, next, currentLevel };
     }
 
     // Funktion um die aktuelle Credits und Coins des Users abzurufen
@@ -1853,50 +1876,50 @@
         table.querySelector('thead').appendChild(filterRow);
 
         selectAllCheckbox.addEventListener('change', (event) => {
-    const isChecked = selectAllCheckbox.checked;
+            const isChecked = selectAllCheckbox.checked;
 
-    // Gesamtkosten nur der sichtbaren, nicht deaktivierten Checkboxen
-    let totalCredits = 0;
-    let totalCoins = 0;
+            // Gesamtkosten nur der sichtbaren, nicht deaktivierten Checkboxen
+            let totalCredits = 0;
+            let totalCoins = 0;
 
-    const rows = tbody.querySelectorAll('tr');
+            const rows = tbody.querySelectorAll('tr');
 
-    rows.forEach(row => {
-        if (row.style.display !== 'none') {
-            const cb = row.querySelector('.extension-checkbox');
-            if (cb && !cb.disabled) {
-                if (isChecked) {
-                    totalCredits += Number(cb.dataset.creditCost) || 0;
-                    totalCoins += Number(cb.dataset.coinCost) || 0;
+            rows.forEach(row => {
+                if (row.style.display !== 'none') {
+                    const cb = row.querySelector('.extension-checkbox');
+                    if (cb && !cb.disabled) {
+                        if (isChecked) {
+                            totalCredits += Number(cb.dataset.creditCost) || 0;
+                            totalCoins += Number(cb.dataset.coinCost) || 0;
+                        }
+                    }
                 }
+            });
+
+            const canPayAllWithCredits = currentCredits >= totalCredits;
+            const canPayAllWithCoins = currentCoins >= totalCoins;
+
+            if (!canPayAllWithCredits && !canPayAllWithCoins) {
+                alert("Du hast nicht genug Credits ODER Coins für die gesamte Auswahl!");
+                // Checkbox zurücksetzen, da nicht erlaubt
+                selectAllCheckbox.checked = false;
+                return;
             }
-        }
-    });
 
-    const canPayAllWithCredits = currentCredits >= totalCredits;
-    const canPayAllWithCoins = currentCoins >= totalCoins;
+            // Checkboxen setzen
+            rows.forEach(row => {
+                if (row.style.display !== 'none') {
+                    const cb = row.querySelector('.extension-checkbox');
+                    if (cb && !cb.disabled) {
+                        cb.checked = isChecked;
+                    }
+                }
+            });
 
-    if (!canPayAllWithCredits && !canPayAllWithCoins) {
-        alert("Du hast nicht genug Credits ODER Coins für die gesamte Auswahl!");
-        // Checkbox zurücksetzen, da nicht erlaubt
-        selectAllCheckbox.checked = false;
-        return;
-    }
-
-    // Checkboxen setzen
-    rows.forEach(row => {
-        if (row.style.display !== 'none') {
-            const cb = row.querySelector('.extension-checkbox');
-            if (cb && !cb.disabled) {
-                cb.checked = isChecked;
-            }
-        }
-    });
-
-    updateBuildSelectedButton();
-    updateSelectAllCheckboxState();
-    updateSelectedAmounts();
-});
+            updateBuildSelectedButton();
+            updateSelectAllCheckboxState();
+            updateSelectedAmounts();
+        });
 
 
         group.forEach(({ building, missingExtensions }) => {
@@ -2183,47 +2206,47 @@
         table.querySelector('thead').appendChild(filterRow);
 
         selectAllCheckbox.addEventListener('change', (event) => {
-    const isChecked = selectAllCheckbox.checked;
+            const isChecked = selectAllCheckbox.checked;
 
-    let totalCredits = 0;
-    let totalCoins = 0;
+            let totalCredits = 0;
+            let totalCoins = 0;
 
-    const rows = tbody.querySelectorAll('tr');
+            const rows = tbody.querySelectorAll('tr');
 
-    rows.forEach(row => {
-        if (row.style.display !== 'none') {
-            const cb = row.querySelector('.storage-checkbox');
-            if (cb && !cb.disabled) {
-                if (isChecked) {
-                    totalCredits += Number(cb.dataset.creditCost) || 0;
-                    totalCoins += Number(cb.dataset.coinCost) || 0;
+            rows.forEach(row => {
+                if (row.style.display !== 'none') {
+                    const cb = row.querySelector('.storage-checkbox');
+                    if (cb && !cb.disabled) {
+                        if (isChecked) {
+                            totalCredits += Number(cb.dataset.creditCost) || 0;
+                            totalCoins += Number(cb.dataset.coinCost) || 0;
+                        }
+                    }
                 }
+            });
+
+            const canPayAllWithCredits = currentCredits >= totalCredits;
+            const canPayAllWithCoins = currentCoins >= totalCoins;
+
+            if (!canPayAllWithCredits && !canPayAllWithCoins) {
+                alert("Du hast nicht genug Credits ODER Coins für die gesamte Auswahl!");
+                selectAllCheckbox.checked = false;
+                return;
             }
-        }
-    });
 
-    const canPayAllWithCredits = currentCredits >= totalCredits;
-    const canPayAllWithCoins = currentCoins >= totalCoins;
+            rows.forEach(row => {
+                if (row.style.display !== 'none') {
+                    const cb = row.querySelector('.storage-checkbox');
+                    if (cb && !cb.disabled) {
+                        cb.checked = isChecked;
+                    }
+                }
+            });
 
-    if (!canPayAllWithCredits && !canPayAllWithCoins) {
-        alert("Du hast nicht genug Credits ODER Coins für die gesamte Auswahl!");
-        selectAllCheckbox.checked = false;
-        return;
-    }
-
-    rows.forEach(row => {
-        if (row.style.display !== 'none') {
-            const cb = row.querySelector('.storage-checkbox');
-            if (cb && !cb.disabled) {
-                cb.checked = isChecked;
-            }
-        }
-    });
-
-    updateSelectAllCheckboxState();
-    updateBuildSelectedButton();
-    updateSelectedAmounts();
-});
+            updateSelectAllCheckboxState();
+            updateBuildSelectedButton();
+            updateSelectedAmounts();
+        });
 
 
         function applyAllFilters() {
@@ -2290,6 +2313,78 @@
         return table;
     }
     function createLevelTable(group, userInfo) {
+
+        function updateBuildButtons(building, selectedLevelId, creditCell, coinCell, levelList, currentLevel) {
+            console.info(`updateBuildButtons für Building ID ${building.id}`);
+            console.info(`Aktueller Level: ${currentLevel}, Gewählter Level: ${selectedLevelId}`);
+
+            let totalCredits = 0;
+            let totalCoins = 0;
+
+            if (currentLevel === -1) {
+                for (let i = 0; i <= selectedLevelId; i++) {
+                    const stufe = levelList[i];
+                    if (!stufe) continue;
+                    totalCredits += stufe.cost || 0;
+                    totalCoins += stufe.coins || 0;
+                }
+            } else if (selectedLevelId > currentLevel) {
+                for (let i = currentLevel + 1; i <= selectedLevelId; i++) {
+                    const stufe = levelList[i];
+                    if (!stufe) continue;
+                    totalCredits += stufe.cost || 0;
+                    totalCoins += stufe.coins || 0;
+                }
+            } else if (selectedLevelId < currentLevel) {
+                for (let i = selectedLevelId + 1; i <= currentLevel; i++) {
+                    const stufe = levelList[i];
+                    if (!stufe) continue;
+                    totalCredits += stufe.cost || 0;
+                    totalCoins += stufe.coins || 0;
+                }
+            } else {
+                totalCredits = 0;
+                totalCoins = 0;
+            }
+
+            console.info(`Berechnete Kosten: ${totalCredits} Credits, ${totalCoins} Coins`);
+
+            creditCell.innerHTML = '';
+            coinCell.innerHTML = '';
+
+            const creditBtn = document.createElement('button');
+            creditBtn.textContent = `${totalCredits.toLocaleString()} Credits`;
+            creditBtn.classList.add('btn', 'btn-sm');
+            creditBtn.style.backgroundColor = '#28a745';
+            creditBtn.style.color = 'white';
+            creditBtn.disabled = userInfo.credits < totalCredits || totalCredits === 0;
+            creditBtn.onclick = () => {
+                if (userInfo.credits < totalCredits) {
+                    alert('Nicht genug Credits!');
+                    return;
+                }
+                console.info(`Baue mit Credits: Gebäude ${building.id}, Stufe ${selectedLevelId}`);
+                buildLevel(building.id, 'credits', selectedLevelId);
+            };
+            creditCell.appendChild(creditBtn);
+
+            const coinBtn = document.createElement('button');
+            coinBtn.textContent = `${totalCoins.toLocaleString()} Coins`;
+            coinBtn.classList.add('btn', 'btn-sm');
+            coinBtn.style.backgroundColor = '#dc3545';
+            coinBtn.style.color = 'white';
+            coinBtn.disabled = userInfo.coins < totalCoins || totalCoins === 0;
+            coinBtn.onclick = () => {
+                if (userInfo.coins < totalCoins) {
+                    alert('Nicht genug Coins!');
+                    return;
+                }
+                console.info(`Baue mit Coins: Gebäude ${building.id}, Stufe ${selectedLevelId}`);
+                buildLevel(building.id, 'coins', selectedLevelId);
+            };
+            coinCell.appendChild(coinBtn);
+        }
+
         const table = document.createElement('table');
         table.style.width = '100%';
         table.style.borderCollapse = 'collapse';
@@ -2312,54 +2407,50 @@
 
         group.forEach(({ building }) => {
             const levelInfo = getBuildingLevelInfo(building);
-            if (!levelInfo || !levelInfo.next) return;
+            if (!levelInfo) return;
 
             const leitstelleName = getLeitstelleName(building);
             const wache = building.caption || '-';
 
-            // Aus dem aktuellen Level-Namen die Nummer holen
-            let currentLevelNumber = parseInt(levelInfo.current?.name.match(/\d+/)?.[0] || '0', 10);
-            // Wenn es > 0 ist, dann ist die interne ID = Anzeige - 1
-            let currentLevelId = currentLevelNumber > 0 ? currentLevelNumber - 1 : 0;
+            const currentLevel = levelInfo.currentLevel;
 
-            // Key für manualLevels
             const key = `${building.building_type}_${building.small_building ? 'small' : 'normal'}`;
             const levelList = manualLevels[key];
-            if (!levelList) return; // keine Ausbaustufen bekannt
+            if (!levelList) return;
+
+            const maxLevel = levelList.length - 1;
+
+            if (currentLevel >= maxLevel) {
+                return;
+            }
+
+            selectedLevels[building.id] = currentLevel;
 
             const row = document.createElement('tr');
             row.style.borderBottom = '1px solid #ddd';
 
-            // Leitstelle
-            const leitstelleCell = document.createElement('td');
-            leitstelleCell.style.padding = '8px';
-            leitstelleCell.style.textAlign = 'center';
-            leitstelleCell.textContent = leitstelleName;
+            const createCell = (text, center = true) => {
+                const td = document.createElement('td');
+                td.style.padding = '8px';
+                if (center) td.style.textAlign = 'center';
+                td.textContent = text;
+                return td;
+            };
 
-            // Wache
-            const wacheCell = document.createElement('td');
-            wacheCell.style.padding = '8px';
-            wacheCell.style.textAlign = 'center';
-            wacheCell.textContent = wache;
+            const leitstelleCell = createCell(leitstelleName);
+            const wacheCell = createCell(wache);
 
-            // Aktuelle Ausbaustufe (Anzeige-Stufe = interne ID + 0 bei Bau)
-            const currentLevelCell = document.createElement('td');
-            currentLevelCell.style.padding = '8px';
-            currentLevelCell.style.textAlign = 'center';
-            currentLevelCell.textContent = `Stufe ${currentLevelNumber}`;
+            const ausbauText = currentLevel === -1 ? 'Nicht gebaut' : currentLevel === 0 ? '0' : currentLevel.toString();
+            const currentLevelCell = createCell(ausbauText);
 
-            // Buttons für wählbare Stufen
             const levelChoiceCell = document.createElement('td');
             levelChoiceCell.style.padding = '8px';
             levelChoiceCell.style.textAlign = 'center';
 
-            // Prüft, ob Body die Klasse "dark" hat
             const isDarkMode = () => document.body.classList.contains('dark');
 
-            // Setzt die Buttonfarben je nach Dark- oder Whitemode
             const updateButtonColors = () => {
                 const darkMode = isDarkMode();
-
                 levelChoiceCell.querySelectorAll('button').forEach(btn => {
                     if (btn.dataset.active === 'true') {
                         btn.style.backgroundColor = '#28a745';
@@ -2376,13 +2467,10 @@
                 });
             };
 
-            // Buttons erzeugen
             levelList.forEach(stufe => {
-                const displayLevel = stufe.id + 1;
-
-                if (displayLevel > currentLevelNumber) {
+                if (stufe.id > currentLevel) {
                     const lvlBtn = document.createElement('button');
-                    lvlBtn.textContent = displayLevel.toString();
+                    lvlBtn.textContent = (stufe.id).toString();
                     lvlBtn.className = 'expand_direct';
                     lvlBtn.setAttribute('level', stufe.id.toString());
 
@@ -2400,11 +2488,7 @@
 
                     lvlBtn.addEventListener('mouseenter', () => {
                         if (lvlBtn.dataset.active !== 'true') {
-                            if (isDarkMode()) {
-                                lvlBtn.style.backgroundColor = '#666';
-                            } else {
-                                lvlBtn.style.backgroundColor = '#ccc';
-                            }
+                            lvlBtn.style.backgroundColor = isDarkMode() ? '#666' : '#ccc';
                         }
                     });
                     lvlBtn.addEventListener('mouseleave', () => {
@@ -2414,94 +2498,109 @@
                     });
 
                     lvlBtn.onclick = () => {
-                        levelChoiceCell.querySelectorAll('button').forEach(btn => {
-                            btn.dataset.active = 'false';
-                        });
-                        lvlBtn.dataset.active = 'true';
+                        // Berechne Kosten für den ausgewählten Level
+                        let totalCredits = 0;
+                        let totalCoins = 0;
 
-                        updateButtonColors();
+                        if (currentLevel === -1) {
+                            for (let i = 0; i <= stufe.id; i++) {
+                                const s = levelList[i];
+                                if (!s) continue;
+                                totalCredits += s.cost || 0;
+                                totalCoins += s.coins || 0;
+                            }
+                        } else if (stufe.id > currentLevel) {
+                            for (let i = currentLevel + 1; i <= stufe.id; i++) {
+                                const s = levelList[i];
+                                if (!s) continue;
+                                totalCredits += s.cost || 0;
+                                totalCoins += s.coins || 0;
+                            }
+                        } else if (stufe.id < currentLevel) {
+                            for (let i = stufe.id + 1; i <= currentLevel; i++) {
+                                const s = levelList[i];
+                                if (!s) continue;
+                                totalCredits += s.cost || 0;
+                                totalCoins += s.coins || 0;
+                            }
+                        } else {
+                            totalCredits = 0;
+                            totalCoins = 0;
+                        }
 
-                        const buildingElement = document.querySelector(`#building_${building.id}`);
-                        if (!buildingElement) {
-                            alert(`Gebäude #${building.id} nicht gefunden.`);
+                        const canPayWithCredits = userInfo.credits >= totalCredits && totalCredits > 0;
+                        const canPayWithCoins = userInfo.coins >= totalCoins && totalCoins > 0;
+
+                        if (!canPayWithCredits && !canPayWithCoins) {
+                            alert('Nicht genug Credits oder Coins für diese Stufe!');
                             return;
                         }
-                        const levelButton = buildingElement.querySelector(`.expand_direct[level="${stufe.id}"]`);
-                        if (levelButton) {
-                            levelButton.click();
-                        } else {
-                            alert(`Kein Button für Stufe ${stufe.id + 1} gefunden.`);
-                        }
+
+                        levelChoiceCell.querySelectorAll('button').forEach(btn => btn.dataset.active = 'false');
+                        lvlBtn.dataset.active = 'true';
+                        updateButtonColors();
+
+                        selectedLevels[building.id] = stufe.id;
+
+                        updateBuildButtons(building, stufe.id, creditCell, coinCell, levelList, currentLevel);
+
+                        updateSelectedAmounts(group, userInfo);
                     };
 
                     levelChoiceCell.appendChild(lvlBtn);
                 }
             });
 
-            // Initiale Farbsetzung
-            updateButtonColors();
+            // Trash-Button erstellen
+            const trashBtn = document.createElement('button');
+            trashBtn.innerHTML = '🗑️';
+            trashBtn.title = 'Auswahl zurücksetzen';
+            trashBtn.classList.add('btn', 'btn-sm', 'btn-danger');
 
-            // MutationObserver für Klassenänderungen im <body>
-            const observer = new MutationObserver(mutations => {
-                mutations.forEach(mutation => {
-                    if (mutation.attributeName === 'class') {
-                        updateButtonColors();
-                    }
-                });
+            // Levelbutton-Styles übernehmen
+            trashBtn.style.display = 'inline-block';
+            trashBtn.style.padding = '2px 6px';
+            trashBtn.style.margin = '0 2px'; // gleicher Abstand wie Level-Buttons
+            trashBtn.style.fontSize = '11px';
+            trashBtn.style.borderRadius = '12px';
+            trashBtn.style.border = 'none';
+            trashBtn.style.cursor = 'pointer';
+            trashBtn.style.fontWeight = 'bold';
+            trashBtn.style.transition = 'background-color 0.2s, color 0.2s';
+
+            trashBtn.addEventListener('mouseenter', () => {
+                trashBtn.style.backgroundColor = '#dc3545'; // kräftiges Rot
+                trashBtn.style.color = '#fff';
+            });
+            trashBtn.addEventListener('mouseleave', () => {
+                trashBtn.style.backgroundColor = '#dc3545'; // bleibt rot
+                trashBtn.style.color = '#fff';
             });
 
-            // Observer starten
-            observer.observe(document.body, { attributes: true });
+            // Event-Handler
+            trashBtn.onclick = () => {
+                selectedLevels[building.id] = currentLevel;
+
+                levelChoiceCell.querySelectorAll('button').forEach(btn => btn.dataset.active = 'false');
+                updateButtonColors();
+
+                updateBuildButtons(building, currentLevel, creditCell, coinCell, levelList, currentLevel);
+
+                updateSelectedAmounts(group, userInfo);
+            };
+
+            levelChoiceCell.appendChild(trashBtn);
 
 
+            updateButtonColors();
 
-            // Credits
             const creditCell = document.createElement('td');
             creditCell.style.textAlign = 'center';
-            const creditBtn = document.createElement('button');
-            creditBtn.textContent = `${levelInfo.next.cost.toLocaleString()} Credits`;
-            creditBtn.classList.add('btn', 'btn-sm');
-            creditBtn.style.backgroundColor = '#28a745';
-            creditBtn.style.color = 'white';
-            creditBtn.disabled = userInfo.credits < levelInfo.next.cost;
-            creditBtn.onclick = () => {
-                const buildingElement = document.querySelector(`#building_${building.id}`);
-                if (!buildingElement) {
-                    alert(`Gebäude #${building.id} nicht gefunden.`);
-                    return;
-                }
-                const levelButton = buildingElement.querySelector(`.expand_direct[level="${levelInfo.next.id}"]`);
-                if (levelButton) {
-                    levelButton.click();
-                } else {
-                    alert(`Kein Button für Stufe ${levelInfo.next.id + 1} gefunden.`);
-                }
-            };
-            creditCell.appendChild(creditBtn);
 
-            // Coins
             const coinCell = document.createElement('td');
             coinCell.style.textAlign = 'center';
-            const coinBtn = document.createElement('button');
-            coinBtn.textContent = `${levelInfo.next.coins.toLocaleString()} Coins`;
-            coinBtn.classList.add('btn', 'btn-sm');
-            coinBtn.style.backgroundColor = '#dc3545';
-            coinBtn.style.color = 'white';
-            coinBtn.disabled = userInfo.coins < levelInfo.next.coins;
-            coinBtn.onclick = () => {
-                const buildingElement = document.querySelector(`#building_${building.id}`);
-                if (!buildingElement) {
-                    alert(`Gebäude #${building.id} nicht gefunden.`);
-                    return;
-                }
-                const levelButton = buildingElement.querySelector(`.expand_direct[level="${levelInfo.next.id}"]`);
-                if (levelButton) {
-                    levelButton.click();
-                } else {
-                    alert(`Kein Button für Stufe ${levelInfo.next.id + 1} gefunden.`);
-                }
-            };
-            coinCell.appendChild(coinBtn);
+
+            updateBuildButtons(building, currentLevel, creditCell, coinCell, levelList, currentLevel);
 
             row.appendChild(leitstelleCell);
             row.appendChild(wacheCell);
@@ -2536,26 +2635,65 @@
     // Diese Funktion dann beim Laden der Seite aufrufen
     initUserCredits();
 
-    function updateSelectedAmounts() {
-    let totalCredits = 0;
-    let totalCoins = 0;
+    // Funktion zur Gesamtkostenberechnung
+    function updateSelectedAmounts(group, userInfo) {
+        let totalCredits = 0;
+        let totalCoins = 0;
 
-    document.querySelectorAll('.extension-checkbox:checked, .storage-checkbox:checked').forEach(cb => {
-        totalCredits += Number(cb.dataset.creditCost) || 0;
-        totalCoins += Number(cb.dataset.coinCost) || 0;
-    });
+        // Kosten aus Checkboxen
+        document.querySelectorAll('.extension-checkbox:checked, .storage-checkbox:checked').forEach(cb => {
+            totalCredits += Number(cb.dataset.creditCost) || 0;
+            totalCoins += Number(cb.dataset.coinCost) || 0;
+        });
 
-    document.getElementById('selected-credits').textContent = totalCredits.toLocaleString();
-    document.getElementById('selected-coins').textContent = totalCoins.toLocaleString();
+        // Kosten aus ausgewählten Levelbuttons
+        for (const { building } of group) {
+            const buildingId = building.id;
+            const selectedLevelId = selectedLevels[buildingId];
+            if (selectedLevelId === undefined) continue;
 
-    // Prüfe, ob mindestens EINE Währung für ALLE reicht:
-    const canPayAllWithCredits = currentCredits >= totalCredits;
-    const canPayAllWithCoins = currentCoins >= totalCoins;
+            const levelInfo = getBuildingLevelInfo(building);
+            if (!levelInfo) continue;
 
-    if (!canPayAllWithCredits && !canPayAllWithCoins) {
-        alert("Du hast nicht genug Credits ODER Coins für die gesamte Auswahl!");
+            const currentLevel = levelInfo.currentLevel;
+            const key = `${building.building_type}_${building.small_building ? 'small' : 'normal'}`;
+            const levelList = manualLevels[key];
+            if (!levelList) continue;
+
+            if (currentLevel === -1) {
+                for (let i = 0; i <= selectedLevelId; i++) {
+                    const stufe = levelList[i];
+                    if (!stufe) continue;
+                    totalCredits += stufe.cost || 0;
+                    totalCoins += stufe.coins || 0;
+                }
+            } else if (selectedLevelId > currentLevel) {
+                for (let i = currentLevel + 1; i <= selectedLevelId; i++) {
+                    const stufe = levelList[i];
+                    if (!stufe) continue;
+                    totalCredits += stufe.cost || 0;
+                    totalCoins += stufe.coins || 0;
+                }
+            } else if (selectedLevelId < currentLevel) {
+                for (let i = selectedLevelId + 1; i <= currentLevel; i++) {
+                    const stufe = levelList[i];
+                    if (!stufe) continue;
+                    totalCredits += stufe.cost || 0;
+                    totalCoins += stufe.coins || 0;
+                }
+            }
+        }
+
+        document.getElementById('selected-credits').textContent = totalCredits.toLocaleString();
+        document.getElementById('selected-coins').textContent = totalCoins.toLocaleString();
+
+        const canPayAllWithCredits = userInfo.credits >= totalCredits;
+        const canPayAllWithCoins = userInfo.coins >= totalCoins;
+
+        if (!canPayAllWithCredits && !canPayAllWithCoins) {
+            alert("Du hast nicht genug Credits ODER Coins für die gesamte Auswahl!");
+        }
     }
-}
 
     // Filterfunktion über Dropdowns
     function filterTableByDropdown(table, columnIndex, filterValue) {
@@ -2820,6 +2958,26 @@
             });
         });
     }
+    function buildLevel(buildingId, method, level) {
+
+        const url = `/buildings/${buildingId}/expand_do/${method}?level=${level}`;
+
+        fetch(url, { method: 'POST' })
+            .then(response => {
+            if (!response.ok) {
+                throw new Error(`Fehler beim Bauen: ${response.statusText}`);
+            }
+            return response.json();
+        })
+            .then(data => {
+            alert(`Gebäude erfolgreich auf Stufe ${level} ausgebaut!`);
+
+        })
+            .catch(err => {
+            alert(`Bau fehlgeschlagen: ${err.message}`);
+        });
+    }
+
 
     fetchBuildingsAndRender();
 
@@ -3286,37 +3444,37 @@
     }
 
     document.addEventListener('click', (event) => {
-    if (event.target.classList.contains('extension-checkbox') || event.target.classList.contains('storage-checkbox')) {
-        const cb = event.target;
-        const willBeChecked = !cb.checked;
+        if (event.target.classList.contains('extension-checkbox') || event.target.classList.contains('storage-checkbox')) {
+            const cb = event.target;
+            const willBeChecked = !cb.checked;
 
-        let totalCredits = 0;
-        let totalCoins = 0;
+            let totalCredits = 0;
+            let totalCoins = 0;
 
-        document.querySelectorAll('.extension-checkbox:checked, .storage-checkbox:checked').forEach(el => {
-            totalCredits += Number(el.dataset.creditCost) || 0;
-            totalCoins += Number(el.dataset.coinCost) || 0;
-        });
+            document.querySelectorAll('.extension-checkbox:checked, .storage-checkbox:checked').forEach(el => {
+                totalCredits += Number(el.dataset.creditCost) || 0;
+                totalCoins += Number(el.dataset.coinCost) || 0;
+            });
 
-        // Wenn Checkbox aktiviert werden soll, addiere deren Werte
-        if (willBeChecked) {
-            totalCredits += Number(cb.dataset.creditCost) || 0;
-            totalCoins += Number(cb.dataset.coinCost) || 0;
+            // Wenn Checkbox aktiviert werden soll, addiere deren Werte
+            if (willBeChecked) {
+                totalCredits += Number(cb.dataset.creditCost) || 0;
+                totalCoins += Number(cb.dataset.coinCost) || 0;
+            }
+
+            const canPayAllWithCredits = currentCredits >= totalCredits;
+            const canPayAllWithCoins = currentCoins >= totalCoins;
+
+            if (!canPayAllWithCredits && !canPayAllWithCoins) {
+                alert("Du hast nicht genug Credits ODER Coins für die gesamte Auswahl!");
+                event.preventDefault(); // Verhindert das Ändern der Checkbox
+            } else {
+                // Nach dem Klick die Anzeige aktualisieren
+                setTimeout(updateSelectedAmounts, 0);
+                updateBuildSelectedButton();
+            }
         }
-
-        const canPayAllWithCredits = currentCredits >= totalCredits;
-        const canPayAllWithCoins = currentCoins >= totalCoins;
-
-        if (!canPayAllWithCredits && !canPayAllWithCoins) {
-            alert("Du hast nicht genug Credits ODER Coins für die gesamte Auswahl!");
-            event.preventDefault(); // Verhindert das Ändern der Checkbox
-        } else {
-            // Nach dem Klick die Anzeige aktualisieren
-            setTimeout(updateSelectedAmounts, 0);
-            updateBuildSelectedButton();
-        }
-    }
-});
+    });
 
     // Ende der Funktion für * Bau von ausgewählten Erweiterungen *
 
