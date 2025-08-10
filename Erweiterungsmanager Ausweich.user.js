@@ -1961,7 +1961,18 @@
                 creditBtn.style.backgroundColor = '#28a745';
                 creditBtn.style.color = 'white';
                 creditBtn.disabled = userInfo.credits < extension.cost;
-                creditBtn.onclick = () => buildExtension(building, extension.id, 'credits', extension.cost, row);
+                creditBtn.onclick = () => {
+                    buildExtension(building, extension.id, 'credits', extension.cost, row);
+
+                    // Auswahl für diese Erweiterung zurücksetzen
+                    const cb = row.querySelector('.extension-checkbox');
+                    if (cb) cb.checked = false;
+
+                    // Anzeige aktualisieren
+                    initUserCredits();
+                    updateSelectedAmounts(group, userInfo);
+                };
+
                 creditCell.appendChild(creditBtn);
                 row.appendChild(creditCell);
 
@@ -1973,7 +1984,16 @@
                 coinBtn.style.backgroundColor = '#dc3545';
                 coinBtn.style.color = 'white';
                 coinBtn.disabled = userInfo.coins < extension.coins;
-                coinBtn.onclick = () => buildExtension(building, extension.id, 'coins', extension.coins, row);
+                coinBtn.onclick = () => {
+                    buildExtension(building, extension.id, 'coins', extension.coins, row);
+
+                    const cb = row.querySelector('.extension-checkbox');
+                    if (cb) cb.checked = false;
+
+                    initUserCredits();
+                    updateSelectedAmounts(group, userInfo);
+                };
+
                 coinsCell.appendChild(coinBtn);
                 row.appendChild(coinsCell);
 
@@ -2130,25 +2150,28 @@
                 creditBtn.style.color = 'white';
                 creditBtn.disabled = userInfo.credits < opt.cost;
                 creditBtn.onclick = () => {
-                    // Statt building.storage_upgrades hier liveBuiltStorages verwenden:
                     const built = [...liveBuiltStorages[building.id]];
 
                     if (!canBuildStorageInOrder(id, baseKey, built)) {
-                        alert("Bitte beachte: Die Lagerräume müssen in der vorgegebenen Reihenfolge gebaut werden.\n\nReihenfolge:\n1. Lagerraum\n2. 1te zusätzlicher Lagerraum\n3. 2te zusätzlicher Lagerraum\n4. 3te zusätzlicher Lagerraum\n5. 4te zusätzlicher Lagerraum\n6. 5te zusätzlicher Lagerraum.\n7. 6te zusätzlicher Lagerraum\n8. 7te zusätzlicher Lagerraum");
+                        alert("Bitte beachte: Die Lagerräume müssen in der vorgegebenen Reihenfolge gebaut werden.\n\nReihenfolge:\n1. Lagerraum\n2. 1te zusätzlicher Lagerraum\n3. 2te zusätzlicher Lagerraum\n4. 3te zusätzlicher Lagerraum\n5. 4te zusätzlicher Lagerraum\n6. 5te zusätzlicher Lagerraum\n7. 6te zusätzlicher Lagerraum\n8. 7te zusätzlicher Lagerraum");
                         return;
                     }
 
                     buildStorage(building, id, 'credits', opt.cost, row);
 
-                    // Nach dem erfolgreichen Bau liveBuiltStorages aktualisieren:
                     liveBuiltStorages[building.id].add(id);
 
-                    // UI anpassen - Button und Checkbox deaktivieren
+                    // UI anpassen
                     creditBtn.disabled = true;
                     coinBtn.disabled = true;
-                    checkbox.checked = true;
                     checkbox.disabled = true;
+
+                    // Zähler sofort aktualisieren
+                    initUserCredits();
+                    updateBuildSelectedButton();
+                    updateSelectedAmounts(group, userInfo);
                 };
+
                 creditCell.appendChild(creditBtn);
                 row.appendChild(creditCell);
 
@@ -2163,7 +2186,7 @@
                     const built = [...liveBuiltStorages[building.id]];
 
                     if (!canBuildStorageInOrder(id, baseKey, built)) {
-                        alert("Bitte beachte: Die Lagerräume müssen in der vorgegebenen Reihenfolge gebaut werden.\n\nReihenfolge:\n1. Lagerraum\n2. 1te zusätzlicher Lagerraum\n3. 2te zusätzlicher Lagerraum\n4. 3te zusätzlicher Lagerraum\n5. 4te zusätzlicher Lagerraum\n6. 5te zusätzlicher Lagerraum\nusw.");
+                        alert("Bitte beachte: Die Lagerräume müssen in der vorgegebenen Reihenfolge gebaut werden.\n\nReihenfolge:\n1. Lagerraum\n2. 1te zusätzlicher Lagerraum\n3. 2te zusätzlicher Lagerraum\n4. 3te zusätzlicher Lagerraum\n5. 4te zusätzlicher Lagerraum\nusw.");
                         return;
                     }
 
@@ -2173,9 +2196,13 @@
 
                     creditBtn.disabled = true;
                     coinBtn.disabled = true;
-                    checkbox.checked = true;
                     checkbox.disabled = true;
+
+                    initUserCredits();
+                    updateBuildSelectedButton();
+                    updateSelectedAmounts(group, userInfo);
                 };
+
                 coinsCell.appendChild(coinBtn);
                 row.appendChild(coinsCell);
 
@@ -2362,16 +2389,23 @@
                     alert('Nicht genug Credits!');
                     return;
                 }
-                console.info(`Baue mit Credits: Gebäude ${building.id}, Stufe ${selectedLevelId}`);
                 try {
                     await buildLevel(building.id, 'credits', selectedLevelId);
-                    alert('Ausbau mit Credits erfolgreich!');
-                    // Optional: Seite neu laden oder UI aktualisieren
+
+                    // Reset alle selectedLevels auf aktuellen Level
+                    for (const b of group) {
+                        const currentLevel = getBuildingLevelInfo(b.building)?.currentLevel ?? -1;
+                        selectedLevels[b.building.id] = currentLevel;
+                    }
+
+                    fetchBuildingsAndRender();
+                    updateSelectedAmounts(group, userInfo);
+                    updateBuildSelectedLevelsButtonState(group);
                 } catch (e) {
                     alert('Fehler beim Bauen mit Credits.');
                 }
-
             };
+
             creditCell.appendChild(creditBtn);
 
             updateBuildSelectedLevelsButtonState(group);
@@ -2390,12 +2424,21 @@
                 console.info(`Baue mit Coins: Gebäude ${building.id}, Stufe ${selectedLevelId}`);
                 try {
                     await buildLevel(building.id, 'coins', selectedLevelId);
-                    alert('Ausbau mit Coins erfolgreich!');
-                    // Optional: Seite neu laden oder UI aktualisieren
+
+                    // Reset alle selectedLevels auf aktuellen Level
+                    for (const b of group) {
+                        const currentLevel = getBuildingLevelInfo(b.building)?.currentLevel ?? -1;
+                        selectedLevels[b.building.id] = currentLevel;
+                    }
+
+                    fetchBuildingsAndRender();
+                    updateSelectedAmounts(group, userInfo);
+                    updateBuildSelectedLevelsButtonState(group);
                 } catch (e) {
-                    alert('Fehler beim Bauen mit Coins.');
+                    alert('Fehler beim Bauen mit Credits.');
                 }
             };
+
             coinCell.appendChild(coinBtn);
         }
         updateBuildSelectedLevelsButtonState(group);
@@ -3537,10 +3580,15 @@
 
     // Anfang der Funktion für * Bau von ausgewählten Stufen *
 
+    // Funktion zum Bau der ausgewählten Stufen
     async function buildSelectedLevels(group, userInfo) {
+        let totalCredits = 0;
+        let totalCoins = 0;
+        const levelRows = [];
+
         for (const { building } of group) {
             const level = selectedLevels[building.id];
-            if (level === undefined || level === null) continue; // keine Auswahl
+            if (level === undefined || level === null) continue;
 
             const key = `${building.building_type}_${building.small_building ? 'small' : 'normal'}`;
             const levelList = manualLevels[key];
@@ -3548,56 +3596,43 @@
 
             const currentLevel = getBuildingLevelInfo(building)?.currentLevel ?? -1;
 
-            let totalCredits = 0;
-            let totalCoins = 0;
+            const start = currentLevel === -1 ? 0 : (currentLevel < level ? currentLevel + 1 : level + 1);
+            const end = currentLevel === -1 ? level : (currentLevel < level ? level : currentLevel);
 
-            if (currentLevel === -1) {
-                for (let i = 0; i <= level; i++) {
-                    const stufe = levelList[i];
-                    if (!stufe) continue;
-                    totalCredits += stufe.cost || 0;
-                    totalCoins += stufe.coins || 0;
-                }
-            } else if (level > currentLevel) {
-                for (let i = currentLevel + 1; i <= level; i++) {
-                    const stufe = levelList[i];
-                    if (!stufe) continue;
-                    totalCredits += stufe.cost || 0;
-                    totalCoins += stufe.coins || 0;
-                }
-            } else if (level < currentLevel) {
-                for (let i = level + 1; i <= currentLevel; i++) {
-                    const stufe = levelList[i];
-                    if (!stufe) continue;
-                    totalCredits += stufe.cost || 0;
-                    totalCoins += stufe.coins || 0;
-                }
-            } else {
-                continue; // keine Änderung
+            let buildingCredits = 0;
+            let buildingCoins = 0;
+
+            for (let i = start; i <= end; i++) {
+                const stufe = levelList[i];
+                if (!stufe) continue;
+                buildingCredits += stufe.cost || 0;
+                buildingCoins += stufe.coins || 0;
             }
 
-            if (userInfo.credits >= totalCredits && totalCredits > 0) {
-                try {
-                    await buildLevel(building.id, 'credits', level);
-                    userInfo.credits -= totalCredits; // optional
-                    console.log(`Gebäude ${building.id} mit Credits auf Stufe ${level} gebaut`);
-                } catch (e) {
-                    alert(`Fehler beim Ausbau von Gebäude ${building.id} mit Credits.`);
-                }
-            } else if (userInfo.coins >= totalCoins && totalCoins > 0) {
-                try {
-                    await buildLevel(building.id, 'coins', level);
-                    userInfo.coins -= totalCoins; // optional
-                    console.log(`Gebäude ${building.id} mit Coins auf Stufe ${level} gebaut`);
-                } catch (e) {
-                    alert(`Fehler beim Ausbau von Gebäude ${building.id} mit Coins.`);
-                }
-            } else {
-                alert(`Nicht genug Credits oder Coins für Gebäude ${building.id} Stufe ${level}`);
-            }
+            if (buildingCredits === 0 && buildingCoins === 0) continue;
+
+            totalCredits += buildingCredits;
+            totalCoins += buildingCoins;
+
+            // Speichern wie bei extensionRows in showCurrencySelection
+            levelRows.push({
+                buildingId: building.id,
+                targetLevel: level,
+                buildingCredits,
+                buildingCoins
+            });
         }
+
+        if (levelRows.length === 0) {
+            alert("Keine Leveländerungen ausgewählt.");
+            return;
+        }
+
+        // Jetzt einfach dein vorhandenes Fenster nutzen, aber angepasst für Level-Bau
+        await showCurrencySelectionForLevels(levelRows, userInfo, totalCredits, totalCoins);
     }
 
+    // Funktion um den Ausgewählte Stufen Button zu aktivieren
     function updateBuildSelectedLevelsButtonState(group) {
         const buttonContainers = document.querySelectorAll('.button-container');
 
@@ -3614,6 +3649,169 @@
 
             buildSelectedLevelsButton.disabled = !hasSelectedLevels;
         });
+    }
+
+    // Auswahlfenster für Level-Ausbau
+    async function showCurrencySelectionForLevels(levelRows, userInfo, totalCredits, totalCoins) {
+        const userSettings = await getUserMode();
+        const isDarkMode = userSettings && (userSettings.design_mode === 1 || userSettings.design_mode === 4);
+
+        const fehlendeCredits = Math.max(0, totalCredits - userInfo.credits);
+        const fehlendeCoins = Math.max(0, totalCoins - userInfo.coins);
+
+        if (userInfo.credits < totalCredits && userInfo.coins < totalCoins) {
+            alert(`Du hast nicht genug Ressourcen!\n\n- Fehlende Credits: ${formatNumber(fehlendeCredits)}\n- Fehlende Coins: ${formatNumber(fehlendeCoins)}`);
+            return;
+        }
+
+        const selectionDiv = document.createElement('div');
+        selectionDiv.className = 'currency-selection';
+        selectionDiv.style.position = 'fixed';
+        selectionDiv.style.top = '50%';
+        selectionDiv.style.left = '50%';
+        selectionDiv.style.transform = 'translate(-50%, -50%)';
+        selectionDiv.style.zIndex = '10001';
+        selectionDiv.style.background = isDarkMode ? '#333' : '#fff';
+        selectionDiv.style.color = isDarkMode ? '#fff' : '#000';
+        selectionDiv.style.border = `1px solid ${isDarkMode ? '#444' : '#ccc'}`;
+        selectionDiv.style.padding = '20px';
+        selectionDiv.style.borderRadius = '8px';
+        selectionDiv.style.boxShadow = '0 4px 10px rgba(0,0,0,0.3)';
+        selectionDiv.style.minWidth = '320px';
+        selectionDiv.style.textAlign = 'center';
+
+        const totalText = document.createElement('p');
+        totalText.innerHTML = `Wähle zwischen <b style="color:green">Credits (grün)</b> oder <b style="color:red">Coins (rot)</b><br><br>Info:<br>Sollte eine Währung <b>nicht</b> ausreichend vorhanden sein,<br>kannst Du diese nicht auswählen`;
+        selectionDiv.appendChild(totalText);
+
+        // Fortschrittsanzeige
+        function showProgress() {
+            const container = document.createElement('div');
+            container.style.position = 'fixed';
+            container.style.top = '50%';
+            container.style.left = '50%';
+            container.style.transform = 'translate(-50%, -50%)';
+            container.style.zIndex = '10002';
+            container.style.background = isDarkMode ? '#333' : '#fff';
+            container.style.padding = '20px';
+            container.style.borderRadius = '8px';
+            container.style.textAlign = 'center';
+            container.style.boxShadow = '0 4px 10px rgba(0,0,0,0.3)';
+            container.innerHTML = 'Bitte warten...';
+
+            const progressBar = document.createElement('div');
+            progressBar.style.height = '10px';
+            progressBar.style.width = '100%';
+            progressBar.style.backgroundColor = '#e0e0e0';
+            progressBar.style.marginTop = '10px';
+            progressBar.style.borderRadius = '5px';
+
+            const progressFill = document.createElement('div');
+            progressFill.style.height = '100%';
+            progressFill.style.width = '0%';
+            progressFill.style.backgroundColor = '#76c7c0';
+            progressFill.style.borderRadius = '5px';
+            progressBar.appendChild(progressFill);
+
+            const progressText = document.createElement('p');
+            progressText.style.marginTop = '8px';
+            progressText.textContent = '0 von 0 Gebäude gebaut';
+
+            container.appendChild(progressBar);
+            container.appendChild(progressText);
+
+            document.body.appendChild(container);
+
+            return {
+                container,
+                update: (done, total) => {
+                    progressFill.style.width = `${(done / total) * 100}%`;
+                    progressText.textContent = `${done} von ${total} Gebäude gebaut`;
+                },
+                close: () => {
+                    document.body.removeChild(container);
+                }
+            };
+        }
+
+        // Credits-Button
+        const creditsButton = document.createElement('button');
+        creditsButton.className = 'currency-button credits-button';
+        creditsButton.textContent = `${formatNumber(totalCredits)} Credits`;
+        creditsButton.disabled = userInfo.credits < totalCredits;
+        creditsButton.style.margin = '5px';
+        creditsButton.style.padding = '10px 20px';
+        creditsButton.style.backgroundColor = '#28a745';
+        creditsButton.style.color = 'white';
+        creditsButton.style.border = 'none';
+        creditsButton.style.borderRadius = '5px';
+        creditsButton.style.cursor = creditsButton.disabled ? 'not-allowed' : 'pointer';
+
+        creditsButton.onclick = async () => {
+            const progress = showProgress();
+            let done = 0;
+            const totalTasks = levelRows.length;
+
+            for (const lvl of levelRows) {
+                await buildLevel(lvl.buildingId, 'credits', lvl.targetLevel);
+                userInfo.credits -= lvl.buildingCredits;
+                done++;
+                progress.update(done, totalTasks);
+            }
+
+            progress.close();
+            document.body.removeChild(selectionDiv);
+        };
+
+        // Coins-Button
+        const coinsButton = document.createElement('button');
+        coinsButton.className = 'currency-button coins-button';
+        coinsButton.textContent = `${formatNumber(totalCoins)} Coins`;
+        coinsButton.disabled = userInfo.coins < totalCoins;
+        coinsButton.style.margin = '5px';
+        coinsButton.style.padding = '10px 20px';
+        coinsButton.style.backgroundColor = '#dc3545';
+        coinsButton.style.color = 'white';
+        coinsButton.style.border = 'none';
+        coinsButton.style.borderRadius = '5px';
+        coinsButton.style.cursor = coinsButton.disabled ? 'not-allowed' : 'pointer';
+
+        coinsButton.onclick = async () => {
+            const progress = showProgress();
+            let done = 0;
+            const totalTasks = levelRows.length;
+
+            for (const lvl of levelRows) {
+                await buildLevel(lvl.buildingId, 'coins', lvl.targetLevel);
+                userInfo.coins -= lvl.buildingCoins;
+                done++;
+                progress.update(done, totalTasks);
+            }
+
+            progress.close();
+            document.body.removeChild(selectionDiv);
+        };
+
+        // Abbrechen-Button
+        const cancelButton = document.createElement('button');
+        cancelButton.className = 'cancel-button';
+        cancelButton.textContent = 'Abbrechen';
+        cancelButton.style.margin = '5px';
+        cancelButton.style.padding = '10px 20px';
+        cancelButton.style.backgroundColor = '#6c757d';
+        cancelButton.style.color = 'white';
+        cancelButton.style.border = 'none';
+        cancelButton.style.borderRadius = '5px';
+        cancelButton.style.cursor = 'pointer';
+        cancelButton.onclick = () => {
+            document.body.removeChild(selectionDiv);
+        };
+
+        selectionDiv.appendChild(creditsButton);
+        selectionDiv.appendChild(coinsButton);
+        selectionDiv.appendChild(cancelButton);
+
+        document.body.appendChild(selectionDiv);
     }
 
     // Ende der Funktion für * Bau von ausgewählten Stufen *
