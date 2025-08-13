@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         [LSS] Erweiterungs-Manager
+// @name         *Beta-Testcode für den Erweiterungs-Manager
 // @namespace    http://tampermonkey.net/
-// @version      1.3.1
-// @description  Ermöglicht das einfache Verwalten und Hinzufügen von fehlenden Erweiterungen und Lagerräumen für deine Wachen und Gebäude.
+// @version      5.0
+// @description  Dies ist ein Testcode und garantiert keine 100% funktionalität Updates erfolgen OHNE Vorankündigung!
 // @author       Caddy21
 // @match        https://www.leitstellenspiel.de/
 // @grant        GM_xmlhttpRequest
