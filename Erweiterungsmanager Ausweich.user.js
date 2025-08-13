@@ -102,6 +102,13 @@
         border-bottom: 2px solid var(--border-color);
         }
 
+        #extension-lightbox      #loading-overlay {
+        background-color: #f0f0f0;
+        border-radius: 6px;
+        padding: 15px;
+        margin-bottom: 15px;
+        }
+
         /* === Buttons === */
         #extension-lightbox button,
         .currency-button,
@@ -134,6 +141,19 @@
         #extension-lightbox .build-all-button:disabled {
         background-color: gray !important;
         cursor: not-allowed;
+        }
+
+        #extension-lightbox button.btn-danger,
+        #extension-lightbox button.btn-danger:hover,
+        #extension-lightbox button.btn-danger:focus,
+        #extension-lightbox button.btn-danger:active {
+        background-color: var(--coins-color) !important;
+        border-color: var(--coins-color) !important;
+        color: white !important;
+        box-shadow: none !important;
+        filter: none !important;
+        transition: none !important;
+        cursor: pointer;
         }
 
         /* Neue Flexbox-Regel für Button-Container mit Abständen */
@@ -210,55 +230,54 @@
     lightbox.id = 'extension-lightbox';
     lightbox.style.display = 'none';
     lightbox.innerHTML = `
-      <div id="extension-lightbox-modal">
-        <div id="extension-lightbox-header" style="display:flex; justify-content:space-between; align-items:center;">
-          <div id="user-balance" style="text-align:left; display: flex; gap: 20px;">
-            <div>
-              <div>Aktuelle Credits: <span id="current-credits" style="color: var(--credits-color); font-weight: bold;">...</span></div>
-              <div>Aktuelle Coins: <span id="current-coins" style="color: var(--coins-color); font-weight: bold;">...</span></div>
-            </div>
-            <div>
-              <div>Ausgewählte Credits: <span id="selected-credits" style="color: var(--credits-color); font-weight: bold;">0</span></div>
-              <div>Ausgewählte Coins: <span id="selected-coins" style="color: var(--coins-color); font-weight: bold;">0</span></div>
-            </div>
-          </div>
-          <button id="close-extension-helper">Schließen</button>
+  <div id="extension-lightbox-modal">
+    <div id="extension-lightbox-header" style="display:flex; justify-content:space-between; align-items:center;">
+      <div id="user-balance" style="text-align:left; display: flex; gap: 20px;">
+        <div>
+          <div>Aktuelle Credits: <span id="current-credits" style="color: var(--credits-color); font-weight: bold;">...</span></div>
+          <div>Aktuelle Coins: <span id="current-coins" style="color: var(--coins-color); font-weight: bold;">...</span></div>
         </div>
-        <div id="extension-lightbox-content">
-          <h3>🚒🏗️ <strong>Herzlich willkommen beim ultimativen Ausbau-Assistenten für eure Wachen!</strong> 🚒🏗️</h3>
-          <h2><br>Dem Erweiterungs-Manager</h2>
-          <h5>
-            <br><br>Dieses kleine Helferlein zeigt euch genau, wo noch Platz in euren Wachen ist: Welche <strong>Erweiterungen</strong> und <strong>Lagerräume</strong> noch möglich sind – und mit nur ein paar Klicks geht’s direkt in den Ausbau. Einfacher wird’s nicht!
-            <br><br>Und das Beste: Über den
-            <button id="open-extension-settings" style="
-              font-weight: 600;
-              color: #fff;
-              background-color: var(--primary-color, #007bff);
-              border: none;
-              padding: 6px 14px;
-              border-radius: 5px;
-              cursor: pointer;
-              transition: background-color 0.3s ease;
-              margin: 0 5px;
-            ">
-              Einstellungen
-            </button>
-            -Button könnt ihr festlegen, welche Erweiterungen und Lagerräume euch pro Wachen-Typ angezeigt werden – ganz nach eurem Geschmack. Einmal gespeichert, für immer gemerkt.
-            <br><br>Kleiner Hinweis am Rande: Feedback, Verbesserungsvorschläge oder Kritik zum Skript sind jederzeit im
-            <a href="https://forum.leitstellenspiel.de/index.php?thread/27856-script-erweiterungs-manager/" target="_blank" style="color:#007bff; text-decoration:none;">
-              <strong>Forum</strong>
-            </a> willkommen. 💌
-            <br><br><br>Und nun viel Spaß beim Credits oder Coins ausgeben!
-            <br><br>
-            <div id="extension-list">
-              Einen Moment Geduld bitte …
-              <br><br>
-              Gebäudedaten werden geladen, Kaffee kocht – gleich geht's los!
-            </div>
-          </h5>
+        <div>
+          <div>Ausgewählte Credits: <span id="selected-credits" style="color: var(--credits-color); font-weight: bold;">0</span></div>
+          <div>Ausgewählte Coins: <span id="selected-coins" style="color: var(--coins-color); font-weight: bold;">0</span></div>
         </div>
       </div>
-    `;
+      <button id="close-extension-helper">Schließen</button>
+    </div>
+    <div id="extension-lightbox-content">
+      <h3>🚒🏗️ <strong>Herzlich willkommen beim ultimativen Ausbau-Assistenten für eure Wachen!</strong> 🚒🏗️</h3>
+      <h2><br>Dem Erweiterungs-Manager</h2>
+      <h5>
+        <br><br>Dieses kleine Helferlein zeigt euch genau, wo noch Platz in euren Wachen ist: Welche <strong>Erweiterungen</strong> und <strong>Lagerräume</strong> noch möglich sind – und mit nur ein paar Klicks geht’s direkt in den Ausbau. Einfacher wird’s nicht!
+        <br><br>Und das Beste: Über den
+        <button id="open-extension-settings" style="
+          font-weight: 600;
+          color: #fff;
+          background-color: var(--primary-color, #007bff);
+          border: none;
+          padding: 6px 14px;
+          border-radius: 5px;
+          cursor: pointer;
+          transition: background-color 0.3s ease;
+          margin: 0 5px;
+        ">
+          Einstellungen
+        </button>
+        -Button könnt ihr festlegen, welche Erweiterungen und Lagerräume euch pro Wachen-Typ angezeigt werden – ganz nach eurem Geschmack. Einmal gespeichert, für immer gemerkt.
+        <br><br>Kleiner Hinweis am Rande: Feedback, Verbesserungsvorschläge oder Kritik zum Skript sind jederzeit im
+        <a href="https://forum.leitstellenspiel.de/index.php?thread/27856-script-erweiterungs-manager/" target="_blank" style="color:#007bff; text-decoration:none;">
+          <strong>Forum</strong>
+        </a> willkommen. 💌
+        <br><br><br>Und nun viel Spaß beim Credits oder Coins ausgeben!
+        <br><br>
+        <div id="loading-container" style="display:none; padding: 20px; text-align:center;">
+  <div id="loading-text" style="font-weight: bold; font-size: 16px;">Lade Daten</div>
+</div>
+        <div id="extension-list"></div>
+      </h5>
+    </div>
+  </div>
+`;
 
     // Werte nur aktualisieren, nicht die komplette HTML-Struktur ersetzen
     getUserCredits().then(({ credits, coins }) => {
@@ -492,150 +511,141 @@
         ], // Rettungshubschrauber-Station
     };        // Lagerräume
     const manualLevels = {
-        '0_normal': [
-            { id: 0, name: '0', cost: 0, coins: 0 },
-            { id: 1, name: '1', cost: 10000, coins: 10 },
-            { id: 2, name: '2', cost: 50000, coins: 15 },
-            { id: 3, name: '3', cost: 100000, coins: 20 },
-            { id: 4, name: '4', cost: 100000, coins: 20 },
-            { id: 5, name: '5', cost: 100000, coins: 20 },
-            { id: 6, name: '6', cost: 100000, coins: 20 },
-            { id: 7, name: '7', cost: 100000, coins: 20 },
-            { id: 8, name: '8', cost: 100000, coins: 20 },
-            { id: 9, name: '9', cost: 100000, coins: 20 },
-            { id: 10, name: '10', cost: 100000, coins: 20 },
-            { id: 11, name: '11', cost: 100000, coins: 20 },
-            { id: 12, name: '12', cost: 100000, coins: 20 },
-            { id: 13, name: '13', cost: 100000, coins: 20 },
-            { id: 14, name: '14', cost: 100000, coins: 20 },
-            { id: 15, name: '15', cost: 100000, coins: 20 },
-            { id: 16, name: '16', cost: 100000, coins: 20 },
-            { id: 17, name: '17', cost: 100000, coins: 20 },
-            { id: 18, name: '18', cost: 100000, coins: 20 },
-            { id: 19, name: '19', cost: 100000, coins: 20 },
-        ],  // Feuerwache (Normal)
+        '0_normal': [  // Feuerwache (Normal)
+            { id: 0, name: '1', cost: 10000, coins: 10 },
+            { id: 1, name: '2', cost: 50000, coins: 15 },
+            { id: 2, name: '3', cost: 100000, coins: 20 },
+            { id: 3, name: '4', cost: 100000, coins: 20 },
+            { id: 4, name: '5', cost: 100000, coins: 20 },
+            { id: 5, name: '6', cost: 100000, coins: 20 },
+            { id: 6, name: '7', cost: 100000, coins: 20 },
+            { id: 7, name: '8', cost: 100000, coins: 20 },
+            { id: 8, name: '9', cost: 100000, coins: 20 },
+            { id: 9, name: '10', cost: 100000, coins: 20 },
+            { id: 10, name: '11', cost: 100000, coins: 20 },
+            { id: 11, name: '12', cost: 100000, coins: 20 },
+            { id: 12, name: '13', cost: 100000, coins: 20 },
+            { id: 13, name: '14', cost: 100000, coins: 20 },
+            { id: 14, name: '15', cost: 100000, coins: 20 },
+            { id: 15, name: '16', cost: 100000, coins: 20 },
+            { id: 16, name: '17', cost: 100000, coins: 20 },
+            { id: 17, name: '18', cost: 100000, coins: 20 },
+            { id: 18, name: '19', cost: 100000, coins: 20 },
+        ],
 
-        '0_small': [
-            { id: 0, name: '0', cost: 0, coins: 0 },
-            { id: 1, name: '1', cost: 10000, coins: 10 },
-            { id: 2, name: '2', cost: 50000, coins: 15 },
-            { id: 3, name: '3', cost: 100000, coins: 20 },
-            { id: 4, name: '4', cost: 100000, coins: 20 },
-            { id: 5, name: '5', cost: 100000, coins: 20 },
-        ],   // Feuerwache (Kleinwache)
+        '0_small': [  // Feuerwache (Kleinwache)
+            { id: 0, name: '1', cost: 10000, coins: 10 },
+            { id: 1, name: '2', cost: 50000, coins: 15 },
+            { id: 2, name: '3', cost: 100000, coins: 20 },
+            { id: 3, name: '4', cost: 100000, coins: 20 },
+            { id: 4, name: '5', cost: 100000, coins: 20 },
+        ],
 
-        '2_normal': [
-            { id: 0, name: '0', cost: 0, coins: 0 },
-            { id: 1, name: '1', cost: 10000, coins: 10 },
-            { id: 2, name: '2', cost: 50000, coins: 15 },
-            { id: 3, name: '3', cost: 100000, coins: 20 },
-            { id: 4, name: '4', cost: 100000, coins: 20 },
-            { id: 5, name: '5', cost: 100000, coins: 20 },
-            { id: 6, name: '6', cost: 100000, coins: 20 },
-            { id: 7, name: '7', cost: 100000, coins: 20 },
-            { id: 8, name: '8', cost: 100000, coins: 20 },
-            { id: 9, name: '9', cost: 100000, coins: 20 },
-            { id: 10, name: '10', cost: 100000, coins: 20 },
-            { id: 11, name: '11', cost: 100000, coins: 20 },
-            { id: 12, name: '12', cost: 100000, coins: 20 },
-            { id: 13, name: '13', cost: 100000, coins: 20 },
-            { id: 14, name: '14', cost: 100000, coins: 20 },
-        ],  // Rettungswache (Normal)
+        '2_normal': [  // Rettungswache (Normal)
+            { id: 0, name: '1', cost: 10000, coins: 10 },
+            { id: 1, name: '2', cost: 50000, coins: 15 },
+            { id: 2, name: '3', cost: 100000, coins: 20 },
+            { id: 3, name: '4', cost: 100000, coins: 20 },
+            { id: 4, name: '5', cost: 100000, coins: 20 },
+            { id: 5, name: '6', cost: 100000, coins: 20 },
+            { id: 6, name: '7', cost: 100000, coins: 20 },
+            { id: 7, name: '8', cost: 100000, coins: 20 },
+            { id: 8, name: '9', cost: 100000, coins: 20 },
+            { id: 9, name: '10', cost: 100000, coins: 20 },
+            { id: 10, name: '11', cost: 100000, coins: 20 },
+            { id: 11, name: '12', cost: 100000, coins: 20 },
+            { id: 12, name: '13', cost: 100000, coins: 20 },
+            { id: 13, name: '14', cost: 100000, coins: 20 },
+        ],
 
-        '2_small': [
-            { id: 0, name: '0', cost: 0, coins: 0 },
-            { id: 1, name: '1', cost: 10000, coins: 10 },
-            { id: 2, name: '2', cost: 50000, coins: 15 },
-            { id: 3, name: '3', cost: 100000, coins: 20 },
-            { id: 4, name: '4', cost: 100000, coins: 20 },
-            { id: 5, name: '5', cost: 100000, coins: 20 },
-        ],   // Rettungswache (Kleinwache)
+        '2_small': [  // Rettungswache (Kleinwache)
+            { id: 0, name: '1', cost: 10000, coins: 10 },
+            { id: 1, name: '2', cost: 50000, coins: 15 },
+            { id: 2, name: '3', cost: 100000, coins: 20 },
+            { id: 3, name: '4', cost: 100000, coins: 20 },
+            { id: 4, name: '5', cost: 100000, coins: 20 },
+        ],
 
-        '4_normal': [
-            { id: 0, name: '0', cost: 0, coins: 0 },
-            { id: 1, name: '1', cost: 19000, coins: 11 },
-            { id: 2, name: '2', cost: 19000, coins: 11 },
-            { id: 3, name: '3', cost: 19000, coins: 11 },
-            { id: 4, name: '4', cost: 19000, coins: 11 },
-            { id: 5, name: '5', cost: 19000, coins: 11 },
-            { id: 6, name: '6', cost: 19000, coins: 11 },
-            { id: 7, name: '7', cost: 19000, coins: 11 },
-            { id: 8, name: '8', cost: 19000, coins: 11 },
-            { id: 9, name: '9', cost: 19000, coins: 11 },
-            { id: 10, name: '10', cost: 19000, coins: 11 },
-            { id: 11, name: '11', cost: 19000, coins: 11 },
-            { id: 12, name: '12', cost: 19000, coins: 11 },
-            { id: 13, name: '13', cost: 19000, coins: 11 },
-            { id: 14, name: '14', cost: 19000, coins: 11 },
-            { id: 15, name: '15', cost: 19000, coins: 11 },
-            { id: 16, name: '16', cost: 19000, coins: 11 },
-            { id: 17, name: '17', cost: 19000, coins: 11 },
-            { id: 18, name: '18', cost: 19000, coins: 11 },
-            { id: 19, name: '19', cost: 19000, coins: 11 },
-            { id: 20, name: '20', cost: 19000, coins: 11 },
-        ],  // Krankenhaus
+        '4_normal': [  // Krankenhaus
+            { id: 0, name: '1', cost: 19000, coins: 11 },
+            { id: 1, name: '2', cost: 19000, coins: 11 },
+            { id: 2, name: '3', cost: 19000, coins: 11 },
+            { id: 3, name: '4', cost: 19000, coins: 11 },
+            { id: 4, name: '5', cost: 19000, coins: 11 },
+            { id: 5, name: '6', cost: 19000, coins: 11 },
+            { id: 6, name: '7', cost: 19000, coins: 11 },
+            { id: 7, name: '8', cost: 19000, coins: 11 },
+            { id: 8, name: '9', cost: 19000, coins: 11 },
+            { id: 9, name: '10', cost: 19000, coins: 11 },
+            { id: 10, name: '11', cost: 19000, coins: 11 },
+            { id: 11, name: '12', cost: 19000, coins: 11 },
+            { id: 12, name: '13', cost: 19000, coins: 11 },
+            { id: 13, name: '14', cost: 19000, coins: 11 },
+            { id: 14, name: '15', cost: 19000, coins: 11 },
+            { id: 15, name: '16', cost: 19000, coins: 11 },
+            { id: 16, name: '17', cost: 19000, coins: 11 },
+            { id: 17, name: '18', cost: 19000, coins: 11 },
+            { id: 18, name: '19', cost: 19000, coins: 11 },
+            { id: 19, name: '20', cost: 19000, coins: 11 },
+        ],
 
-        '6_normal': [
-            { id: 0, name: '0', cost: 0, coins: 0 },
-            { id: 1, name: '1', cost: 10000, coins: 10 },
-            { id: 2, name: '2', cost: 50000, coins: 15 },
-            { id: 3, name: '3', cost: 100000, coins: 20 },
-            { id: 4, name: '4', cost: 100000, coins: 20 },
-            { id: 5, name: '5', cost: 100000, coins: 20 },
-            { id: 6, name: '6', cost: 100000, coins: 20 },
-            { id: 7, name: '7', cost: 100000, coins: 20 },
-            { id: 8, name: '8', cost: 100000, coins: 20 },
-            { id: 9, name: '9', cost: 100000, coins: 20 },
-            { id: 10, name: '10', cost: 100000, coins: 20 },
-            { id: 11, name: '11', cost: 100000, coins: 20 },
-            { id: 12, name: '12', cost: 100000, coins: 20 },
-            { id: 13, name: '13', cost: 100000, coins: 20 },
-            { id: 14, name: '14', cost: 100000, coins: 20 },
-        ],  // Polizeiwache (Normal)
+        '6_normal': [  // Polizeiwache (Normal)
+            { id: 0, name: '1', cost: 10000, coins: 10 },
+            { id: 1, name: '2', cost: 50000, coins: 15 },
+            { id: 2, name: '3', cost: 100000, coins: 20 },
+            { id: 3, name: '4', cost: 100000, coins: 20 },
+            { id: 4, name: '5', cost: 100000, coins: 20 },
+            { id: 5, name: '6', cost: 100000, coins: 20 },
+            { id: 6, name: '7', cost: 100000, coins: 20 },
+            { id: 7, name: '8', cost: 100000, coins: 20 },
+            { id: 8, name: '9', cost: 100000, coins: 20 },
+            { id: 9, name: '10', cost: 100000, coins: 20 },
+            { id: 10, name: '11', cost: 100000, coins: 20 },
+            { id: 11, name: '12', cost: 100000, coins: 20 },
+            { id: 12, name: '13', cost: 100000, coins: 20 },
+            { id: 13, name: '14', cost: 100000, coins: 20 },
+        ],
 
-        '6_small': [
-            { id: 0, name: '0', cost: 0, coins: 0 },
-            { id: 1, name: '1', cost: 10000, coins: 10 },
-            { id: 2, name: '2', cost: 50000, coins: 15 },
-            { id: 3, name: '3', cost: 100000, coins: 20 },
-            { id: 4, name: '4', cost: 100000, coins: 20 },
-            { id: 5, name: '5', cost: 100000, coins: 20 },
-        ],   // Polizeiwache (Kleinwache)
+        '6_small': [  // Polizeiwache (Kleinwache)
+            { id: 0, name: '1', cost: 10000, coins: 10 },
+            { id: 1, name: '2', cost: 50000, coins: 15 },
+            { id: 2, name: '3', cost: 100000, coins: 20 },
+            { id: 3, name: '4', cost: 100000, coins: 20 },
+            { id: 4, name: '5', cost: 100000, coins: 20 },
+        ],
 
-        '15_normal': [
-            { id: 0, name: '0', cost: 0, coins: 0 },
-            { id: 1, name: '1', cost: 10000, coins: 10 },
-            { id: 2, name: '2', cost: 50000, coins: 15 },
-            { id: 3, name: '3', cost: 100000, coins: 20 },
-            { id: 4, name: '4', cost: 100000, coins: 20 },
-            { id: 5, name: '5', cost: 100000, coins: 20 },
-        ], // Wasserrettung
+        '15_normal': [  // Wasserrettung
+            { id: 0, name: '1', cost: 10000, coins: 10 },
+            { id: 1, name: '2', cost: 50000, coins: 15 },
+            { id: 2, name: '3', cost: 100000, coins: 20 },
+            { id: 3, name: '4', cost: 100000, coins: 20 },
+            { id: 4, name: '5', cost: 100000, coins: 20 },
+        ],
 
-        '25_normal': [
-            { id: 0, name: '0', cost: 0, coins: 0 },
-            { id: 1, name: '1', cost: 10000, coins: 10 },
-            { id: 2, name: '2', cost: 50000, coins: 15 },
-            { id: 3, name: '3', cost: 100000, coins: 20 },
-            { id: 4, name: '4', cost: 100000, coins: 20 },
-            { id: 5, name: '5', cost: 100000, coins: 20 },
-            { id: 6, name: '6', cost: 100000, coins: 20 },
-            { id: 7, name: '7', cost: 100000, coins: 20 },
-            { id: 8, name: '8', cost: 100000, coins: 20 },
-            { id: 9, name: '9', cost: 100000, coins: 20 },
-            { id: 10, name: '10', cost: 100000, coins: 20 },
-            { id: 11, name: '11', cost: 100000, coins: 20 },
-            { id: 12, name: '12', cost: 100000, coins: 20 },
-            { id: 13, name: '13', cost: 100000, coins: 20 },
-            { id: 14, name: '14', cost: 100000, coins: 20 },
-        ], // Bergrettungswache
+        '25_normal': [  // Bergrettungswache
+            { id: 0, name: '1', cost: 10000, coins: 10 },
+            { id: 1, name: '2', cost: 50000, coins: 15 },
+            { id: 2, name: '3', cost: 100000, coins: 20 },
+            { id: 3, name: '4', cost: 100000, coins: 20 },
+            { id: 4, name: '5', cost: 100000, coins: 20 },
+            { id: 5, name: '6', cost: 100000, coins: 20 },
+            { id: 6, name: '7', cost: 100000, coins: 20 },
+            { id: 7, name: '8', cost: 100000, coins: 20 },
+            { id: 8, name: '9', cost: 100000, coins: 20 },
+            { id: 9, name: '10', cost: 100000, coins: 20 },
+            { id: 10, name: '11', cost: 100000, coins: 20 },
+            { id: 11, name: '12', cost: 100000, coins: 20 },
+            { id: 12, name: '13', cost: 100000, coins: 20 },
+            { id: 13, name: '14', cost: 100000, coins: 20 },
+        ],
 
-        '26_normal': [
-            { id: 0, name: '0', cost: 0, coins: 0 },
-            { id: 1, name: '1', cost: 10000, coins: 10 },
-            { id: 2, name: '2', cost: 50000, coins: 15 },
-            { id: 3, name: '3', cost: 100000, coins: 20 },
-            { id: 4, name: '4', cost: 100000, coins: 20 },
-        ], // Seenotrettungswache
+        '26_normal': [  // Seenotrettungswache
+            { id: 0, name: '1', cost: 10000, coins: 10 },
+            { id: 1, name: '2', cost: 50000, coins: 15 },
+            { id: 2, name: '3', cost: 100000, coins: 20 },
+            { id: 3, name: '4', cost: 100000, coins: 20 },
+            { id: 4, name: '5', cost: 100000, coins: 20 },
+        ],
     };              // Ausbaustufen
     const buildingTypeNames = {
         '0_normal': 'Feuerwache (Normal)',
@@ -1325,30 +1335,53 @@
     const storageGroups = {};
     const selectedLevels = {};
 
-    // Funktion zum Abrufen der Gebäudedaten
-    function fetchBuildingsAndRender() {
-        fetch('https://www.leitstellenspiel.de/api/buildings')
-            .then(response => {
-            if (!response.ok) {
-                throw new Error('Fehler beim Abrufen der Daten');
-            }
-            return response.json();
-        })
-            .then(data => {
-            buildingsData = data;
+    async function fetchBuildingsAndRender() {
+        const loadingText = document.getElementById('loading-text');
+        const loadingContainer = document.getElementById('loading-container');
+        const extensionList = document.getElementById('extension-list');
 
-            data.forEach(building => {
-                const levelInfo = getBuildingLevelInfo(building);
+        let dotInterval;
 
-            });
+        function startLoadingAnimation() {
+            let dots = 0;
+            loadingText.textContent = 'Lade die Daten, je nach Größe kann dies einen Augenblick dauern';
+            dotInterval = setInterval(() => {
+                dots = (dots + 1) % 4; // 0 bis 3 Punkte
+                loadingText.textContent = 'Lade die Daten, je nach Größe kann dies einen Augenblick dauern' + '.'.repeat(dots);
+            }, 500);
+        }
 
-            renderMissingExtensions(data);
-        })
-            .catch(error => {
-            const list = document.getElementById('extension-list');
-            list.innerHTML = 'Fehler beim Laden der Gebäudedaten.';
-        });
+        function stopLoadingAnimation() {
+            clearInterval(dotInterval);
+        }
+
+        // Ladeanzeige starten
+        loadingContainer.style.display = 'block';
+        extensionList.style.display = 'none';
+        startLoadingAnimation();
+
+        try {
+            const response = await fetch('https://www.leitstellenspiel.de/api/buildings');
+            if (!response.ok) throw new Error('Fehler beim Abrufen der Daten');
+            const buildingsData = await response.json();
+
+            buildingsData.forEach(building => getBuildingLevelInfo(building));
+            await initUserCredits();
+            await renderMissingExtensions(buildingsData);
+
+            // Ladeanzeige beenden
+            stopLoadingAnimation();
+            loadingContainer.style.display = 'none';
+            extensionList.style.display = 'block';
+
+        } catch (error) {
+            stopLoadingAnimation();
+            loadingContainer.style.display = 'none';
+            extensionList.style.display = 'block';
+            extensionList.innerHTML = 'Fehler beim Laden der Gebäudedaten.';
+        }
     }
+
 
     // Funktion, um den Namen der zugehörigen Leitstelle zu ermitteln
     function getLeitstelleName(building) {
@@ -1431,6 +1464,7 @@
 
     // Funktion um die Tabellen mit Daten zu füllen
     async function renderMissingExtensions(buildings) {
+        console.log('renderMissingExtensions called at', new Date().toISOString());
         const userInfo = await getUserCredits();
         const list = document.getElementById('extension-list');
         list.innerHTML = '';
@@ -1873,7 +1907,34 @@
         resetCell.appendChild(resetBtn);
         filterRow.appendChild(resetCell);
 
-        filterRow.appendChild(document.createElement('th')); // leer lassen
+        // Leere Spalte "Bauen mit Coins" ersetzen durch einen globalen Abwähl-Button
+        const uncheckAllCell = document.createElement('th');
+        uncheckAllCell.style.textAlign = 'center';
+        uncheckAllCell.style.padding = '4px 8px';
+
+        const uncheckAllBtn = document.createElement('button');
+        uncheckAllBtn.textContent = 'Alle abwählen';
+        uncheckAllBtn.classList.add('btn', 'btn-sm', 'btn-warning');
+        uncheckAllBtn.style.padding = '2px 6px';
+        uncheckAllBtn.style.fontSize = '0.8em';
+
+        uncheckAllBtn.onclick = () => {
+            tbody.querySelectorAll('tr').forEach(row => {
+                if (row.style.display !== 'none') {
+                    const cb = row.querySelector('.extension-checkbox');
+                    if (cb && !cb.disabled) {
+                        cb.checked = false;
+                    }
+                }
+            });
+            updateBuildSelectedButton();
+            updateSelectAllCheckboxState();
+            updateSelectedAmounts(group, userInfo);
+        };
+
+        uncheckAllCell.appendChild(uncheckAllBtn);
+        filterRow.appendChild(uncheckAllCell);
+
         table.querySelector('thead').appendChild(filterRow);
 
         selectAllCheckbox.addEventListener('change', (event) => {
@@ -1961,15 +2022,16 @@
                 creditBtn.style.backgroundColor = '#28a745';
                 creditBtn.style.color = 'white';
                 creditBtn.disabled = userInfo.credits < extension.cost;
-                creditBtn.onclick = () => {
-                    buildExtension(building, extension.id, 'credits', extension.cost, row);
+                creditBtn.onclick = async () => {
+                    await buildExtension(building, extension.id, 'credits', extension.cost, row);
 
                     // Auswahl für diese Erweiterung zurücksetzen
                     const cb = row.querySelector('.extension-checkbox');
                     if (cb) cb.checked = false;
 
-                    // Anzeige aktualisieren
-                    initUserCredits();
+                    // Guthaben neu laden und anzeigen
+                    await initUserCredits();
+
                     updateSelectedAmounts(group, userInfo);
                 };
 
@@ -1984,13 +2046,14 @@
                 coinBtn.style.backgroundColor = '#dc3545';
                 coinBtn.style.color = 'white';
                 coinBtn.disabled = userInfo.coins < extension.coins;
-                coinBtn.onclick = () => {
-                    buildExtension(building, extension.id, 'coins', extension.coins, row);
+                coinBtn.onclick = async () => {
+                    await buildExtension(building, extension.id, 'coins', extension.coins, row);
 
                     const cb = row.querySelector('.extension-checkbox');
                     if (cb) cb.checked = false;
 
-                    initUserCredits();
+                    await initUserCredits();
+
                     updateSelectedAmounts(group, userInfo);
                 };
 
@@ -2149,7 +2212,7 @@
                 creditBtn.style.backgroundColor = '#28a745';
                 creditBtn.style.color = 'white';
                 creditBtn.disabled = userInfo.credits < opt.cost;
-                creditBtn.onclick = () => {
+                creditBtn.onclick = async () => {
                     const built = [...liveBuiltStorages[building.id]];
 
                     if (!canBuildStorageInOrder(id, baseKey, built)) {
@@ -2157,17 +2220,15 @@
                         return;
                     }
 
-                    buildStorage(building, id, 'credits', opt.cost, row);
+                    await buildStorage(building, id, 'credits', opt.cost, row);
 
                     liveBuiltStorages[building.id].add(id);
 
-                    // UI anpassen
                     creditBtn.disabled = true;
                     coinBtn.disabled = true;
                     checkbox.disabled = true;
 
-                    // Zähler sofort aktualisieren
-                    initUserCredits();
+                    await initUserCredits();
                     updateBuildSelectedButton();
                     updateSelectedAmounts(group, userInfo);
                 };
@@ -2229,7 +2290,34 @@
         };
         resetCell.appendChild(resetBtn);
         filterRow.appendChild(resetCell);
-        filterRow.appendChild(document.createElement('th')); // Coins-Spalte leer lassen
+
+        // Leere Spalte "Bauen mit Coins" ersetzen durch einen globalen Abwähl-Button
+        const uncheckAllCell = document.createElement('th');
+        uncheckAllCell.style.textAlign = 'center';
+        uncheckAllCell.style.padding = '4px 8px';
+
+        const uncheckAllBtn = document.createElement('button');
+        uncheckAllBtn.textContent = 'Alle abwählen';
+        uncheckAllBtn.classList.add('btn', 'btn-sm', 'btn-warning');
+        uncheckAllBtn.style.padding = '2px 6px';
+        uncheckAllBtn.style.fontSize = '0.8em';
+
+        uncheckAllBtn.onclick = () => {
+            tbody.querySelectorAll('tr').forEach(row => {
+                if (row.style.display !== 'none') {
+                    const cb = row.querySelector('.storage-checkbox');
+                    if (cb && !cb.disabled) {
+                        cb.checked = false;
+                    }
+                }
+            });
+            updateBuildSelectedButton();
+            updateSelectAllCheckboxState();
+            updateSelectedAmounts(group, userInfo);
+        };
+
+        uncheckAllCell.appendChild(uncheckAllBtn);
+        filterRow.appendChild(uncheckAllCell);
 
         table.querySelector('thead').appendChild(filterRow);
 
@@ -2341,28 +2429,34 @@
         return table;
     }
     function createLevelTable(group, userInfo) {
-
         function updateBuildButtons(building, selectedLevelId, creditCell, coinCell, levelList, currentLevel) {
-
             let totalCredits = 0;
             let totalCoins = 0;
 
-            if (currentLevel === -1) {
-                for (let i = 0; i <= selectedLevelId; i++) {
-                    const stufe = levelList[i];
-                    if (!stufe) continue;
-                    totalCredits += stufe.cost || 0;
-                    totalCoins += stufe.coins || 0;
-                }
-            } else if (selectedLevelId > currentLevel) {
-                for (let i = currentLevel + 1; i <= selectedLevelId; i++) {
-                    const stufe = levelList[i];
-                    if (!stufe) continue;
-                    totalCredits += stufe.cost || 0;
-                    totalCoins += stufe.coins || 0;
-                }
-            } else if (selectedLevelId < currentLevel) {
-                for (let i = selectedLevelId + 1; i <= currentLevel; i++) {
+            if (selectedLevelId === null) {
+                creditCell.innerHTML = '';
+                coinCell.innerHTML = '';
+
+                const creditBtn = document.createElement('button');
+                creditBtn.textContent = '0 Credits';
+                creditBtn.classList.add('btn', 'btn-sm');
+                creditBtn.style.backgroundColor = '#28a745';
+                creditBtn.style.color = 'white';
+                creditBtn.disabled = true;
+                creditCell.appendChild(creditBtn);
+
+                const coinBtn = document.createElement('button');
+                coinBtn.textContent = '0 Coins';
+                coinBtn.classList.add('btn', 'btn-sm');
+                coinBtn.style.backgroundColor = '#dc3545';
+                coinBtn.style.color = 'white';
+                coinBtn.disabled = true;
+                coinCell.appendChild(coinBtn);
+                return;
+            }
+
+            if (selectedLevelId >= currentLevel) {
+                for (let i = currentLevel; i <= selectedLevelId; i++) {
                     const stufe = levelList[i];
                     if (!stufe) continue;
                     totalCredits += stufe.cost || 0;
@@ -2373,11 +2467,7 @@
                 totalCoins = 0;
             }
 
-            console.info(`Berechnete Kosten: ${totalCredits} Credits, ${totalCoins} Coins`);
-
             creditCell.innerHTML = '';
-            coinCell.innerHTML = '';
-
             const creditBtn = document.createElement('button');
             creditBtn.textContent = `${totalCredits.toLocaleString()} Credits`;
             creditBtn.classList.add('btn', 'btn-sm');
@@ -2391,25 +2481,20 @@
                 }
                 try {
                     await buildLevel(building.id, 'credits', selectedLevelId);
-
-                    // Reset alle selectedLevels auf aktuellen Level
                     for (const b of group) {
-                        const currentLevel = getBuildingLevelInfo(b.building)?.currentLevel ?? -1;
+                        const currentLevel = getBuildingLevelInfo(b.building)?.currentLevel ?? 0;
                         selectedLevels[b.building.id] = currentLevel;
                     }
-
                     fetchBuildingsAndRender();
                     updateSelectedAmounts(group, userInfo);
                     updateBuildSelectedLevelsButtonState(group);
-                } catch (e) {
+                } catch {
                     alert('Fehler beim Bauen mit Credits.');
                 }
             };
-
             creditCell.appendChild(creditBtn);
 
-            updateBuildSelectedLevelsButtonState(group);
-
+            coinCell.innerHTML = '';
             const coinBtn = document.createElement('button');
             coinBtn.textContent = `${totalCoins.toLocaleString()} Coins`;
             coinBtn.classList.add('btn', 'btn-sm');
@@ -2421,117 +2506,248 @@
                     alert('Nicht genug Coins!');
                     return;
                 }
-                console.info(`Baue mit Coins: Gebäude ${building.id}, Stufe ${selectedLevelId}`);
                 try {
                     await buildLevel(building.id, 'coins', selectedLevelId);
-
-                    // Reset alle selectedLevels auf aktuellen Level
                     for (const b of group) {
-                        const currentLevel = getBuildingLevelInfo(b.building)?.currentLevel ?? -1;
+                        const currentLevel = getBuildingLevelInfo(b.building)?.currentLevel ?? 0;
                         selectedLevels[b.building.id] = currentLevel;
                     }
-
                     fetchBuildingsAndRender();
                     updateSelectedAmounts(group, userInfo);
                     updateBuildSelectedLevelsButtonState(group);
-                } catch (e) {
-                    alert('Fehler beim Bauen mit Credits.');
+                } catch {
+                    alert('Fehler beim Bauen mit Coins.');
                 }
             };
-
             coinCell.appendChild(coinBtn);
         }
-        updateBuildSelectedLevelsButtonState(group);
 
+        const isDarkMode = () => document.body.classList.contains('dark');
+        const updateButtonColors = (container) => {
+            container.querySelectorAll('button').forEach(btn => {
+                if (btn.dataset.active === 'true') {
+                    btn.style.backgroundColor = '#28a745';
+                    btn.style.color = '#fff';
+                } else {
+                    if (isDarkMode()) {
+                        btn.style.backgroundColor = '#444';
+                        btn.style.color = '#fff';
+                    } else {
+                        btn.style.backgroundColor = '#e0e0e0';
+                        btn.style.color = '#000';
+                    }
+                }
+            });
+        };
+
+        // --- Tabelle mit Head und Body ---
         const table = document.createElement('table');
         table.style.width = '100%';
         table.style.borderCollapse = 'collapse';
-
         table.innerHTML = `
-    <thead style="background-color: #f2f2f2; font-weight: bold; border-bottom: 2px solid #ccc;">
-        <tr>
-            <th style="padding: 10px; text-align: center;">Leitstelle</th>
-            <th style="padding: 10px; text-align: center;">Wache</th>
-            <th style="padding: 10px; text-align: center;">Ausbaustufe</th>
-            <th style="padding: 10px; text-align: center;">Stufenausbau wählen</th>
-            <th style="padding: 10px; text-align: center;">Bauen mit Credits</th>
-            <th style="padding: 10px; text-align: center;">Bauen mit Coins</th>
-        </tr>
-    </thead>
-    <tbody></tbody>
+        <thead style="background-color: #f2f2f2; font-weight: bold; border-bottom: 2px solid #ccc;">
+            <tr>
+                <th style="padding: 10px; text-align: center;">Leitstelle</th>
+                <th style="padding: 10px; text-align: center;">Wache</th>
+                <th style="padding: 10px; text-align: center;">Stufe</th>
+                <th style="padding: 10px; text-align: center;">Ausbaustufe wählen</th>
+                <th style="padding: 10px; text-align: center;">Bauen mit Credits</th>
+                <th style="padding: 10px; text-align: center;">Bauen mit Coins</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
     `;
-
         const tbody = table.querySelector('tbody');
+        const thead = table.querySelector('thead');
 
+        // --- Filter-Row bauen ---
+        const filterRow = document.createElement('tr');
+        // Zellen für Filter (Leitstelle + Wache) + Leer für Rest + Reset-Button am Ende
+        const leitstelleOptions = [...new Set(group.map(({ building }) => getLeitstelleName(building)))].sort();
+        const wacheOptions = [...new Set(group.map(({ building }) => building.caption || '-'))].sort();
+        const stufeOptions = [...new Set(
+            group
+            .filter(({ building }) => {
+                const info = getBuildingLevelInfo(building);
+                if (!info) return false;
+                const type = building.building_type;
+                const size = building.small_building ? 'small' : 'normal';
+                const key = `${type}_${size}`;
+                const levelList = manualLevels[key];
+                if (!levelList) return false;
+
+                // Nur Gebäude, die nicht komplett ausgebaut sind
+                return info.currentLevel < levelList.length;
+            })
+            .map(({ building }) => {
+                const info = getBuildingLevelInfo(building);
+                return info ? info.currentLevel.toString() : null;
+            })
+            .filter(x => x !== null && x !== '-1')
+        )].sort((a, b) => Number(a) - Number(b));
+
+
+        function createFilterCell(options, placeholder) {
+            const th = document.createElement('th');
+            th.style.padding = '4px 8px';
+            const select = document.createElement('select');
+            select.style.width = '100%';
+            select.innerHTML = `<option value="">🔽 ${placeholder}</option>`;
+            options.forEach(opt => {
+                const option = document.createElement('option');
+                option.value = opt;
+                option.textContent = opt;
+                select.appendChild(option);
+            });
+            th.appendChild(select);
+            return { th, select };
+        }
+
+        const leitstelleFilter = createFilterCell(leitstelleOptions, 'Leitstellen');
+        const wacheFilter = createFilterCell(wacheOptions, 'Wachen');
+        const ausbaustufeFilter = createFilterCell(stufeOptions, 'Stufe');
+
+        filterRow.appendChild(leitstelleFilter.th);
+        filterRow.appendChild(wacheFilter.th);
+        filterRow.appendChild(ausbaustufeFilter.th);
+        // --- Neuer globaler "Stufenauswahl löschen" Button ---
+        const clearLevelsTh = document.createElement('th');
+        clearLevelsTh.style.textAlign = 'center';
+        clearLevelsTh.style.padding = '4px 8px';
+
+        const clearLevelsBtn = document.createElement('button');
+        clearLevelsBtn.textContent = 'Stufenauswahl löschen';
+        clearLevelsBtn.classList.add('btn', 'btn-sm', 'btn-warning');
+        clearLevelsBtn.style.padding = '2px 6px';
+        clearLevelsBtn.style.fontSize = '0.8em';
+        clearLevelsBtn.onclick = () => {
+            // Alle Auswahl zurücksetzen
+            for (const id in selectedLevels) {
+                selectedLevels[id] = null;
+            }
+            // Alle Buttons zurücksetzen
+            tbody.querySelectorAll('tr').forEach(row => {
+                const levelChoiceCell = row.children[3];
+                if (levelChoiceCell) {
+                    levelChoiceCell.querySelectorAll('button').forEach(btn => btn.dataset.active = 'false');
+                    updateButtonColors(levelChoiceCell);
+                }
+                // Bauen-Buttons auf 0 setzen
+                const buildingId = Object.keys(selectedLevels)[Array.from(tbody.children).indexOf(row)];
+                const buildingData = group.find(g => g.building.id == buildingId);
+                if (buildingData) {
+                    const levelInfo = getBuildingLevelInfo(buildingData.building);
+                    const key = `${buildingData.building.building_type}_${buildingData.building.small_building ? 'small' : 'normal'}`;
+                    const levelList = manualLevels[key];
+                    updateBuildButtons(buildingData.building, null, row.children[4], row.children[5], levelList, levelInfo.currentLevel);
+                }
+            });
+            updateSelectedAmounts(group, userInfo);
+            updateBuildSelectedLevelsButtonState(group);
+        };
+
+        clearLevelsTh.appendChild(clearLevelsBtn);
+        filterRow.appendChild(clearLevelsTh);
+        filterRow.appendChild(document.createElement('th')); // Credits keine Filter
+
+        // Reset Button
+        const resetTh = document.createElement('th');
+        resetTh.style.textAlign = 'center';
+        resetTh.style.padding = '4px 8px';
+        const resetBtn = document.createElement('button');
+        resetBtn.textContent = 'Filter zurücksetzen';
+        resetBtn.classList.add('btn', 'btn-sm', 'btn-primary');
+        resetBtn.style.padding = '2px 6px';
+        resetBtn.style.fontSize = '0.8em';
+        resetBtn.onclick = () => {
+            leitstelleFilter.select.selectedIndex = 0;
+            wacheFilter.select.selectedIndex = 0;
+            ausbaustufeFilter.select.selectedIndex = 0;
+            applyFilters();
+        };
+        resetTh.appendChild(resetBtn);
+        filterRow.appendChild(resetTh);
+
+        thead.appendChild(filterRow);
+
+        // --- Filterfunktion ---
+        function applyFilters() {
+            const selectedLeitstelle = leitstelleFilter.select.value;
+            const selectedWache = wacheFilter.select.value;
+            const selectedStufe = ausbaustufeFilter.select.value;
+
+            tbody.querySelectorAll('tr').forEach(row => {
+                const leitstelleText = row.children[0].textContent;
+                const wacheText = row.children[1].textContent;
+                const stufeText = row.children[2].textContent;
+
+                const matchLeitstelle = !selectedLeitstelle || leitstelleText === selectedLeitstelle;
+                const matchWache = !selectedWache || wacheText === selectedWache;
+                const matchStufe = !selectedStufe || stufeText === selectedStufe;
+
+                row.style.display = (matchLeitstelle && matchWache && matchStufe) ? '' : 'none';
+            });
+        }
+
+        // --- Tabellenzeilen aufbauen (dein Originalcode vereinfacht) ---
         group.forEach(({ building }) => {
             const levelInfo = getBuildingLevelInfo(building);
             if (!levelInfo) return;
 
             const leitstelleName = getLeitstelleName(building);
             const wache = building.caption || '-';
-
             const currentLevel = levelInfo.currentLevel;
 
             const key = `${building.building_type}_${building.small_building ? 'small' : 'normal'}`;
             const levelList = manualLevels[key];
             if (!levelList) return;
 
-            const maxLevel = levelList.length - 1;
+            const maxLevel = levelList.length;
+            if (currentLevel >= maxLevel) return; // schon voll ausgebaut
 
-            if (currentLevel >= maxLevel) {
-                return;
-            }
-
-            selectedLevels[building.id] = currentLevel;
+            selectedLevels[building.id] = null;
 
             const row = document.createElement('tr');
             row.style.borderBottom = '1px solid #ddd';
 
-            const createCell = (text, center = true) => {
+            function createCell(text, center = true) {
                 const td = document.createElement('td');
                 td.style.padding = '8px';
                 if (center) td.style.textAlign = 'center';
                 td.textContent = text;
                 return td;
-            };
+            }
 
             const leitstelleCell = createCell(leitstelleName);
             const wacheCell = createCell(wache);
-
-            const ausbauText = currentLevel === -1 ? 'Nicht gebaut' : currentLevel === 0 ? '0' : currentLevel.toString();
-            const currentLevelCell = createCell(ausbauText);
+            const currentLevelCell = createCell(currentLevel.toString());
 
             const levelChoiceCell = document.createElement('td');
             levelChoiceCell.style.padding = '8px';
             levelChoiceCell.style.textAlign = 'center';
 
-            const isDarkMode = () => document.body.classList.contains('dark');
+            const creditCell = document.createElement('td');
+            creditCell.style.textAlign = 'center';
+            const coinCell = document.createElement('td');
+            coinCell.style.textAlign = 'center';
 
-            const updateButtonColors = () => {
-                const darkMode = isDarkMode();
-                levelChoiceCell.querySelectorAll('button').forEach(btn => {
-                    if (btn.dataset.active === 'true') {
-                        btn.style.backgroundColor = '#28a745';
-                        btn.style.color = '#fff';
-                    } else {
-                        if (darkMode) {
-                            btn.style.backgroundColor = '#444';
-                            btn.style.color = '#fff';
-                        } else {
-                            btn.style.backgroundColor = '#e0e0e0';
-                            btn.style.color = '#000';
-                        }
-                    }
-                });
-            };
+            row.appendChild(leitstelleCell);
+            row.appendChild(wacheCell);
+            row.appendChild(currentLevelCell);
+            row.appendChild(levelChoiceCell);
+            row.appendChild(creditCell);
+            row.appendChild(coinCell);
 
+            // Hier kannst du deine updateBuildButtons-Funktion einfügen
+            updateBuildButtons(building, null, creditCell, coinCell, levelList, currentLevel);
+
+            // Buttons für Level-Auswahl und Reset (dein bestehender Code)
             levelList.forEach(stufe => {
-                if (stufe.id > currentLevel) {
+                if (stufe.id >= currentLevel) {
                     const lvlBtn = document.createElement('button');
-                    lvlBtn.textContent = (stufe.id).toString();
+                    lvlBtn.textContent = (stufe.id + 1).toString();
                     lvlBtn.className = 'expand_direct';
                     lvlBtn.setAttribute('level', stufe.id.toString());
-
                     lvlBtn.style.display = 'inline-block';
                     lvlBtn.style.padding = '2px 6px';
                     lvlBtn.style.margin = '0 2px';
@@ -2541,7 +2757,6 @@
                     lvlBtn.style.cursor = 'pointer';
                     lvlBtn.style.fontWeight = 'bold';
                     lvlBtn.style.transition = 'background-color 0.2s, color 0.2s';
-
                     lvlBtn.dataset.active = 'false';
 
                     lvlBtn.addEventListener('mouseenter', () => {
@@ -2551,44 +2766,22 @@
                     });
                     lvlBtn.addEventListener('mouseleave', () => {
                         if (lvlBtn.dataset.active !== 'true') {
-                            updateButtonColors();
+                            updateButtonColors(levelChoiceCell);
                         }
                     });
 
                     lvlBtn.onclick = () => {
-                        // Berechne Kosten für den ausgewählten Level
                         let totalCredits = 0;
                         let totalCoins = 0;
-
-                        if (currentLevel === -1) {
-                            for (let i = 0; i <= stufe.id; i++) {
-                                const s = levelList[i];
-                                if (!s) continue;
-                                totalCredits += s.cost || 0;
-                                totalCoins += s.coins || 0;
-                            }
-                        } else if (stufe.id > currentLevel) {
-                            for (let i = currentLevel + 1; i <= stufe.id; i++) {
-                                const s = levelList[i];
-                                if (!s) continue;
-                                totalCredits += s.cost || 0;
-                                totalCoins += s.coins || 0;
-                            }
-                        } else if (stufe.id < currentLevel) {
-                            for (let i = stufe.id + 1; i <= currentLevel; i++) {
-                                const s = levelList[i];
-                                if (!s) continue;
-                                totalCredits += s.cost || 0;
-                                totalCoins += s.coins || 0;
-                            }
-                        } else {
-                            totalCredits = 0;
-                            totalCoins = 0;
+                        for (let i = currentLevel; i <= stufe.id; i++) {
+                            const s = levelList[i];
+                            if (!s) continue;
+                            totalCredits += s.cost || 0;
+                            totalCoins += s.coins || 0;
                         }
 
                         const canPayWithCredits = userInfo.credits >= totalCredits && totalCredits > 0;
                         const canPayWithCoins = userInfo.coins >= totalCoins && totalCoins > 0;
-
                         if (!canPayWithCredits && !canPayWithCoins) {
                             alert('Nicht genug Credits oder Coins für diese Stufe!');
                             return;
@@ -2596,78 +2789,49 @@
 
                         levelChoiceCell.querySelectorAll('button').forEach(btn => btn.dataset.active = 'false');
                         lvlBtn.dataset.active = 'true';
-                        updateButtonColors();
-
+                        updateButtonColors(levelChoiceCell);
                         selectedLevels[building.id] = stufe.id;
-
                         updateBuildButtons(building, stufe.id, creditCell, coinCell, levelList, currentLevel);
-
                         updateSelectedAmounts(group, userInfo);
+                        updateBuildSelectedLevelsButtonState(group);
                     };
 
                     levelChoiceCell.appendChild(lvlBtn);
                 }
             });
 
-            // Trash-Button erstellen
+            // Reset-Button pro Zeile
             const trashBtn = document.createElement('button');
             trashBtn.innerHTML = '🗑️';
             trashBtn.title = 'Auswahl zurücksetzen';
             trashBtn.classList.add('btn', 'btn-sm', 'btn-danger');
-
-            // Levelbutton-Styles übernehmen
             trashBtn.style.display = 'inline-block';
             trashBtn.style.padding = '2px 6px';
-            trashBtn.style.margin = '0 2px'; // gleicher Abstand wie Level-Buttons
+            trashBtn.style.margin = '0 2px';
             trashBtn.style.fontSize = '11px';
             trashBtn.style.borderRadius = '12px';
             trashBtn.style.border = 'none';
             trashBtn.style.cursor = 'pointer';
             trashBtn.style.fontWeight = 'bold';
-            trashBtn.style.transition = 'background-color 0.2s, color 0.2s';
-
-            trashBtn.addEventListener('mouseenter', () => {
-                trashBtn.style.backgroundColor = '#dc3545'; // kräftiges Rot
-                trashBtn.style.color = '#fff';
-            });
-            trashBtn.addEventListener('mouseleave', () => {
-                trashBtn.style.backgroundColor = '#dc3545'; // bleibt rot
-                trashBtn.style.color = '#fff';
-            });
-
-            // Event-Handler
             trashBtn.onclick = () => {
-                selectedLevels[building.id] = currentLevel;
-
+                selectedLevels[building.id] = null;
                 levelChoiceCell.querySelectorAll('button').forEach(btn => btn.dataset.active = 'false');
-                updateButtonColors();
-                updateBuildButtons(building, currentLevel, creditCell, coinCell, levelList, currentLevel);
+                updateButtonColors(levelChoiceCell);
+                updateBuildButtons(building, null, creditCell, coinCell, levelList, currentLevel);
                 updateSelectedAmounts(group, userInfo);
                 updateBuildSelectedLevelsButtonState(group);
             };
 
             levelChoiceCell.appendChild(trashBtn);
-
-
-            updateButtonColors();
-
-            const creditCell = document.createElement('td');
-            creditCell.style.textAlign = 'center';
-
-            const coinCell = document.createElement('td');
-            coinCell.style.textAlign = 'center';
-
-            updateBuildButtons(building, currentLevel, creditCell, coinCell, levelList, currentLevel);
-
-            row.appendChild(leitstelleCell);
-            row.appendChild(wacheCell);
-            row.appendChild(currentLevelCell);
-            row.appendChild(levelChoiceCell);
-            row.appendChild(creditCell);
-            row.appendChild(coinCell);
+            updateButtonColors(levelChoiceCell);
 
             tbody.appendChild(row);
         });
+
+        // --- Eventlistener auf Filter setzen ---
+        leitstelleFilter.select.addEventListener('change', applyFilters);
+        wacheFilter.select.addEventListener('change', applyFilters);
+        ausbaustufeFilter.select.addEventListener('change', applyFilters);
 
         return table;
     }
@@ -2696,10 +2860,8 @@
     // Funktion zur Gesamtkostenberechnung
     function updateSelectedAmounts(group, userInfo) {
         if (!Array.isArray(group)) {
-            // Wenn group nicht definiert oder kein Array ist, einfach abbrechen oder leeres Array setzen
             console.warn('updateSelectedAmounts: group ist kein Array:', group);
             return;
-            Alternativ: group = [];
         }
 
         let totalCredits = 0;
@@ -2713,39 +2875,35 @@
 
         // Kosten der Level
         group.forEach(({ building }) => {
-
             const key = `${building.building_type}_${building.small_building ? 'small' : 'normal'}`;
-
             const levelList = manualLevels[key];
             if (!levelList) {
                 console.warn('Kein LevelList für Key:', key);
                 return;
             }
 
-            const currentLevel = getBuildingLevelInfo(building)?.currentLevel ?? -1;
-            const selectedLevelId = selectedLevels[building.id] ?? currentLevel;
-            console.log('currentLevel:', currentLevel, 'selectedLevelId:', selectedLevelId);
+            const apiLevel = getBuildingLevelInfo(building)?.currentLevel ?? 0;
 
-            if (selectedLevelId === currentLevel) {
+            // Index des aktuellen Levels suchen anhand des Namens (z.B. "1", "2" ...)
+            let currentLevelIndex = levelList.findIndex(l => Number(l.name) === Number(apiLevel));
+            // Wenn nicht gefunden → -1 (vor dem ersten Ausbau)
+            if (currentLevelIndex === -1) {
+                currentLevelIndex = -1;
+            }
+
+            const selectedLevelIndex = selectedLevels[building.id] ?? currentLevelIndex;
+
+            // Wenn keine Änderung oder Downgrade, überspringen
+            if (selectedLevelIndex <= currentLevelIndex) {
                 return;
             }
 
-            if (currentLevel === -1) {
-                for (let i = 0; i <= selectedLevelId; i++) {
-                    const stufe = levelList[i];
-                    if (!stufe) continue;
-                    totalCredits += stufe.cost || 0;
-                    totalCoins += stufe.coins || 0;
-                }
-            } else if (selectedLevelId > currentLevel) {
-                for (let i = currentLevel + 1; i <= selectedLevelId; i++) {
-                    const stufe = levelList[i];
-                    if (!stufe) continue;
-                    totalCredits += stufe.cost || 0;
-                    totalCoins += stufe.coins || 0;
-                }
-            } else if (selectedLevelId < currentLevel) {
-                // Downgrade, hier evtl. anders behandeln
+            // Kosten von nächstem Level bis ausgewähltem Level aufsummieren
+            for (let i = currentLevelIndex + 1; i <= selectedLevelIndex; i++) {
+                const stufe = levelList[i];
+                if (!stufe) continue;
+                totalCredits += stufe.cost || 0;
+                totalCoins += stufe.coins || 0;
             }
         });
 
@@ -3635,19 +3793,39 @@
     // Funktion um den Ausgewählte Stufen Button zu aktivieren
     function updateBuildSelectedLevelsButtonState(group) {
         const buttonContainers = document.querySelectorAll('.button-container');
+        if (!buttonContainers.length) {
+            console.warn('⚠️ Keine Button-Container gefunden');
+            return;
+        }
 
         buttonContainers.forEach(container => {
             const buildSelectedLevelsButton = container.querySelector('.build-selected-levels-button');
-            if (!buildSelectedLevelsButton) return;
+            if (!buildSelectedLevelsButton) {
+                console.warn('⚠️ Build-Selected-Level-Button nicht gefunden');
+                return;
+            }
 
-            // Prüfe, ob mindestens ein Gebäude ausgewählte Stufe != aktuelles Level hat
-            const hasSelectedLevels = group.some(({ building }) => {
+            // Prüfe, ob mind. ein Gebäude eine Auswahl >= aktueller Level hat
+            let hasSelectedLevels = false;
+
+            for (const { building } of group) {
                 const currentLevel = getBuildingLevelInfo(building)?.currentLevel ?? -1;
-                const selectedLevel = selectedLevels[building.id];
-                return selectedLevel !== undefined && selectedLevel !== currentLevel;
-            });
+                const selectedLevel = selectedLevels[building.id] ?? null;
+
+                console.log(
+                    `🏢 Building ${building.id}: currentLevel=${currentLevel}, selectedLevel=${selectedLevel}`
+                );
+
+                if (selectedLevel !== null && selectedLevel >= currentLevel) {
+                    hasSelectedLevels = true;
+                    break; // wir haben einen gefunden, also können wir abbrechen
+                }
+            }
 
             buildSelectedLevelsButton.disabled = !hasSelectedLevels;
+            console.log(
+                `🔘 Button "${buildSelectedLevelsButton.textContent}" disabled: ${!hasSelectedLevels}`
+            );
         });
     }
 
