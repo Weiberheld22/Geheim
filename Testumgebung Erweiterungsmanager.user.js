@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         *Beta-Testcode für den Erweiterungs-Manager
 // @namespace    http://tampermonkey.net/
-// @version      5.0
+// @version      5.1
 // @description  Dies ist ein Testcode und garantiert keine 100% funktionalität Updates erfolgen OHNE Vorankündigung!
 // @author       Caddy21
 // @match        https://www.leitstellenspiel.de/
@@ -1330,11 +1330,13 @@
         return 'Unbekanntes Gebäude';
     }
 
-    let buildingsData = []; // Globale Variable, um die abgerufenen Gebäudedaten zu speichern
-    let buildingGroups = {}; // Globale Definition
+    let buildingsData = [];
+    let buildingGroups = {};
     const storageGroups = {};
     const selectedLevels = {};
+    const storageBuildQueue = {};
 
+    // Funktion um alle Daten zu sammeln
     async function fetchBuildingsAndRender() {
         const loadingText = document.getElementById('loading-text');
         const loadingContainer = document.getElementById('loading-container');
@@ -1381,7 +1383,6 @@
             extensionList.innerHTML = 'Fehler beim Laden der Gebäudedaten.';
         }
     }
-
 
     // Funktion, um den Namen der zugehörigen Leitstelle zu ermitteln
     function getLeitstelleName(building) {
@@ -1464,7 +1465,6 @@
 
     // Funktion um die Tabellen mit Daten zu füllen
     async function renderMissingExtensions(buildings) {
-        console.log('renderMissingExtensions called at', new Date().toISOString());
         const userInfo = await getUserCredits();
         const list = document.getElementById('extension-list');
         list.innerHTML = '';
@@ -1539,6 +1539,8 @@
 
             const header = createHeader(buildingType);
             const buttons = createButtonContainer(groupKey, group, userInfo);
+
+            buttons.container.dataset.buildingType = groupKey;
 
             const hasEnabledStorage = group.some(({ building }) => {
                 const baseKey = `${building.building_type}_${building.small_building ? 'small' : 'normal'}`;
@@ -1828,7 +1830,7 @@
         return true;
     }
 
-    // Funktion um die Tabelle für Erweiterung, Lager und Level zu erstellen
+    // Funktion um die Tabelle für Erweiterung, Lager und Ausbaustufen zu erstellen
     function createExtensionTable(groupKey, group, userInfo, buildSelectedButton) {
         const table = document.createElement('table');
         table.innerHTML = `
@@ -1962,7 +1964,7 @@
             const canPayAllWithCoins = currentCoins >= totalCoins;
 
             if (!canPayAllWithCredits && !canPayAllWithCoins) {
-                alert("Du hast nicht genug Credits ODER Coins für die gesamte Auswahl!");
+                alert("Du hast nicht genug Credits oder Coins für die gesamte Auswahl!");
                 // Checkbox zurücksetzen, da nicht erlaubt
                 selectAllCheckbox.checked = false;
                 return;
@@ -2860,7 +2862,6 @@
     // Funktion zur Gesamtkostenberechnung
     function updateSelectedAmounts(group, userInfo) {
         if (!Array.isArray(group)) {
-            console.warn('updateSelectedAmounts: group ist kein Array:', group);
             return;
         }
 
@@ -2878,7 +2879,6 @@
             const key = `${building.building_type}_${building.small_building ? 'small' : 'normal'}`;
             const levelList = manualLevels[key];
             if (!levelList) {
-                console.warn('Kein LevelList für Key:', key);
                 return;
             }
 
@@ -3297,6 +3297,29 @@
         return true;
     }
 
+    // Hilfsfunktion: ermittelt aktuelle Lagerzustände eines Gebäudes
+    function getCurrentStorageState(buildingId) {
+        const building = buildingsData.find(b => String(b.id) === String(buildingId));
+        if (!building) return [];
+
+        // Bereits gebaute Erweiterungen
+        const builtExtensions = building.extensions ? building.extensions.map(e => e.type_id) : [];
+
+        // Bereits gebaute oder im Bau befindliche Lager
+        const builtStorages = new Set(
+            (building.storage_upgrades || [])
+            .filter(s => s.available || storageBuildQueue[buildingId]?.includes(s.type_id))
+            .map(s => s.type_id)
+        );
+
+        // Lager, die gerade ausgewählt wurden (Queue)
+        if (storageBuildQueue[buildingId]) {
+            storageBuildQueue[buildingId].forEach(s => builtStorages.add(s));
+        }
+
+        return Array.from(new Set([...builtExtensions, ...builtStorages]));
+    }
+
     // Funktion zum Bau der ausgewählten Erweiterungen
     async function buildSelectedExtensions() {
         const selectedExtensions = document.querySelectorAll('.extension-checkbox:checked');
@@ -3308,12 +3331,12 @@
         // Erweiterungen erfassen
         selectedExtensions.forEach(checkbox => {
             const buildingId = checkbox.dataset.buildingId;
-            const extensionId = checkbox.dataset.extensionId;
+            const extensionId = parseInt(checkbox.dataset.extensionId, 10);
 
             if (!selectedExtensionsByBuilding[buildingId]) {
                 selectedExtensionsByBuilding[buildingId] = [];
             }
-            selectedExtensionsByBuilding[buildingId].push(parseInt(extensionId, 10));
+            selectedExtensionsByBuilding[buildingId].push(extensionId);
         });
 
         // Lager erfassen
@@ -3327,63 +3350,51 @@
             selectedStoragesByBuilding[buildingId].push(storageType);
         });
 
-        // Regeln für Kleinwachen prüfen
-        for (const [buildingId, extensions] of Object.entries(selectedExtensionsByBuilding)) {
-            const building = buildingsData.find(b => String(b.id) === String(buildingId));
-            if (!building) continue;
-
-            if (building.small_building) {
-                if (building.building_type === 0) {
-                    const invalid = [0, 6, 8, 13, 14, 16, 18, 19, 25];
-                    if (extensions.filter(id => invalid.includes(id)).length > 1) {
-                        showError("Information zu deinem Bauvorhaben:\n\nDiese Erweiterungen für die Feuerwehr-Kleinwache können nicht zusammen gebaut werden.\n\nBitte wähle nur eine Erweiterung aus.");
-                        updateBuildSelectedButton();
-                        return;
-                    }
-                }
-
-                if (building.building_type === 6) {
-                    const invalid = [10, 11, 12, 13];
-                    if (extensions.filter(id => invalid.includes(id)).length > 1) {
-                        showError("Information zu deinem Bauvorhaben:\n\nDiese Erweiterungen für die Polizei-Kleinwache können nicht zusammen gebaut werden.\n\nBitte wähle nur eine Erweiterung aus.");
-                        updateBuildSelectedButton();
-                        return;
-                    }
-                }
-            }
-        }
-
-        // Prüfung Lagerreihenfolge
-        for (const [buildingId, selectedStorageTypes] of Object.entries(selectedStoragesByBuilding)) {
+        // Prüfung Lagerreihenfolge unter Berücksichtigung API-Daten
+        for (const [buildingId, storageTypes] of Object.entries(selectedStoragesByBuilding)) {
             const building = buildingsData.find(b => String(b.id) === String(buildingId));
             if (!building) continue;
 
             const buildingTypeKey = `${building.building_type}_${building.small_building ? 'small' : 'normal'}`;
-            const builtStorages = building.extensions || [];
+            const storageOrder = manualStorageRooms[buildingTypeKey]?.map(s => s.id) || [];
 
-            if (!canBuildAllSelectedInOrder(selectedStorageTypes, buildingTypeKey, builtStorages)) {
-                showError(`Bitte beachte: Die Lagerräume müssen in der vorgegebenen Reihenfolge für das Gebäude ${getBuildingCaption(buildingId)} gebaut werden.\n\nReihenfolge:\n1. Lagerraum\n2. 1te zusätzlicher Lagerraum\n3. 2te zusätzlicher Lagerraum\n4. 3te zusätzlicher Lagerraum\n5. 4te zusätzlicher Lagerraum\n6. 5te zusätzlicher Lagerraum.\n7. 6te zusätzlicher Lagerraum\n8. 7te zusätzlicher Lagerraum'
-`);
-                updateBuildSelectedButton();
-                return;
+            // Bereits gebaut + API-Lager
+            const builtStorages = new Set(
+                (building.storage_upgrades || [])
+                .filter(s => !s.available) // nur Lager, die schon gebaut wurden
+                .map(s => s.type_id)
+            );
+
+            // Lokale Bau-Queue hinzufügen
+            if (storageBuildQueue[buildingId]) {
+                storageBuildQueue[buildingId].forEach(s => builtStorages.add(s));
             }
-        }
+            // Temporär die ausgewählten als "im Bau" markieren
+            storageTypes.forEach(s => builtStorages.add(s));
 
-        const userInfo = await getUserCredits();
-        if (!user_premium) {
-            for (const [buildingId, extensions] of Object.entries(selectedExtensionsByBuilding)) {
-                if (extensions.length > 2) {
-                    alert(`Zu viele Erweiterungen für Gebäude ${getBuildingCaption(buildingId)} ausgewählt.\n\nOhne Premium-Account sind maximal 2 Ausbauten möglich.`);
+            for (let i = 0; i < storageTypes.length; i++) {
+                const storageId = storageTypes[i];
+                const requiredIndex = storageOrder.indexOf(storageId);
+                if (requiredIndex === -1) {
+                    continue;
+                }
+
+                const missing = storageOrder.slice(0, requiredIndex).some(prevId => !builtStorages.has(prevId));
+
+                if (missing) {
+                    showError(`Bitte beachte: Die Lagerräume müssen in der vorgegebenen Reihenfolge gebaut werden.\n\nReihenfolge:\n1. Lagerraum\n2. 1te zusätzlicher Lagerraum\n3. 2te zusätzlicher Lagerraum\n4. 3te zusätzlicher Lagerraum\n5. 4te zusätzlicher Lagerraum\n6. 5te zusätzlicher Lagerraum\n7. 6te zusätzlicher Lagerraum\n8. 7te zusätzlicher Lagerraum`);
                     updateBuildSelectedButton();
                     return;
                 }
             }
+            //console.log(`✅ Reihenfolge korrekt für Gebäude ${getBuildingCaption(buildingId)}`);
         }
 
+        // Berechne Credits und Coins inkl. API-Lager
+        const userInfo = await getUserCredits();
         let totalCredits = 0;
         let totalCoins = 0;
 
-        // Erweiterungen berechnen
         for (const [buildingId, extensions] of Object.entries(selectedExtensionsByBuilding)) {
             extensions.forEach(extensionId => {
                 const row = document.querySelector(`.row-${buildingId}-${extensionId}`);
@@ -3392,53 +3403,38 @@
                 const creditElement = row.querySelector('.credit-button');
                 const coinElement = row.querySelector('.coins-button');
 
-                if (creditElement) {
-                    totalCredits += parseInt(creditElement.innerText.replace(/\D/g, '') || '0', 10);
-                }
-                if (coinElement) {
-                    totalCoins += parseInt(coinElement.innerText.replace(/\D/g, '') || '0', 10);
-                }
+                if (creditElement) totalCredits += parseInt(creditElement.innerText.replace(/\D/g, '') || '0', 10);
+                if (coinElement) totalCoins += parseInt(coinElement.innerText.replace(/\D/g, '') || '0', 10);
             });
         }
 
-        // Lager berechnen
         for (const [buildingId, storageTypes] of Object.entries(selectedStoragesByBuilding)) {
             const building = buildingsData.find(b => String(b.id) === String(buildingId));
             if (!building) continue;
 
             const buildingTypeKey = `${building.building_type}_${building.small_building ? 'small' : 'normal'}`;
             const storageDefs = manualStorageRooms[buildingTypeKey];
-            if (!storageDefs) {
-                console.warn(`⚠️ Keine Lagerdefinitionen für Gebäudetyp ${buildingTypeKey}`);
-                continue;
-            }
+            if (!storageDefs) continue;
 
             storageTypes.forEach(storageType => {
                 const storageDef = storageDefs.find(s => s.id === storageType);
-                if (!storageDef) {
-                    console.warn(`⚠️ Keine Lagerdefinition für Typ "${storageType}" in ${buildingTypeKey}`);
-                    return;
-                }
+                if (!storageDef) return;
 
                 totalCredits += storageDef.cost || 0;
                 totalCoins += storageDef.coins || 0;
             });
         }
 
-        // Zeige Coin/Credit-Auswahl inkl. Lager
+        // Zeige Coin/Credit-Auswahl
         showCurrencySelection(selectedExtensionsByBuilding, userInfo, selectedStoragesByBuilding);
 
         // Checkboxen zurücksetzen
         setTimeout(() => {
-            [...selectedExtensions, ...selectedStorages].forEach(checkbox => {
-                checkbox.checked = false;
+            [...selectedExtensions, ...selectedStorages].forEach(checkbox => checkbox.checked = false);
+            document.querySelectorAll('.select-all-checkbox, .select-all-checkbox-lager').forEach(cb => {
+                cb.checked = false;
+                cb.dispatchEvent(new Event('change'));
             });
-
-            document.querySelectorAll('.select-all-checkbox, .select-all-checkbox-lager').forEach(checkbox => {
-                checkbox.checked = false;
-                checkbox.dispatchEvent(new Event('change'));
-            });
-
             updateBuildSelectedButton();
         }, 100);
     }
@@ -3622,6 +3618,8 @@
 
             progress.close();
             document.body.removeChild(selectionDiv);
+
+            await fetchBuildingsAndRender();
         };
 
         const coinsButton = document.createElement('button');
@@ -3655,6 +3653,8 @@
 
             progress.close();
             document.body.removeChild(selectionDiv);
+
+            await fetchBuildingsAndRender();
         };
 
         const cancelButton = document.createElement('button');
@@ -3792,41 +3792,41 @@
 
     // Funktion um den Ausgewählte Stufen Button zu aktivieren
     function updateBuildSelectedLevelsButtonState(group) {
-        const buttonContainers = document.querySelectorAll('.button-container');
-        if (!buttonContainers.length) {
-            console.warn('⚠️ Keine Button-Container gefunden');
+        if (!group.length) {
+            console.warn('⚠️ Gruppe ist leer');
             return;
         }
 
-        buttonContainers.forEach(container => {
-            const buildSelectedLevelsButton = container.querySelector('.build-selected-levels-button');
-            if (!buildSelectedLevelsButton) {
-                console.warn('⚠️ Build-Selected-Level-Button nicht gefunden');
-                return;
+        // Wachtentyp-Schlüssel bestimmen (z. B. "6_small")
+        const typeKey = `${group[0].building.building_type}_${group[0].building.small_building ? 'small' : 'normal'}`;
+
+        // Nur den passenden Button-Container suchen
+        const container = document.querySelector(`.button-container[data-building-type="${typeKey}"]`);
+        if (!container) {
+            console.warn(`⚠️ Kein Button-Container für Typ ${typeKey} gefunden`);
+            return;
+        }
+
+        const buildSelectedLevelsButton = container.querySelector('.build-selected-levels-button');
+        if (!buildSelectedLevelsButton) {
+            console.warn(`⚠️ Build-Selected-Level-Button für Typ ${typeKey} nicht gefunden`);
+            return;
+        }
+
+        // Prüfen, ob mindestens ein Gebäude in dieser Gruppe eine passende Auswahl hat
+        let hasSelectedLevels = false;
+
+        for (const { building } of group) {
+            const currentLevel = getBuildingLevelInfo(building)?.currentLevel ?? -1;
+            const selectedLevel = selectedLevels[building.id] ?? null;
+
+            if (selectedLevel !== null && selectedLevel >= currentLevel) {
+                hasSelectedLevels = true;
+                break;
             }
+        }
 
-            // Prüfe, ob mind. ein Gebäude eine Auswahl >= aktueller Level hat
-            let hasSelectedLevels = false;
-
-            for (const { building } of group) {
-                const currentLevel = getBuildingLevelInfo(building)?.currentLevel ?? -1;
-                const selectedLevel = selectedLevels[building.id] ?? null;
-
-                console.log(
-                    `🏢 Building ${building.id}: currentLevel=${currentLevel}, selectedLevel=${selectedLevel}`
-                );
-
-                if (selectedLevel !== null && selectedLevel >= currentLevel) {
-                    hasSelectedLevels = true;
-                    break; // wir haben einen gefunden, also können wir abbrechen
-                }
-            }
-
-            buildSelectedLevelsButton.disabled = !hasSelectedLevels;
-            console.log(
-                `🔘 Button "${buildSelectedLevelsButton.textContent}" disabled: ${!hasSelectedLevels}`
-            );
-        });
+        buildSelectedLevelsButton.disabled = !hasSelectedLevels;
     }
 
     // Auswahlfenster für Level-Ausbau
@@ -4183,6 +4183,7 @@
         }, 500); // 500ms Pause bevor die Fortschrittsanzeige entfernt wird
     }
 
+    // Funktion um einfach alles zu bauen was man eingestellt hat
     async function buildAllExtensionsWithPause(groupKey, currency) {
         const wachenGroup = buildingGroups[groupKey] || [];
         const lagerGroup = storageGroups[groupKey] || [];
