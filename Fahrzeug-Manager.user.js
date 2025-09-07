@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         LSS Fahrzeug-Manager mit API & globaler Konfiguration
+// @name         LSS Fahrzeug-Manager
 // @namespace    http://tampermonkey.net/
-// @version      1.2
-// @description  Fahrzeug-Manager mit Tabellen, Spoilern pro Gebäudetyp, Dark/Light Mode, mittiger Lightbox, API-Daten und globaler Fahrzeug-Konfiguration
+// @version      2.8
+// @description  Übersicht & Konfig:
 // @author       Du
 // @match        https://www.leitstellenspiel.de/*
 // @grant        none
@@ -11,129 +11,258 @@
 (function() {
     'use strict';
 
-    const buildingTypeNames = {
-        '0_normal': 'Feuerwache (Normal)',
-        '0_small': 'Feuerwache (Kleinwache)',
-        '2_normal': 'Rettungswache (Normal)',
-        '2_small': 'Rettungswache (Kleinwache)',
-        '6_normal': 'Polizeiwache (Normal)',
-        '6_small': 'Polizeiwache (Kleinwache)',
-        '9_normal': 'Technisches Hilfswerk',
-        '11_normal': 'Bereitschaftspolizei',
-        '12_normal': 'Schnelleinsatzgruppe (SEG)',
-        '15_normal': 'Wasserrettung',
-        '17_normal': 'Polizei-Sondereinheiten',
-        '24_normal': 'Reiterstaffel',
-        '25_normal': 'Bergrettungswache',
-        '26_normal': 'Seenotrettungswache'
+    // Reihenfolge und Mapping
+    const wachenOrder = [
+        '0_normal', '0_small',
+        '2_normal', '2_small',
+        '6_normal', '6_small',
+        '9_normal', '11_normal', '12_normal', '15_normal', '17_normal',
+        '24_normal', '25_normal', '26_normal'
+    ];
+    const apiMapping = {
+        '0_normal': 0, '0_small': 18, '2_normal': 2, '2_small': 20, '6_normal': 6, '6_small': 19,
+        '9_normal': 9, '11_normal': 11, '12_normal': 12, '15_normal': 15, '17_normal': 17,
+        '24_normal': 24, '25_normal': 25, '26_normal': 26
     };
-    const globalWachenConfig = {};
+    const buildingTypeNames = {
+        '0_normal': 'Feuerwache (Normal)', '0_small': 'Feuerwache (Kleinwache)',
+        '2_normal': 'Rettungswache (Normal)', '2_small': 'Rettungswache (Kleinwache)',
+        '6_normal': 'Polizeiwache (Normal)', '6_small': 'Polizeiwache (Kleinwache)',
+        '9_normal': 'Technisches Hilfswerk', '11_normal': 'Bereitschaftspolizei',
+        '12_normal': 'Schnelleinsatzgruppe (SEG)', '15_normal': 'Wasserrettung',
+        '17_normal': 'Polizei-Sondereinheiten', '24_normal': 'Reiterstaffel',
+        '25_normal': 'Bergrettungswache', '26_normal': 'Seenotrettungswache'
+    };
+    let globalWachenConfig = {};
 
-    // === CSS einfügen ===
+    // Funktion für Hinzufügen der Styles (CSS für Buttons, Tabellen, Spoiler usw.)
     function addFahrzeugManagerStyles() {
         if (document.getElementById('fahrzeug-manager-styles')) return;
 
         const style = document.createElement('style');
         style.id = 'fahrzeug-manager-styles';
         style.innerHTML = `
-        :root {
-            --fm-background-color: #ffffff;
-            --fm-text-color: #000000;
-            --fm-border-color: #ccc;
-            --fm-button-background-color: #007bff;
-            --fm-button-text-color: #ffffff;
-            --fm-danger-color: #dc3545;
-            --fm-success-color: #28a745;
-            --fm-spoiler-bg-light: #eee;
-            --fm-spoiler-bg-dark: #444;
-            --fm-spoiler-text-light: #000;
-            --fm-spoiler-text-dark: #fff;
-        }
+    /* =========================
+       ROOT VARIABLEN
+       ========================= */
+    :root {
+        /* Button Colors */
+        --fm-btn-primary-bg: #007bff;
+        --fm-btn-success-bg: #28a745;
+        --fm-btn-danger-bg: #dc3545;
+        --fm-btn-coin-bg: #dc3545;
+        --fm-btn-close-bg: #dc3545;
+        --fm-btn-primary-txt: #fff;
+        --fm-btn-success-txt: #fff;
+        --fm-btn-danger-txt: #fff;
 
-        #fahrzeug-manager-lightbox {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            z-index: 9999;
-            overflow-y: auto;
-        }
+        /* Backgrounds & Text */
+        --fm-background-light: #fff;
+        --fm-background-dark: #222;
+        --fm-text-light: #222;
+        --fm-text-dark: #fff;
 
-        #fahrzeug-manager-content {
-            background: var(--fm-background-color);
-            color: var(--fm-text-color);
-            border: 1px solid var(--fm-border-color);
-            padding: 20px;
-            width: 90%;
-            max-width: 2000px;
-            max-height: 80vh;
-            overflow-y: auto;
-            border-radius: 8px;
-            position: relative;
-            box-sizing: border-box;
-        }
+        /* Borders & Spoiler */
+        --fm-border-light: #bbb;
+        --fm-border-dark: #444;
+        --fm-spoiler-bg-light: #eee;
+        --fm-spoiler-bg-dark: #444;
+        --fm-spoiler-txt-light: #000;
+        --fm-spoiler-txt-dark: #fff;
+    }
 
-        #fahrzeug-manager-content h2 {
-            text-align: left;
-            margin-bottom: 15px;
-        }
+    /* =========================
+       LIGHTBOX & BOX
+       ========================= */
+    .fm-lightbox {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 99999;
+        background: rgba(0,0,0,0.7);
+    }
 
-        #fahrzeug-manager-content table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-        }
+    .fm-box {
+        min-width: 350px;
+        max-width: 2000px;
+        width: 95vw;
+        background: var(--fm-background-light);
+        color: var(--fm-text-light);
+        border: 1px solid var(--fm-border-light);
+        border-radius: 10px;
+        padding: 20px;
+        position: relative;
+        max-height: 95vh;
+        overflow-y: auto;
+    }
 
-        #fahrzeug-manager-content th,
-        #fahrzeug-manager-content td {
-            text-align: center;
-            vertical-align: middle;
-            border: 1px solid var(--fm-border-color);
-            padding: 10px;
-        }
+    .dark .fm-box {
+        background: var(--fm-background-dark);
+        color: var(--fm-text-dark);
+        border-color: var(--fm-border-dark);
+    }
 
-        .fm-btn {
-            padding: 5px 10px;
-            border-radius: 4px;
-            font-size: 14px;
-            border: none;
-            cursor: pointer;
-            color: var(--fm-button-text-color);
-            background-color: var(--fm-button-background-color);
-        }
+    /* =========================
+       BUTTONS
+       ========================= */
+    .fm-btn {
+        font-size: 14px;
+        border: none;
+        border-radius: 4px;
+        padding: 5px 10px;
+        cursor: pointer;
+        transition: filter 0.1s;
+        outline: none;
+    }
+    .fm-btn:active { filter: brightness(0.9); }
+    .fm-btn:focus { box-shadow: 0 0 0 2px #88aaff88; }
+    .fm-btn-primary { background-color: var(--fm-btn-primary-bg); color: var(--fm-btn-primary-txt); }
+    .fm-btn-success { background-color: var(--fm-btn-success-bg); color: var(--fm-btn-success-txt); }
+    .fm-btn-danger  { background-color: var(--fm-btn-danger-bg); color: var(--fm-btn-danger-txt); }
+    .fm-btn-coin    { background-color: var(--fm-btn-coin-bg);   color: var(--fm-btn-danger-txt); }
+    .fm-btn-close   { background-color: var(--fm-btn-close-bg);  color: var(--fm-btn-danger-txt); }
 
-        .fm-btn-success {
-            background-color: var(--fm-success-color);
-            color: white;
-        }
+    /* =========================
+       HEADER
+       ========================= */
+    .fm-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+    }
+    .fm-header h2 { margin: 0; }
+    .fm-header-btns {
+        display: flex;
+        gap: 8px;
+    }
 
-        .fm-btn-danger {
-            background-color: var(--fm-danger-color);
-            color: white;
-        }
+    /* =========================
+       TABLES
+       ========================= */
+    .fm-table {
+    width: 100%;          /* Tabelle passt sich der Box an */
+    table-layout: auto;    /* flexible Spaltenbreite */
+}
+    .fm-table th, .fm-table td {
+        padding: 5px 7px;
+        text-align: center;
+        border: 1px solid var(--fm-border-light);
+    }
+    .dark .fm-table th, .dark .fm-table td {
+        border: 1px solid var(--fm-border-dark);
+    }
+    .fm-table td.wache,
+    .fm-table td.leitstelle {
+        white-space: nowrap;
+        overflow: visible;
+    }
 
-        .fm-btn-reset {
-            background-color: var(--fm-button-background-color);
-            color: var(--fm-button-text-color);
-        }
+    /* =========================
+       MISSING VEHICLES
+       ========================= */
+    .fm-missing {
+        color: var(--fm-btn-danger-bg);
+        font-weight: bold;
+    }
 
-        .fm-btn-xs {
-            padding: 2px 6px;
-            font-size: 12px;
-            border-radius: 3px;
-        }
-        `;
+    /* =========================
+       FILTER ROW
+       ========================= */
+    .fm-filter-row select { font-size:12px; width:100%; }
+
+    /* =========================
+       CHECKBOX ROWS
+       ========================= */
+    .fm-checkbox-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 5px;
+    }
+    .fm-checkbox-row label, .fm-checkbox-row span {
+        font-size: 15px;
+        margin: 0 6px 0 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .fm-checkbox-row input[type=number] {
+        width: 44px;
+        margin-left: 4px;
+    }
+    .fm-checkbox-row input[type="checkbox"] {
+        align-self: flex-start;
+        margin-top: 6px;
+    }
+
+    /* =========================
+       ROW STATES
+       ========================= */
+    .fm-row-inactive { opacity: 0.4; pointer-events: auto; }
+    .fm-row-disabled { opacity: 0.25 !important; pointer-events: none !important; }
+    .fm-ext-hint {
+        font-size:10px;
+        color:var(--fm-btn-danger-bg);
+        margin-left:5px;
+    }
+    .dark .fm-ext-hint { color:var(--fm-btn-danger-bg); }
+
+    /* =========================
+       SPOILER
+       ========================= */
+    .fm-spoiler {
+        background: var(--fm-spoiler-bg-light);
+        color: var(--fm-spoiler-txt-light);
+        border-radius: 7px;
+        margin: 8px 0 4px 0;
+        padding: 7px 10px;
+        cursor: pointer;
+        user-select: none;
+        font-weight: bold;
+        transition: background 0.2s;
+    }
+    .dark .fm-spoiler {
+        background: var(--fm-spoiler-bg-dark);
+        color: var(--fm-spoiler-txt-dark);
+    }
+    .fm-spoiler-content {
+    width: 100%;          /* volle Breite der Box */
+    max-width: 100%;      /* kein Überschreiten der Box */
+    padding: 10px;        /* Innenabstand */
+    overflow-x: auto;     /* optional: Scroll nur wenn nötig */
+}
+    .fm-spoiler.fm-open + .fm-spoiler-content {
+        max-height: 2000px;
+        overflow: visible;
+        padding-top: 7px;
+        padding-bottom: 10px;
+        margin-bottom: 10px;
+    }
+    `;
         document.head.appendChild(style);
     }
 
-    // === Menü-Button einfügen ===
+    // Funktion für das Erstellen von einheitlich gestylten Buttons
+    function createStyledButton(label, opts = {}) {
+        const btn = document.createElement('button');
+        btn.className = 'fm-btn';
+        if (opts.variant) btn.classList.add('fm-btn-' + opts.variant);
+        btn.textContent = label;
+        if (opts.title) btn.title = opts.title;
+        if (opts.onclick) btn.onclick = opts.onclick;
+        return btn;
+    }
+
+    // Funktion für Hinzufügen des Menüeintrags „Fahrzeug-Manager“ im Profildropdown
     function addFahrzeugManagerButton() {
         const menu = document.querySelector('#menu_profile + .dropdown-menu');
         if (!menu) return;
-
         if (menu.querySelector('#fahrzeug-manager-button')) return;
 
         const li = document.createElement('li');
@@ -143,404 +272,625 @@
         a.href = "#";
         a.id = "fahrzeug-manager-button";
         a.innerHTML = '<span class="glyphicon glyphicon-road"></span>&nbsp;&nbsp; Fahrzeug-Manager';
-
-        a.addEventListener('click', function(e) {
+        a.onclick = e => {
             e.preventDefault();
-            openFahrzeugManagerLightbox();
-        });
+            if (typeof openMainLightbox === 'function') openMainLightbox();
+            else console.warn('openMainLightbox() noch nicht verfügbar');
+        };
 
         li.appendChild(a);
 
         const firstDivider = menu.querySelector('li.divider');
-        if (firstDivider) {
-            menu.insertBefore(li, firstDivider);
-        } else {
-            menu.appendChild(li);
-        }
+        if (firstDivider) menu.insertBefore(li, firstDivider);
+        else menu.appendChild(li);
+
+        console.info('Fahrzeug-Manager Button hinzugefügt');
     }
 
-    function waitForMenu() {
-        const menu = document.querySelector('#menu_profile + .dropdown-menu');
-        if(menu) {
-            addFahrzeugManagerStyles();
-            addFahrzeugManagerButton();
-        } else {
-            setTimeout(waitForMenu, 500);
-        }
-    }
-    window.addEventListener('load', waitForMenu);
-
-    // === Lightbox Haupt ===
-    async function openFahrzeugManagerLightbox() {
-        if(!document.getElementById('fahrzeug-manager-lightbox')) createFahrzeugManagerLightbox();
-
-        const lightbox = document.getElementById('fahrzeug-manager-lightbox');
-        const content = document.getElementById('fahrzeug-manager-content');
-
-        lightbox.style.background = document.body.classList.contains('dark') ? 'rgba(0,0,0,0.85)' : 'rgba(0,0,0,0.7)';
-        content.style.backgroundColor = document.body.classList.contains('dark') ? '#2c2c2c' : '#ffffff';
-        content.style.color = document.body.classList.contains('dark') ? '#fff' : '#000';
-        lightbox.style.display = 'flex';
-
-        // Daten laden
-        await loadBuildingData();
-    }
-
-    function createFahrzeugManagerLightbox() {
-        if(document.getElementById('fahrzeug-manager-lightbox')) return;
-
-        const lightbox = document.createElement('div');
-        lightbox.id = 'fahrzeug-manager-lightbox';
-
-        const content = document.createElement('div');
-        content.id = 'fahrzeug-manager-content';
-
-        // Header + Close-Button
-        const header = document.createElement('h2');
-        header.innerText = 'Fahrzeug-Manager';
-
-        // Global-Konfig Button
-        const configButton = document.createElement('button');
-        configButton.className = 'fm-btn fm-btn-success fm-btn-xs';
-        configButton.style.marginLeft = '10px';
-        configButton.innerText = 'Globale Wachen-Konfig';
-        configButton.addEventListener('click', () => {
-            openGlobalConfigLightbox(); // öffnet die globale Konfig-Lightbox
-        });
-        header.appendChild(configButton);
-
-        // Close Button
-        const closeButton = document.createElement('button');
-        closeButton.id = 'fahrzeug-manager-close';
-        closeButton.className = 'fm-btn fm-btn-danger';
-        closeButton.style.position = 'absolute';
-        closeButton.style.top = '10px';
-        closeButton.style.right = '10px';
-        closeButton.innerHTML = '&times;';
-        closeButton.addEventListener('click', () => { lightbox.style.display = 'none'; });
-        header.appendChild(closeButton);
-
-        content.appendChild(header);
-
-
-        // Spoiler pro Gebäudetyp
-        for(const [type, name] of Object.entries(buildingTypeNames)) {
-            const spoilerHeader = document.createElement('div');
-            spoilerHeader.style.cursor = 'pointer';
-            spoilerHeader.style.padding = '8px';
-            spoilerHeader.style.marginTop = '10px';
-            spoilerHeader.style.borderRadius = '4px';
-            spoilerHeader.style.fontWeight = 'bold';
-            spoilerHeader.innerText = name;
-            if(document.body.classList.contains('dark')) {
-                spoilerHeader.style.backgroundColor = 'var(--fm-spoiler-bg-dark)';
-                spoilerHeader.style.color = 'var(--fm-spoiler-text-dark)';
-            } else {
-                spoilerHeader.style.backgroundColor = 'var(--fm-spoiler-bg-light)';
-                spoilerHeader.style.color = 'var(--fm-spoiler-text-light)';
+    // MutationObserver, der das Menü überwacht
+    function observeMenu() {
+        const target = document.body;
+        const observer = new MutationObserver(() => {
+            const menu = document.querySelector('#menu_profile + .dropdown-menu');
+            if (menu) {
+                addFahrzeugManagerButton();
+                observer.disconnect(); // nur einmal nötig
             }
+        });
+        observer.observe(target, { childList: true, subtree: true });
+    }
 
-            const table = document.createElement('table');
-            table.className = 'table table-striped table-bordered';
-            table.style.width = '100%';
-            table.style.display = 'none';
-            table.innerHTML = `
-                <thead>
-                    <tr>
-                        <th>Leitstelle</th>
-                        <th>Wachenname</th>
-                        <th>Fahrzeuganzahl</th>
-                        <th>Freie Stellplätze</th>
-                        <th>Fahrzeugbezeichnung</th>
-                        <th>Kaufen mit Credits</th>
-                        <th>Kaufen mit Coins</th>
-                    </tr>
-                </thead>
-            `;
+    // Initialisierung beim Laden der Seite
+    window.addEventListener('load', () => {
+        addFahrzeugManagerStyles();
+        observeMenu();
+    });
 
-            spoilerHeader.addEventListener('click', () => { table.style.display = table.style.display === 'none' ? 'table' : 'none'; });
+    // Funktion für den Button „Globale Fahrzeug-Konfiguration“ (öffnet Lightbox)
+    function openGlobalConfigBtn() {
+        return createStyledButton('Globale Fahrzeug-Konfiguration', {
+            variant: 'primary',
+            onclick: () => openGlobalConfigModal()
+        });
+    }
 
-            content.appendChild(spoilerHeader);
-            content.appendChild(table);
-        }
-
-        lightbox.appendChild(content);
+    // Funktion für das Öffnen der Haupt-Lightbox (Übersicht aller Wachen + Fahrzeuge)
+    async function openMainLightbox() {
+        document.querySelectorAll('.fm-lightbox:not(#fm-globalconfig-lightbox)').forEach(e=>e.remove());
+        const lightbox = document.createElement('div');
+        lightbox.className = 'fm-lightbox';
+        lightbox.id = 'fm-main-lightbox';
+        if(document.body.classList.contains('dark')) lightbox.style.background = 'rgba(0,0,0,0.88)';
         document.body.appendChild(lightbox);
-    }
-
-    async function loadBuildingData() {
-        console.log('Lade Gebäude- und Fahrzeug-Daten von API...');
-        try {
-            const [buildingsResponse, vehiclesResponse] = await Promise.all([
-                fetch('https://www.leitstellenspiel.de/api/buildings'),
-                fetch('https://www.leitstellenspiel.de/api/vehicles')
-            ]);
-
-            if(!buildingsResponse.ok || !vehiclesResponse.ok) throw new Error('API konnte nicht geladen werden');
-
-            const buildings = await buildingsResponse.json();
-            const vehicles = await vehiclesResponse.json();
-
-            console.log('Gebäude-Daten:', buildings);
-            console.log('Fahrzeuge-Daten:', vehicles);
-
-            const config = getGlobalConfig();
-
-            for(const [type, name] of Object.entries(buildingTypeNames)) {
-                const table = Array.from(document.querySelectorAll('#fahrzeug-manager-content table'))
-                .find(t => t.previousElementSibling && t.previousElementSibling.innerText === name);
-                if(!table) continue;
-
-                console.log(`Fülle Tabelle für ${name}`);
-
-                const oldTbody = table.querySelector('tbody');
-                if(oldTbody) table.removeChild(oldTbody);
-                const tbody = document.createElement('tbody');
-
-                let filteredBuildings = buildings.filter(b => {
-                    const bType = `${b.building_type}_${b.small_building ? 'small' : 'normal'}`;
-                    return bType === type;
-                });
-                filteredBuildings.sort((a,b) => a.caption.toUpperCase().localeCompare(b.caption.toUpperCase()));
-
-                if(filteredBuildings.length === 0) {
-                    const tr = document.createElement('tr');
-                    tr.innerHTML = `<td colspan="7" style="text-align:center;">Keine Wachen vorhanden</td>`;
-                    tbody.appendChild(tr);
-                } else {
-                    for(const b of filteredBuildings) {
-                        const tr = document.createElement('tr');
-                        tr.dataset.buildingId = b.id;
-
-                        const vehiclesAtBuilding = vehicles.filter(v => v.building_id === b.id);
-                        const currentVehicles = vehiclesAtBuilding.length;
-                        const maxStellplaetze = b.level + 1;
-                        const freeSpots = maxStellplaetze - currentVehicles;
-
-                        let leitstelleName = '-';
-                        if(b.leitstelle_building_id) {
-                            const lstBuilding = buildings.find(l => l.id === b.leitstelle_building_id);
-                            if(lstBuilding) leitstelleName = lstBuilding.caption;
-                        }
-
-                        // Fahrzeuge gruppieren
-                        const counts = {};
-                        vehiclesAtBuilding.forEach(v => {
-                            let type = v.vehicle_type_caption || v.caption;
-                            type = type.replace(/\s*-\s*\n\s*/g,'-').replace(/\n/g,' ').replace(/\s+/g,' ').trim();
-                            counts[type] = (counts[type] || 0) + 1;
-                        });
-
-                        // Globale Konfiguration anwenden (fehlende Fahrzeuge markieren)
-                        const configForBuilding = config[b.building_type + (b.small_building?'_small':'_normal')] || {};
-                        const vehicleDisplay = Object.entries(counts)
-                        .map(([type,count]) => {
-                            const wanted = configForBuilding[type] || 0;
-                            const missing = wanted - count;
-                            return missing > 0 ? `<span style="color:red">${missing}x ${type}</span>` : `${count}x ${type}`;
-                        }).join(', ');
-
-                        tr.innerHTML = `
-                            <td>${leitstelleName}</td>
-                            <td>${b.caption}</td>
-                            <td>${currentVehicles}</td>
-                            <td>${freeSpots}</td>
-                            <td>${vehicleDisplay || '-'}</td>
-                            <td><button class="fm-btn fm-btn-success">Credits</button></td>
-                            <td><button class="fm-btn fm-btn-danger">Coins</button></td>
-                        `;
-
-                        tbody.appendChild(tr);
-                    }
-                }
-
-                table.appendChild(tbody);
-                addColumnFilters(table);
-            }
-        } catch(err) {
-            console.error(err);
-        }
-    }
-
-    function addColumnFilters(table) {
-        const thead = table.querySelector('thead');
-        if(thead.querySelector('tr.filter-row')) return;
-
-        const filterRow = document.createElement('tr');
-        filterRow.className = 'filter-row';
-
-        Array.from(thead.querySelectorAll('th')).forEach((th, colIndex) => {
-            const thFilter = document.createElement('th');
-
-            if(colIndex <= 3) {
-                const select = document.createElement('select');
-                select.style.width = '100%';
-                select.innerHTML = `<option value="">Alle</option>`;
-                const values = Array.from(table.querySelectorAll('tbody tr td:nth-child(' + (colIndex+1) + ')'))
-                .map(td => td.innerText)
-                .filter((v,i,a) => a.indexOf(v)===i).sort();
-                values.forEach(v => select.innerHTML += `<option value="${v}">${v}</option>`);
-                select.addEventListener('change', () => {
-                    const filterValue = select.value;
-                    Array.from(table.querySelectorAll('tbody tr')).forEach(tr => {
-                        const cellText = tr.querySelector('td:nth-child('+(colIndex+1)+')').innerText;
-                        tr.style.display = (!filterValue || cellText === filterValue) ? '' : 'none';
-                    });
-                });
-                thFilter.appendChild(select);
-            } else if(colIndex===4) {
-                const button = document.createElement('button');
-                button.className = 'fm-btn fm-btn-reset fm-btn-xs';
-                button.innerText = 'Filter zurücksetzen';
-                button.addEventListener('click', () => {
-                    thead.querySelectorAll('select').forEach(s=>s.value='');
-                    Array.from(table.querySelectorAll('tbody tr')).forEach(tr=>tr.style.display='');
-                });
-                thFilter.appendChild(button);
-            }
-
-            filterRow.appendChild(thFilter);
-        });
-
-        thead.appendChild(filterRow);
-    }
-
-    // === Globale Fahrzeugkonfiguration ===
-    function getGlobalConfig() {
-        return JSON.parse(localStorage.getItem('globalVehicleConfig') || '{}');
-    }
-
-    function setGlobalConfig(config) {
-        localStorage.setItem('globalVehicleConfig', JSON.stringify(config));
-    }
-
-    async function openGlobalConfigLightbox() {
-        const oldBox = document.getElementById('global-config-lightbox');
-        if(oldBox) oldBox.remove();
-
-        const lightbox = document.createElement('div');
-        lightbox.id = 'global-config-lightbox';
-        lightbox.style = "position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);display:flex;justify-content:center;align-items:center;z-index:10001;";
 
         const box = document.createElement('div');
-        box.style = "background:var(--fm-background-color);color:var(--fm-text-color);padding:20px;border-radius:8px;width:700px;max-height:80vh;overflow-y:auto;";
+        box.className = 'fm-box';
+        box.style.maxWidth = "2000px";
         box.innerHTML = `
-        <h3>Globale Fahrzeug-Konfiguration</h3>
-        <p>Pro Wachenart gewünschte Fahrzeuge und Stückzahl auswählen.</p>
-        <div id="global-config-list">Lade Fahrzeugdaten…</div>
-        <div style="margin-top:15px;text-align:right;">
-            <button class="fm-btn fm-btn-success" id="global-config-save">Speichern</button>
-            <button class="fm-btn fm-btn-danger" id="global-config-cancel">Schließen</button>
+            <div class="fm-header">
+                <h2>Fahrzeug-Manager Übersicht</h2>
+                <div class="fm-header-btns"></div>
+            </div>
+            <div id="main-fahrzeug-manager-list">Lade Gebäudedaten…</div>
+        `;
+        const btnContainer = box.querySelector('.fm-header-btns');
+        btnContainer.appendChild(openGlobalConfigBtn());
+        // Schließen-Button = Danger
+        btnContainer.appendChild(createStyledButton('Schließen', {
+            variant: 'close',
+            onclick: () => lightbox.remove()
+        }));
+
+        lightbox.appendChild(box);
+        await renderMainOverview(box.querySelector('#main-fahrzeug-manager-list'));
+    }
+
+    // Funktion für das Rendern der Hauptübersicht (Tabelle mit Wachen und Fahrzeugstatus)
+   async function renderMainOverview(container) {
+    container.innerHTML = 'Lade Gebäudedaten…';
+    try {
+        const [buildings, vehicles, allVehicles] = await Promise.all([
+            fetch('https://www.leitstellenspiel.de/api/buildings').then(r => r.json()),
+            fetch('https://www.leitstellenspiel.de/api/vehicles').then(r => r.json()),
+            fetch('https://api.lss-manager.de/de_DE/vehicles').then(r => r.json())
+        ]);
+        const globalConfigData = getGlobalConfig();
+        globalWachenConfig = globalConfigData.vehicles || {};
+
+        const wachenByType = {};
+        buildings.forEach(b => {
+            const typeKey = `${b.building_type}_${b.small_building ? 'small' : 'normal'}`;
+            if (!wachenByType[typeKey]) wachenByType[typeKey] = [];
+            wachenByType[typeKey].push(b);
+        });
+
+        container.innerHTML = '';
+        const allSpoilers = [];
+
+        wachenOrder.forEach(typeKey => {
+            const apiBuildingType = apiMapping[typeKey];
+            const typeName = buildingTypeNames[typeKey] || typeKey;
+            const buildingsList = wachenByType[typeKey] || [];
+            if (buildingsList.length === 0) return;
+
+            const allowedVehicles = Object.values(allVehicles)
+            .filter(v => Array.isArray(v.possibleBuildings) &&
+                    v.possibleBuildings.map(Number).includes(Number(apiBuildingType)))
+            .sort((a, b) => a.caption.localeCompare(b.caption, 'de'));
+
+            const spoiler = document.createElement('div');
+            spoiler.className = 'fm-spoiler';
+            spoiler.tabIndex = 0;
+            spoiler.innerText = `${typeName} (${buildingsList.length})`;
+            allSpoilers.push(spoiler);
+
+            const content = document.createElement('div');
+            content.className = 'fm-spoiler-content';
+            content.style.display = 'none'; // Spoiler standardmäßig geschlossen
+
+            // Tabelle erstellen
+            const table = document.createElement('table');
+            table.className = 'fm-table';
+
+            table.innerHTML = `
+<thead>
+<tr>
+    <th>Alle An-/Abwählen</th>
+    <th>Leitstelle</th>
+    <th>Wachenname</th>
+    <th>Fahrzeuganzahl</th>
+    <th>Freie Stellplätze</th>
+    <th>Fahrzeugbezeichnung</th>
+    <th>Kaufen mit Credits</th>
+    <th>Kaufen mit Coins</th>
+</tr>
+<tr class="fm-filter-row">
+    <th><input type="checkbox" id="fm-select-all-${typeKey}"></th>
+    <th>
+        <select><option value=''>Alle</option></select>
+    </th>
+    <th>
+        <select><option value=''>Alle</option></select>
+    </th>
+    <th></th>
+    <th></th>
+    <th></th>
+    <th></th>
+    <th></th>
+</tr>
+</thead>
+<tbody></tbody>
+`;
+
+            const thead = table.querySelector('thead');
+            const filterRow = thead.querySelector('.fm-filter-row');
+
+            // Leitstelle-Pulldown
+            const leitstelleSelect = filterRow.children[1].querySelector('select');
+            Array.from(new Set(buildingsList.map(b => {
+                if (b.leitstelle_building_id) {
+                    const lst = buildings.find(l => l.id === b.leitstelle_building_id);
+                    return lst ? lst.caption : '';
+                }
+                return '';
+            })))
+                .filter(Boolean).sort((a, b) => a.localeCompare(b, 'de'))
+                .forEach(n => { let o = document.createElement('option'); o.value = n; o.innerText = n; leitstelleSelect.appendChild(o); });
+            leitstelleSelect.onchange = () => updateTableFilter(table, 1, leitstelleSelect.value);
+
+            // Wachenname-Pulldown
+            const wacheSelect = filterRow.children[2].querySelector('select');
+            buildingsList.map(b => b.caption).sort((a, b) => a.localeCompare(b, 'de')).forEach(n => {
+                let o = document.createElement('option'); o.value = n; o.innerText = n; wacheSelect.appendChild(o);
+            });
+            wacheSelect.onchange = () => updateTableFilter(table, 2, wacheSelect.value);
+
+            // Body
+            const tbody = table.querySelector('tbody');
+            buildingsList.sort((a, b) => a.caption.localeCompare(b.caption, 'de')).forEach(b => {
+                const tr = document.createElement('tr');
+
+                // Checkbox
+                const checkboxTd = document.createElement('td');
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.dataset.buildingId = b.id;
+                checkboxTd.appendChild(checkbox);
+                tr.appendChild(checkboxTd);
+
+                const vehiclesAtBuilding = vehicles.filter(v => v.building_id === b.id);
+                const currentVehicles = vehiclesAtBuilding.length;
+                const maxStellplaetze = b.level + 1;
+                const freeSpots = maxStellplaetze - currentVehicles;
+                let leitstelleName = '-';
+                if (b.leitstelle_building_id) {
+                    const lstBuilding = buildings.find(l => l.id === b.leitstelle_building_id);
+                    if (lstBuilding) leitstelleName = lstBuilding.caption;
+                }
+                const counts = {};
+                vehiclesAtBuilding.forEach(v => {
+                    let type = v.vehicle_type_caption || v.caption;
+                    type = type.replace(/\s*-\s*\n\s*/g, '-').replace(/\n/g, ' ').replace(/\s+/g, ' ').trim();
+                    counts[type] = (counts[type] || 0) + 1;
+                });
+                const configForBuilding = globalWachenConfig[typeKey] || {};
+
+                const vehicleDisplay = allowedVehicles.map(v => {
+                    const name = v.caption;
+                    const wanted = configForBuilding[name] || 0;
+                    const count = counts[name] || 0;
+
+                    if (wanted > 0) {
+                        const missing = wanted - count;
+                        if (missing > 0) {
+                            return `<span class="fm-missing">${missing}x ${name}</span>`;
+                        } else {
+                            return `${count}x ${name}`;
+                        }
+                    }
+                    if (count > 0) return `${count}x ${name}`;
+                    return '';
+                }).filter(Boolean).join(', ');
+
+                tr.innerHTML += `
+<td class="leitstelle">${leitstelleName}</td>
+<td class="wache">${b.caption}</td>
+<td>${currentVehicles}</td>
+<td>${freeSpots}</td>
+<td>${vehicleDisplay || '-'}</td>
+<td></td>
+<td></td>
+`;
+
+                // Buttons
+                const creditMissingTotal = allowedVehicles.reduce((sum, v) => {
+                    const wanted = globalWachenConfig[typeKey]?.[v.caption] || 0;
+                    const count = counts[v.caption] || 0;
+                    const missing = Math.max(0, wanted - count);
+                    return sum + missing * (v.credits || 0);
+                }, 0);
+
+                const coinMissingTotal = allowedVehicles.reduce((sum, v) => {
+                    const wanted = globalWachenConfig[typeKey]?.[v.caption] || 0;
+                    const count = counts[v.caption] || 0;
+                    const missing = Math.max(0, wanted - count);
+                    return sum + missing * (v.coins || 0);
+                }, 0);
+
+                const creditBtn = createStyledButton(`Credits: ${creditMissingTotal.toLocaleString()}`, {
+                    variant: 'success', size: 'xs', title: 'Fahrzeug mit Credits kaufen', onclick: async () => { /* Kauf-Logik hier */ }
+                });
+                const coinBtn = createStyledButton(`Coins: ${coinMissingTotal}`, {
+                    variant: 'danger', size: 'xs', title: 'Fahrzeug mit Coins kaufen', onclick: async () => { /* Kauf-Logik hier */ }
+                });
+
+                // Buttons in Spalten einfügen
+                tr.children[6].style.display = 'flex';
+                tr.children[6].style.justifyContent = 'center';
+                tr.children[6].style.gap = '6px';
+                tr.children[6].appendChild(creditBtn);
+
+                tr.children[7].style.display = 'flex';
+                tr.children[7].style.justifyContent = 'center';
+                tr.children[7].style.gap = '6px';
+                tr.children[7].appendChild(coinBtn);
+
+                tbody.appendChild(tr);
+            });
+
+            // Checkbox "Alle auswählen"
+            const selectAllCheckbox = table.querySelector(`#fm-select-all-${typeKey}`);
+            if (selectAllCheckbox) {
+                selectAllCheckbox.addEventListener('change', e => {
+                    const checked = e.target.checked;
+                    tbody.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = checked);
+                });
+            }
+
+            content.appendChild(table);
+            container.appendChild(spoiler);
+            container.appendChild(content);
+        });
+
+        // Spoiler Toggle
+        allSpoilers.forEach(spoiler => {
+            const content = spoiler.nextElementSibling;
+            spoiler.onclick = () => {
+                allSpoilers.forEach(s => {
+                    if (s !== spoiler) {
+                        s.classList.remove('fm-open');
+                        s.nextElementSibling.style.display = 'none';
+                    }
+                });
+                if (spoiler.classList.contains('fm-open')) {
+                    spoiler.classList.remove('fm-open');
+                    content.style.display = 'none';
+                } else {
+                    spoiler.classList.add('fm-open');
+                    content.style.display = 'block';
+                }
+            };
+            spoiler.onkeydown = e => { if (e.key === "Enter" || e.key === " ") spoiler.click(); };
+        });
+
+    } catch (err) {
+        container.innerText = 'Fehler beim Laden der Gebäudedaten.';
+        throw err;
+    }
+}
+
+    // Funktion für das Anwenden von Filtereinstellungen in Tabellen (DropDowns)
+    function updateTableFilter(table, col, value) {
+        Array.from(table.querySelectorAll('tbody tr')).forEach(tr => {
+            const tds = tr.querySelectorAll('td');
+            if(!value || tds[col].innerText === value) tr.style.display = '';
+            else tr.style.display = 'none';
+        });
+    }
+
+    // Funktion für das Rendern der Fahrzeug-Konfigurationstabelle (Checkboxen + Anzahlfelder)
+    function renderVehicleConfigTable({
+        allowedVehicles,
+        typeKey,
+        globalWachenConfig,
+        showInactive,
+        buildingsOfType,
+        buildingExtensionsIndex,
+        vehicleExtensionRequirements, // Map Fahrzeug-ID → [Erweiterungen]
+        hiddenVehicles = []
+    })
+    {
+        const table = document.createElement('table');
+        table.style.width = '100%';
+        table.style.borderCollapse = 'collapse';
+        const columns = 4;
+        let tr = document.createElement('tr');
+
+        allowedVehicles.forEach((v, idx) => {
+            if (idx % columns === 0 && idx > 0) {
+                table.appendChild(tr);
+                tr = document.createElement('tr');
+            }
+            const td = document.createElement('td');
+            td.style.verticalAlign = 'top';
+            td.style.padding = '4px 6px';
+
+            const row = document.createElement('div');
+            row.className = 'fm-checkbox-row';
+            row.style.display = 'flex';
+            row.style.justifyContent = 'space-between';
+            row.style.alignItems = 'center';
+            row.style.gap = '4px';
+
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.id = `${typeKey}-${v.caption}`;
+            checkbox.dataset.wache = typeKey;
+            checkbox.dataset.fahrzeug = v.caption;
+
+            let checked = true;
+            let val = globalWachenConfig[typeKey]?.[v.caption] || 1;
+
+            if (hiddenVehicles.includes(v.caption)) {
+                checked = false;
+                val = 0;
+            }
+            checkbox.checked = checked;
+
+            const nameSpan = document.createElement('span');
+            nameSpan.textContent = v.caption;
+            nameSpan.style.flex = '1 1 auto';
+            nameSpan.style.overflow = 'hidden';
+            nameSpan.style.textOverflow = 'clip';
+            nameSpan.style.whiteSpace = 'nowrap';
+
+            const countInput = document.createElement('input');
+            countInput.type = 'number';
+            countInput.min = 0;
+            countInput.value = val;
+            countInput.disabled = !checked;
+
+            if (!checked && !showInactive) td.style.display = 'none';
+            if (!checked && showInactive) row.classList.add('fm-row-inactive');
+
+            checkbox.addEventListener('change', () => {
+                countInput.disabled = !checkbox.checked || checkbox.disabled;
+                if (!checkbox.checked) countInput.value = 0;
+                if (!showInactive && !checkbox.checked) td.style.display = 'none';
+                else td.style.display = '';
+                if (showInactive && !checkbox.checked) row.classList.add('fm-row-inactive');
+                else row.classList.remove('fm-row-inactive');
+            });
+
+            countInput.addEventListener('input', () => {
+                if (countInput.value < 0) countInput.value = 0;
+                if (parseInt(countInput.value, 10) === 0) {
+                    td.style.display = showInactive ? '' : 'none';
+                    if (showInactive) row.classList.add('fm-row-inactive');
+                } else {
+                    td.style.display = '';
+                    row.classList.remove('fm-row-inactive');
+                }
+            });
+
+            row.appendChild(checkbox);
+            row.appendChild(nameSpan);
+            row.appendChild(countInput);
+
+            td.appendChild(row);
+            tr.appendChild(td);
+        });
+
+        if (tr.childNodes.length > 0) table.appendChild(tr);
+        return table;
+    }
+
+    // Funktion zum Öffnen der Lightbox zur globalen Konfiguration
+    async function openGlobalConfigModal() {
+        const existing = document.getElementById('fm-globalconfig-modal');
+        if (existing) existing.remove();
+
+        const modal = document.createElement('div');
+        modal.className = 'fm-lightbox';
+        modal.id = 'fm-globalconfig-modal';
+        if(document.body.classList.contains('dark')) modal.style.background = 'rgba(0,0,0,0.88)';
+        document.body.appendChild(modal);
+
+        const box = document.createElement('div');
+        box.className = 'fm-box';
+        box.style.maxWidth = '1200px';
+        box.innerHTML = `
+        <div class="fm-header">
+            <h2>Globale Fahrzeug-Konfiguration</h2>
+            <div class="fm-header-btns"></div>
+        </div>
+        <p style="margin-top:-8px;font-size:90%">
+            Wähle pro Wachenart gewünschte Fahrzeuge und Stückzahl.<br>
+            Fahrzeuge mit 0 werden nach Speichern ausgeblendet.
+        </p>
+        <div style="margin-bottom:10px">
+            <label style="font-size:95%;user-select:none;cursor:pointer;">
+              <input type="checkbox" id="fm-show-inactive" style="vertical-align:middle;margin-right:5px;">
+              Ausgeblendete Fahrzeuge anzeigen
+            </label>
+        </div>
+        <div id="fm-config-list">Lade Fahrzeugdaten…</div>
+        <div style="margin-top:10px;text-align:right;">
+            <button id="fm-save-config" class="fm-btn fm-btn-success">Speichern</button>
         </div>
     `;
-        lightbox.appendChild(box);
-        document.body.appendChild(lightbox);
+        modal.appendChild(box);
 
-        // Schließen-Button
-        box.querySelector('#global-config-cancel').addEventListener('click', () => lightbox.remove());
+        const headerBtns = box.querySelector('.fm-header-btns');
+        headerBtns.style.display = 'flex';
+        headerBtns.style.justifyContent = 'flex-end';
+        const closeBtn = document.createElement('button');
+        closeBtn.innerText = 'Schließen';
+        closeBtn.className = 'fm-btn fm-btn-close'; // <-- rot
+        closeBtn.onclick = ()=>modal.remove();
+        headerBtns.appendChild(closeBtn);
 
-        const configList = box.querySelector('#global-config-list');
+        const toggleInactive = box.querySelector('#fm-show-inactive');
+        let showInactive = false;
+        toggleInactive.checked = false;
+        toggleInactive.onchange = () => { showInactive = toggleInactive.checked; renderConfigContent(vehicleExtensionRequirements); };
 
-        try {
-            // API abfragen
-            const [buildings, vehicles] = await Promise.all([
-                fetch('https://www.leitstellenspiel.de/api/buildings').then(r => r.json()),
-                fetch('https://www.leitstellenspiel.de/api/vehicles').then(r => r.json())
-            ]);
+        let allVehicles, buildings, allBuildingDefs, wachenByType;
+        const configList = box.querySelector('#fm-config-list');
+        const globalConfigData = getGlobalConfig();
+        globalWachenConfig = globalConfigData.vehicles || {};
+        const hiddenVehiclesGlobal = globalConfigData.hidden || {};
 
-            // Wachen nach Typ gruppieren
-            const wachenByType = {};
-            buildings.forEach(b => {
-                const typeKey = `${b.building_type}_${b.small_building ? 'small' : 'normal'}`;
-                if(!wachenByType[typeKey]) wachenByType[typeKey] = [];
-                wachenByType[typeKey].push(b);
-            });
+        let vehicleExtensionRequirements = {};
 
-            // Fahrzeugtypen pro Wache ermitteln
-            const vehiclesByBuilding = {};
-            vehicles.forEach(v => {
-                if(!vehiclesByBuilding[v.building_id]) vehiclesByBuilding[v.building_id] = [];
-                vehiclesByBuilding[v.building_id].push(v.vehicle_type_caption || v.caption);
-            });
+        (async function(){
+            try {
+                [allVehicles, buildings, allBuildingDefs] = await Promise.all([
+                    fetch('https://api.lss-manager.de/de_DE/vehicles').then(r=>r.json()),
+                    fetch('https://www.leitstellenspiel.de/api/buildings').then(r=>r.json()),
+                    fetch('https://api.lss-manager.de/de_DE/buildings').then(r=>r.json())
+                ]);
 
-            // Für jede Wachenart eine Checkbox-Liste erstellen
-            for(const [typeKey, buildingsOfType] of Object.entries(wachenByType)) {
-                const typeName = buildingTypeNames[typeKey] || typeKey;
-                const vehicleSet = new Set();
-                buildingsOfType.forEach(b => {
-                    (vehiclesByBuilding[b.id] || []).forEach(v => vehicleSet.add(v));
+                wachenByType = {};
+                buildings.forEach(b => {
+                    const typeKey = `${b.building_type}_${b.small_building?'small':'normal'}`;
+                    if(!wachenByType[typeKey]) wachenByType[typeKey]=[];
+                    wachenByType[typeKey].push(b);
                 });
 
-                if(vehicleSet.size === 0) continue; // keine Fahrzeuge vorhanden
-
-                const wacheDiv = document.createElement('div');
-                wacheDiv.style.marginBottom = '15px';
-                const title = document.createElement('h4');
-                title.innerText = typeName;
-                wacheDiv.appendChild(title);
-
-                vehicleSet.forEach(v => {
-                    const fDiv = document.createElement('div');
-                    fDiv.style.marginBottom = '5px';
-
-                    const checkbox = document.createElement('input');
-                    checkbox.type = 'checkbox';
-                    checkbox.id = `${typeKey}-${v}`;
-                    checkbox.dataset.wache = typeKey;
-                    checkbox.dataset.fahrzeug = v;
-
-                    // Wenn schon globale Konfig existiert, aktivieren
-                    if(globalWachenConfig[typeKey] && globalWachenConfig[typeKey][v] > 0) {
-                        checkbox.checked = true;
+                // Map Fahrzeug-ID → benötigte Erweiterungen **vor Render**
+                Object.values(allBuildingDefs).forEach(building => {
+                    if (Array.isArray(building.extensions)) {
+                        building.extensions.forEach(ext => {
+                            if (ext && Array.isArray(ext.unlocksVehicleTypes)) { // <-- hier prüfen
+                                ext.unlocksVehicleTypes.forEach(vId => {
+                                    if (!vehicleExtensionRequirements[vId]) vehicleExtensionRequirements[vId] = [];
+                                    vehicleExtensionRequirements[vId].push(ext.caption);
+                                });
+                            }
+                        });
                     }
-
-                    const label = document.createElement('label');
-                    label.htmlFor = checkbox.id;
-                    label.innerText = ` ${v} `;
-
-                    const countInput = document.createElement('input');
-                    countInput.type = 'number';
-                    countInput.min = 1;
-                    countInput.value = globalWachenConfig[typeKey] && globalWachenConfig[typeKey][v] ? globalWachenConfig[typeKey][v] : 1;
-                    countInput.style.width = '50px';
-                    countInput.disabled = !checkbox.checked;
-
-                    checkbox.addEventListener('change', () => {
-                        countInput.disabled = !checkbox.checked;
-                    });
-
-                    fDiv.appendChild(checkbox);
-                    fDiv.appendChild(label);
-                    fDiv.appendChild(countInput);
-                    wacheDiv.appendChild(fDiv);
                 });
 
-                configList.appendChild(wacheDiv);
-            }
+                renderConfigContent(vehicleExtensionRequirements);
 
-        } catch (err) {
-            console.error('Fehler beim Laden der Fahrzeugdaten:', err);
-            configList.innerText = 'Fehler beim Laden der Fahrzeugdaten.';
+            } catch(err) {
+                configList.innerText = 'Fehler beim Laden der Fahrzeugdaten.';
+                console.error(err);
+            }
+        })();
+
+        async function renderConfigContent(vehicleExtensionRequirements) {
+            configList.innerHTML = '';
+            const buildingExtensionsIndex = {};
+            buildings.forEach(b => {
+                buildingExtensionsIndex[b.id] = new Set(
+                    (b.extensions||[]).filter(e=>e.enabled).map(e=>e.caption)
+                );
+            });
+
+            wachenOrder.forEach(typeKey => {
+                const apiBuildingType = apiMapping[typeKey];
+                if(typeof apiBuildingType === 'undefined') return;
+                const typeName = buildingTypeNames[typeKey] || typeKey;
+
+                const allowedVehiclesForType = Object.values(allVehicles)
+                .filter(v => Array.isArray(v.possibleBuildings) && v.possibleBuildings.map(Number).includes(Number(apiBuildingType)))
+                .sort((a,b)=>a.caption.localeCompare(b.caption,'de'));
+
+                if(allowedVehiclesForType.length === 0) return;
+                const buildingsOfType = (wachenByType && wachenByType[typeKey]) ? wachenByType[typeKey] : [];
+
+                const spoiler = document.createElement('div');
+                spoiler.className = 'fm-spoiler';
+                spoiler.tabIndex = 0;
+
+                const configuredCount = Object.keys(globalWachenConfig[typeKey] || {}).length;
+                spoiler.innerText = `${typeName} (${configuredCount})`;
+
+                const content = document.createElement('div');
+                content.className = 'fm-spoiler-content';
+                content.style.display = 'none';
+
+                const table = renderVehicleConfigTable({
+                    allowedVehicles: allowedVehiclesForType,
+                    typeKey,
+                    globalWachenConfig,
+                    showInactive,
+                    buildingsOfType,
+                    buildingExtensionsIndex,
+                    vehicleExtensionRequirements,
+                    hiddenVehicles: hiddenVehiclesGlobal[typeKey] || []
+                });
+
+                content.appendChild(table);
+
+                spoiler.onclick = () => {
+                    configList.querySelectorAll('.fm-spoiler.fm-open').forEach(s => {
+                        if (s !== spoiler) {
+                            s.classList.remove('fm-open');
+                            s.nextElementSibling.style.display = 'none';
+                        }
+                    });
+                    const isOpen = spoiler.classList.toggle('fm-open');
+                    content.style.display = isOpen ? 'block' : 'none';
+                };
+
+                configList.appendChild(spoiler);
+                configList.appendChild(content);
+            });
         }
 
-        // Speichern
-        box.querySelector('#global-config-save').addEventListener('click', () => {
-            for(const wacheDiv of configList.children) {
-                const typeKey = Object.keys(buildingTypeNames).find(k => buildingTypeNames[k] === wacheDiv.querySelector('h4').innerText);
-                if(!typeKey) continue;
-                if(!globalWachenConfig[typeKey]) globalWachenConfig[typeKey] = {};
-
-                const inputs = wacheDiv.querySelectorAll('input[type="checkbox"]');
-                inputs.forEach(chk => {
-                    const f = chk.dataset.fahrzeug;
-                    const countInput = chk.nextSibling.nextSibling;
-                    if(chk.checked) globalWachenConfig[typeKey][f] = parseInt(countInput.value, 10);
-                    else delete globalWachenConfig[typeKey][f];
+        box.querySelector('#fm-save-config').onclick = ()=>{
+            const config={}; const hidden={};
+            configList.querySelectorAll('.fm-spoiler-content').forEach((content, idx)=>{
+                const typeKey=wachenOrder[idx];
+                if(!typeKey) return;
+                config[typeKey]={}; hidden[typeKey]=[];
+                content.querySelectorAll('.fm-checkbox-row').forEach(row=>{
+                    const chk=row.querySelector('input[type="checkbox"]');
+                    if(chk.disabled) return;
+                    const f=chk.dataset.fahrzeug;
+                    const val=parseInt(row.querySelector('input[type="number"]').value,10)||0;
+                    if(chk.checked && val>0) config[typeKey][f]=val;
+                    else hidden[typeKey].push(f);
                 });
+                if(Object.keys(config[typeKey]).length===0) delete config[typeKey];
+                if(hidden[typeKey].length===0) delete hidden[typeKey];
+            });
+            setGlobalConfig({vehicles:config,hidden:hidden});
+            modal.remove();
+            alert("Globale Konfiguration gespeichert!");
+        };
+    }
+
+    // Funktion zum Laden der gespeicherten globalen Konfiguration (aus localStorage)
+    function getGlobalConfig() {
+        try {
+            const raw = localStorage.getItem('globalVehicleConfig');
+            if (!raw) {
+                return { vehicles: {}, hidden: {} };
             }
-            console.log('Globale Wachen-Konfiguration gespeichert:', globalWachenConfig);
-            lightbox.remove();
-        });
+            const parsed = JSON.parse(raw);
+            return {
+                vehicles: parsed.vehicles || {},
+                hidden: parsed.hidden || {}
+            };
+        } catch (e) {
+            console.error("Fehler beim Laden der globalen Konfiguration:", e);
+            return { vehicles: {}, hidden: {} };
+        }
+    }
+
+    // Funktion zum Speichern der globalen Konfiguration (in localStorage)
+    function setGlobalConfig(config) {
+        // Fallbacks einsetzen, falls nur ein Teil übergeben wurde
+        const safeConfig = {
+            vehicles: config.vehicles || {},
+            hidden: config.hidden || {}
+        };
+        globalWachenConfig = safeConfig;
+        localStorage.setItem('globalVehicleConfig', JSON.stringify(safeConfig));
     }
 
 })();
