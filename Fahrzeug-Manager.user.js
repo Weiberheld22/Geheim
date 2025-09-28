@@ -1,10 +1,11 @@
 // ==UserScript==
-// @name         * 1 - Leitstellenspiel Fahrzeug-Manager mit Fahrzeugtypen
+// @name         [LSS] 29 - Fahrzeug-Manager
 // @namespace    https://leitstellenspiel.de/
-// @version      2.7
-// @description  Zeigt Fahrzeuge auf Wache nach Typ (LF 20, DLK, etc.) mit Mapping auf LSS-Manager-API
-// @author       Du
+// @version      1.0
+// @description  Zeigt fehlden Fahrzeuge pro Wache, je Einstellung an und ermöglicht den Kauf dieser.
+// @author       Caddy21
 // @match        https://www.leitstellenspiel.de/*
+// @icon         https://github.com/Caddy21/-docs-assets-css/raw/main/yoshi_icon__by_josecapes_dgqbro3-fullview.png
 // @grant        GM_addStyle
 // ==/UserScript==
 
@@ -12,10 +13,11 @@
     'use strict';
 
     // Globale Daten
-    let buildingDataGlobal = [];       // alle Gebäude (Array)
-    let vehicleDataGlobal = [];        // alle Fahrzeuge (Array)
-    let vehicleMapGlobal = {};         // mapping buildingId -> [fahrzeuge]
-    let vehicleTypeMapGlobal = {};     // mapping typeId -> vehicleType info (von LSSM API)
+    let buildingDataGlobal = [];
+    let vehicleDataGlobal = [];
+    let vehicleMapGlobal = {};
+    let vehicleTypeMapGlobal = {};
+    let lssmBuildingDefsGlobal = null;
     let currentCredits = 0;
     let currentCoins = 0;
 
@@ -64,14 +66,20 @@
         <div class="modal fade" id="fahrzeugManagerModal" tabindex="-1" role="dialog" aria-labelledby="fahrzeugManagerLabel">
           <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
-              <div class="modal-header" style="display: flex; flex-direction: column; gap: 5px;">
+              <div class="modal-header" fm-sticky-header">
                   <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-                      <h3 class="modal-title" id="fahrzeugManagerLabel" style="font-weight: bold; margin: 0;">🚒 Fahrzeug-Manager</h3>
+                      <h3 class="modal-title" id="fahrzeugManagerLabel" style="font-weight: bold; margin: 0;">🚒 Der Fahrzeug-Manager🚒</h3>
                       <div style="display: flex; gap: 10px; align-items: center;">
                           <button type="button" class="fm-config-btn" id="fm-config-btn">Fahrzeugkonfiguration</button>
                           <button type="button" class="fm-close-btn" data-dismiss="modal">Schließen ✖</button>
                       </div>
                   </div>
+                    <div class="fm-description"
+                         style="font-size: 14px; color: #555; background-color: var(--spoiler-body-bg); padding: 5px 0; line-height: 1.5;">
+                      Nutze den <strong>Fahrzeug-Manager</strong>, um deine Fahrzeugflotte effizient zu verwalten.<br>
+                      Du kannst pro Wachentyp deine Fahrzeuge individuell konfigurieren – über den Button oben rechts.<br>
+                      Außerdem kannst du deine Wachen deutlich schneller mit Fahrzeugen bestücken und behältst dabei stets die Kosten im Blick.
+                    </div>
                   <div style="display: grid; grid-template-columns: max-content 1fr; gap: 15px; row-gap: 3px; align-items: center; font-size: 14px;">
                       <div>Aktuelle Credits: <span id="fm-credits" style="color: #5cb85c; font-weight: bold;">0</span></div>
                       <div>Ausgewählte Credits: <span id="fm-costs-credits" style="color: #5cb85c; font-weight: bold;">0</span></div>
@@ -79,13 +87,13 @@
                       <div>Ausgewählte Coins: <span id="fm-costs-coins" style="color: #dc3545; font-weight: bold;">0</span></div>
                   </div>
                   <div id="fm-progress-container" style="width: 100%; display: none; margin-top: 5px;">
-    <div id="fm-progress-text" style="font-size: 13px; margin-bottom: 3px; font-weight: bold; color: #007bff;">
-        Kauf gestartet...
-    </div>
-    <div style="background: #e0e0e0; border-radius: 4px; overflow: hidden; height: 8px;">
-        <div id="fm-progress-bar" style="width: 0%; height: 100%; background: #28a745; transition: width 0.3s ease;"></div>
-    </div>
-</div>
+                    <div id="fm-progress-text" style="font-size: 13px; margin-bottom: 3px; font-weight: bold; color: #007bff;">
+                        Kauf gestartet...
+                    </div>
+                    <div style="background: #e0e0e0; border-radius: 4px; overflow: hidden; height: 8px;">
+                        <div id="fm-progress-bar" style="width: 0%; height: 100%; background: #28a745; transition: width 0.3s ease;"></div>
+                    </div>
+                </div>
               </div>
               <div class="modal-body" id="fahrzeug-manager-content">
                 <p>Lade Daten...</p>
@@ -125,6 +133,9 @@
         #fahrzeugManagerModal .modal-dialog { max-width: 2500px; width: 95%; margin: 30px auto; }
         #fahrzeugManagerModal .modal-content { width: 100%; overflow-x: auto; }
         #fahrzeugManagerModal { z-index: 10000 !important; }
+        #fahrzeugManagerModal .modal-content { display: flex;  flex-direction: column;  height: 90vh; /* gesamte Modalhöhe */ }
+        #fahrzeugManagerModal .modal-header { flex-shrink: 0;  position: sticky;  top: 0;  z-index: 10;  background: var(--spoiler-body-bg); }
+        #fahrzeugManagerModal .modal-body { overflow-y: auto;  flex-grow: 1; }
         .modal-backdrop { z-index: 9999 !important; }
         .fm-close-btn { background-color: #dc3545; color: white; border: none; border-radius: 4px; padding: 5px 10px; font-size: 13px; cursor: pointer; }
         .fm-close-btn:hover { background-color: #c82333; }
@@ -149,16 +160,52 @@
         #fahrzeugConfigModal .modal-content { width: 100%; overflow-x: auto; }
         #fahrzeugConfigModal { z-index: 10001 !important; }  /* höher als FahrzeugManager */
         #fahrzeugConfigModal + .modal-backdrop { z-index: 10000 !important; }
+
     `);
+
+    // FERTIGER Patch: Stellplatzberechnung für alle Gebäudetypen (auch SEG, THW, Wasserrettung usw.)
+    function calcMaxParkingLots(building, lssmBuildings) {
+        const bTypeId = String(building.building_type);
+        const lssmDef = lssmBuildings?.[bTypeId];
+        if (!lssmDef) return (building.level ?? 0) + 1;
+
+        // Spezialwachen: startParkingLots + alle Erweiterungen mit givesParkingLots
+        let max = lssmDef.startParkingLots || 0;
+        if (Array.isArray(building.extensions)) {
+            for (const ext of building.extensions) {
+                const lssmExt = lssmDef.extensions?.find(e =>
+                                                         (typeof ext.type_id !== "undefined" && typeof e.type_id !== "undefined" && e.type_id === ext.type_id) ||
+                                                         (e.caption && ext.caption && e.caption === ext.caption)
+                                                        );
+                if (lssmExt && lssmExt.givesParkingLots) max += lssmExt.givesParkingLots;
+            }
+        }
+        if (lssmDef.maxLevel > 0) {
+            max += (building.level ?? 0);
+        }
+        return max;
+    }
 
     // LSS-Manager Fahrzeugtypen laden
     async function loadVehicleTypesLSSM() {
         try {
             const res = await fetch('https://api.lss-manager.de/de_DE/vehicles');
             const data = await res.json();
-            return data; // keys: 0, 1, 2, ... → direkt verwendbar!
+            return data;
         } catch (e) {
             console.error('Fehler beim Laden der LSSM Fahrzeugtypen:', e);
+            return {};
+        }
+    }
+
+    // LSS-Manager Building-Definitionen laden
+    async function loadLSSMBuildingDefs() {
+        try {
+            const res = await fetch('https://api.lss-manager.de/de_DE/buildings');
+            const data = await res.json();
+            return data;
+        } catch (e) {
+            console.error('Fehler beim Laden der LSSM Building-Defs:', e);
             return {};
         }
     }
@@ -180,16 +227,18 @@
         const content = document.getElementById('fahrzeug-manager-content');
         content.innerHTML = '<p><span class="glyphicon glyphicon-refresh glyphicon-spin"></span> Lade Übersicht...</p>';
         try {
-            const [buildings, vehiclesRaw, vehicleTypeMap] = await Promise.all([
+            const [buildings, vehiclesRaw, vehicleTypeMap, lssmBuildingDefs] = await Promise.all([
                 fetch('/api/buildings').then(r=>r.json()),
                 loadVehiclesFromAPI_raw(),
-                loadVehicleTypesLSSM()
+                loadVehicleTypesLSSM(),
+                loadLSSMBuildingDefs()
             ]);
 
             // Globale Speicherung
             buildingDataGlobal = buildings;
             vehicleDataGlobal = vehiclesRaw;
             vehicleTypeMapGlobal = vehicleTypeMap;
+            lssmBuildingDefsGlobal = lssmBuildingDefs;
 
             // vehicleMap aufbauen
             const vehicleMap = {};
@@ -208,7 +257,7 @@
             });
 
             const filteredBuildings = buildings.filter(b=>getBuildingTypeName(b)!==null);
-            content.innerHTML = buildBuildingsByType(filteredBuildings, vehicleMap, vehicleTypeMap);
+            content.innerHTML = buildBuildingsByType(filteredBuildings, vehicleMap, vehicleTypeMap, lssmBuildingDefsGlobal);
 
             // Spoiler eventlisteners
             document.querySelectorAll('.fm-spoiler-header').forEach(header=>{
@@ -225,6 +274,130 @@
         } catch(err) {
             content.innerHTML = `<div class="alert alert-danger">❌ Fehler beim Laden der Daten: ${err}</div>`;
         }
+    }
+
+    // Hilfsfunktion: Gibt die Stellplätze für eine Erweiterung zurück
+    function getParkingLotsForExtension(buildingTypeId, extensionTypeIdOrCaption, lssmBuildingDefs) {
+        const buildingDef = lssmBuildingDefs[String(buildingTypeId)];
+        if (!buildingDef || !Array.isArray(buildingDef.extensions)) return 0;
+        const extDef = buildingDef.extensions.find(ext =>
+                                                   (ext.type_id !== undefined && ext.type_id === extensionTypeIdOrCaption) ||
+                                                   (typeof extensionTypeIdOrCaption === "string" && ext.caption === extensionTypeIdOrCaption)
+                                                  );
+        return extDef && extDef.givesParkingLots ? extDef.givesParkingLots : 0;
+    }
+
+    // Nach Typ gruppieren und Spoiler bauen
+    function buildBuildingsByType(buildings, vehicleMap, vehicleTypeMap, lssmBuildingDefs) {
+        const grouped = {};
+        buildings.forEach(b => {
+            const typeName = getBuildingTypeName(b);
+            if(!typeName) return;
+            if(!grouped[typeName]) grouped[typeName]=[];
+            grouped[typeName].push(b);
+        });
+
+        let html='';
+        Object.keys(buildingTypeNames).forEach((key, idx) => {
+            const typeName = buildingTypeNames[key];
+            if(grouped[typeName]){
+                const filteredBuildings = grouped[typeName].filter(b => {
+                    const vehiclesCount = (vehicleMap[b.id] || []).length;
+                    const maxVehicles = calcMaxParkingLots(b, lssmBuildingDefs);
+                    return vehiclesCount < maxVehicles;
+                });
+                if(filteredBuildings.length > 0) {
+                    html+=
+                        `<div class="fm-spoiler">
+                         <div class="fm-spoiler-header" data-target="fm-spoiler-body-${idx}">${typeName}</div>
+                         <div id="fm-spoiler-body-${idx}" class="fm-spoiler-body">${buildFahrzeugTable(filteredBuildings, idx, vehicleMap, vehicleTypeMap, lssmBuildingDefs)}</div>
+                         </div>`;
+                }
+            }
+        });
+        return html;
+    }
+
+    // Tabelle für Gebäude eines Typs
+    function buildFahrzeugTable(buildings, tableId, vehicleMap, vehicleTypeMap, lssmBuildingDefs) {
+        const leitstellen = [...new Set(buildings.map(b => b.leitstelle_caption).filter(Boolean))];
+        const wachen = [...new Set(buildings.map(b => b.caption).filter(Boolean))];
+
+        let html = `<table class="table fm-table" id="fm-table-${tableId}">
+
+        <thead>
+        <tr><th>Alle Aus-/Abwählen</th><th>Leitstelle</th><th>Wache</th><th>Fahrzeuge</th><th>Freie Stellplätze</th><th>Fahrzeuge auf Wache</th><th>Fehlende Fahrzeuge</th><th>Kaufen mit Credits</th><th>Kaufen mit Coins</th></tr>
+        <tr class="fm-filter-row">
+        <td><input type="checkbox" class="fm-select-all" data-table="${tableId}"></td>
+        <td><select class="fm-filter-leitstelle" data-table="${tableId}"><option value="">Alle</option>${leitstellen.map(n=>`<option value="${n}">${n}</option>`).join('')}</select></td>
+        <td><select class="fm-filter-wache" data-table="${tableId}"><option value="">Alle</option>${wachen.map(n=>`<option value="${n}">${n}</option>`).join('')}</select></td>
+        <td><button class="fm-filter-reset btn btn-primary btn-xs" data-table="${tableId}">Reset</button></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td><button class="btn btn-success btn-xs fm-buy-selected-credits" data-table="${tableId}"> Alle kaufen (Credits)</button></td>
+        <td><button class="btn btn-danger btn-xs fm-buy-selected-coins" data-table="${tableId}"> Alle kaufen (Coins)</button></td>
+        </tr>
+        </thead>
+        <tbody>`;
+
+        const sortedBuildings = buildings.slice().sort((a, b) => a.caption.localeCompare(b.caption));
+
+        sortedBuildings.forEach((b, idx) => {
+            const vehiclesOnBuilding = vehicleMap[b.id] || [];
+            const typeCountMap = {};
+
+            vehiclesOnBuilding.forEach(v => {
+                const typeId = v.vehicle_type;
+                let typeName = vehicleTypeMap[typeId]?.caption || `Unbekannt (Typ ${typeId})`;
+                typeCountMap[typeName] = (typeCountMap[typeName] || 0) + 1;
+            });
+
+            const vehicleNames = Object.entries(typeCountMap)
+            .map(([name, count]) => count > 1 ? `${count}x ${name}` : name)
+            .join(',<wbr> ') || 'Keine Fahrzeuge auf Wache vorhanden';
+
+            // **Hier stellen wir sicher, dass der Config-Key stimmt**
+            const configKey = `${b.building_type}_${b.small_building ? 'small' : 'normal'}`;
+            const missingData = getMissingVehiclesForBuilding(b, vehicleMap, vehicleTypeMap, configKey);
+
+            const missingVehiclesJson = JSON.stringify(missingData.vehiclesIds || []);
+
+            // Freie Stellplätze NEU mit Erweiterungen ausrechnen:
+            const maxVehicles = calcMaxParkingLots(b, lssmBuildingDefs);
+            const freieStellplaetze = Math.max(maxVehicles - vehiclesOnBuilding.length, 0);
+
+            html += `<tr data-building-id="${b.id}" data-missing-vehicle-ids='${missingVehiclesJson}'>
+            <td>
+                <input type="checkbox" class="fm-select" id="fm-select-${tableId}-${idx}"
+                    data-credits="${missingData.totalCredits}"
+                    data-coins="${missingData.totalCoins}">
+            </td>
+            <td>${b.leitstelle_caption ?? '-'}</td>
+            <td>${b.caption}</td>
+            <td>${b.vehicle_count ?? 0}</td>
+            <td><span class="badge fm-badge-green">${freieStellplaetze}</span></td>
+            <td><span class="fm-vehicle-list">${vehicleNames}</span></td>
+            <td><span class="fm-vehicle-list">${missingData.names}</span></td>
+            <td>
+                <button class="btn btn-success btn-xs fm-buy-credit"
+                    ${missingData.totalCredits > currentCredits ? 'disabled title="Nicht genug Credits"' : ''}
+                >
+                    ${missingData.totalCredits.toLocaleString()} Credits
+                </button>
+            </td>
+            <td>
+                <button class="btn btn-danger btn-xs fm-buy-coin"
+                    ${missingData.totalCoins > currentCoins ? 'disabled title="Nicht genug Coins"' : ''}
+                >
+                    ${missingData.totalCoins.toLocaleString()} Coins
+                </button>
+            </td>
+        </tr>`;
+        });
+
+        html += '</tbody></table>';
+        return html;
     }
 
     // --- Einzelne Tabellen: Event-Listener zentral anlegen ---
@@ -312,7 +485,7 @@
         const filteredBuildings = buildingDataGlobal.filter(b => getBuildingTypeName(b) !== null);
 
         // Tabellen neu bauen
-        content.innerHTML = buildBuildingsByType(filteredBuildings, vehicleMapGlobal, vehicleTypeMapGlobal);
+        content.innerHTML = buildBuildingsByType(filteredBuildings, vehicleMapGlobal, vehicleTypeMapGlobal, lssmBuildingDefsGlobal, updateSelectedCosts);
 
         // Spoiler-Eventlistener erneut setzen
         document.querySelectorAll('.fm-spoiler-header').forEach(header => {
@@ -372,132 +545,17 @@
     }
 
     // Maximale Stellplätze berechnen (inkl. Erweiterungen)
-    function getMaxVehiclesForBuilding(building) {
-        let max = (building.level ?? 0) + 1;
+    function getMaxVehiclesForBuilding(building, lssmBuildingDefs) {
+        // Standard: Level + 1
+        let max = building.level !== undefined ? building.level + 1 : 1;
 
-        // Erweiterungen berücksichtigen
-        if (Array.isArray(building.extensions)) {
+        // Spezialwachen: Stellplätze durch Erweiterungen (SEG/THW etc.)
+        if (Array.isArray(building.extensions) && lssmBuildingDefs) {
             building.extensions.forEach(ext => {
-                if (ext.givesParkingLots) {
-                    max += ext.givesParkingLots;
-                }
+                max += getParkingLotsForExtension(building.building_type, ext.type_id ?? ext.caption, lssmBuildingDefs);
             });
         }
         return max;
-    }
-
-    // Nach Typ gruppieren und Spoiler bauen
-    function buildBuildingsByType(buildings, vehicleMap, vehicleTypeMap) {
-        const grouped = {};
-        buildings.forEach(b => {
-            const typeName = getBuildingTypeName(b);
-            if(!typeName) return;
-            if(!grouped[typeName]) grouped[typeName]=[];
-            grouped[typeName].push(b);
-        });
-
-        let html='';
-        Object.keys(buildingTypeNames).forEach((key, idx) => {
-            const typeName = buildingTypeNames[key];
-            if(grouped[typeName]){
-                // Filtere Wachen mit freien Stellplätzen:
-                const filteredBuildings = grouped[typeName].filter(b => {
-                    const vehiclesCount = (vehicleMap[b.id] || []).length;
-                    // Stellplätze: Level + 1 (wie im Code), kann ggf. angepasst werden
-                    const maxVehicles = getMaxVehiclesForBuilding(b);
-                    return vehiclesCount < maxVehicles;
-
-                });
-                if(filteredBuildings.length > 0) {
-                    html+=
-                        `<div class="fm-spoiler">
-                         <div class="fm-spoiler-header" data-target="fm-spoiler-body-${idx}">${typeName}</div>
-                         <div id="fm-spoiler-body-${idx}" class="fm-spoiler-body">${buildFahrzeugTable(filteredBuildings, idx, vehicleMap, vehicleTypeMap)}</div>
-                         </div>`;
-                }
-            }
-        });
-        return html;
-    }
-
-    // Tabelle für Gebäude eines Typs
-    function buildFahrzeugTable(buildings, tableId, vehicleMap, vehicleTypeMap) {
-        const leitstellen = [...new Set(buildings.map(b => b.leitstelle_caption).filter(Boolean))];
-        const wachen = [...new Set(buildings.map(b => b.caption).filter(Boolean))];
-
-        let html = `<table class="table fm-table" id="fm-table-${tableId}">
-
-        <thead>
-        <tr><th>Alle Aus-/Abwählen</th><th>Leitstelle</th><th>Wache</th><th>Fahrzeuge</th><th>Freie Stellplätze</th><th>Fahrzeuge auf Wache</th><th>Fehlende Fahrzeuge</th><th>Kaufen mit Credits</th><th>Kaufen mit Coins</th></tr>
-        <tr class="fm-filter-row">
-        <td><input type="checkbox" class="fm-select-all" data-table="${tableId}"></td>
-        <td><select class="fm-filter-leitstelle" data-table="${tableId}"><option value="">Alle</option>${leitstellen.map(n=>`<option value="${n}">${n}</option>`).join('')}</select></td>
-        <td><select class="fm-filter-wache" data-table="${tableId}"><option value="">Alle</option>${wachen.map(n=>`<option value="${n}">${n}</option>`).join('')}</select></td>
-        <td><button class="fm-filter-reset btn btn-primary btn-xs" data-table="${tableId}">Reset</button></td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td><button class="btn btn-success btn-xs fm-buy-selected-credits" data-table="${tableId}"> Alle kaufen (Credits)</button></td>
-        <td><button class="btn btn-danger btn-xs fm-buy-selected-coins" data-table="${tableId}"> Alle kaufen (Coins)</button></td>
-        </tr>
-        </thead>
-        <tbody>`;
-
-        const sortedBuildings = buildings.slice().sort((a, b) => a.caption.localeCompare(b.caption));
-
-        sortedBuildings.forEach((b, idx) => {
-            const vehiclesOnBuilding = vehicleMap[b.id] || [];
-            const typeCountMap = {};
-
-            vehiclesOnBuilding.forEach(v => {
-                const typeId = v.vehicle_type;
-                let typeName = vehicleTypeMap[typeId]?.caption || `Unbekannt (Typ ${typeId})`;
-                typeCountMap[typeName] = (typeCountMap[typeName] || 0) + 1;
-            });
-
-            const vehicleNames = Object.entries(typeCountMap)
-            .map(([name, count]) => count > 1 ? `${count}x ${name}` : name)
-            .join(',<wbr> ') || 'Keine Fahrzeuge auf Wache vorhanden';
-
-            // **Hier stellen wir sicher, dass der Config-Key stimmt**
-            const configKey = `${b.building_type}_${b.small_building ? 'small' : 'normal'}`;
-            const missingData = getMissingVehiclesForBuilding(b, vehicleMap, vehicleTypeMap, configKey);
-
-            console.info(`[FM][Table] Wache "${b.caption}" - Fehlende Fahrzeuge:`, missingData.names);
-
-            const missingVehiclesJson = JSON.stringify(missingData.vehiclesIds || []);
-
-            html += `<tr data-building-id="${b.id}" data-missing-vehicle-ids='${missingVehiclesJson}'>
-            <td>
-                <input type="checkbox" class="fm-select" id="fm-select-${tableId}-${idx}"
-                    data-credits="${missingData.totalCredits}"
-                    data-coins="${missingData.totalCoins}">
-            </td>
-            <td>${b.leitstelle_caption ?? '-'}</td>
-            <td>${b.caption}</td>
-            <td>${b.vehicle_count ?? 0}</td>
-            <td><span class="badge fm-badge-green">${Math.max((b.level ?? 0) + 1 - vehiclesOnBuilding.length, 0)}</span></td>
-            <td><span class="fm-vehicle-list">${vehicleNames}</span></td>
-            <td><span class="fm-vehicle-list">${missingData.names}</span></td>
-            <td>
-                <button class="btn btn-success btn-xs fm-buy-credit"
-                    ${missingData.totalCredits > currentCredits ? 'disabled title="Nicht genug Credits"' : ''}
-                >
-                    ${missingData.totalCredits.toLocaleString()} Credits
-                </button>
-            </td>
-            <td>
-                <button class="btn btn-danger btn-xs fm-buy-coin"
-                    ${missingData.totalCoins > currentCoins ? 'disabled title="Nicht genug Coins"' : ''}
-                >
-                    ${missingData.totalCoins.toLocaleString()} Coins
-                </button>
-            </td>
-        </tr>`;
-        });
-
-        html += '</tbody></table>';
-        return html;
     }
 
     // Aktuelle Ressourcen holen und regelmäßig aktualisieren
@@ -586,14 +644,14 @@
 
                 if (vehiclesForBuilding.length > 0) {
                     html += `
-<div class="fm-spoiler">
-  <div class="fm-spoiler-header" data-target="fm-config-body-${key}">
-    ${buildingCaption} – wird geladen …
-  </div>
-  <div id="fm-config-body-${key}" class="fm-spoiler-body">
-    ${buildConfigGrid(vehiclesForBuilding, key, 10, buildingCaption)}
-  </div>
-</div>`;
+                    <div class="fm-spoiler">
+                      <div class="fm-spoiler-header" data-target="fm-config-body-${key}">
+                        ${buildingCaption} – wird geladen …
+                      </div>
+                      <div id="fm-config-body-${key}" class="fm-spoiler-body">
+                        ${buildConfigGrid(vehiclesForBuilding, key, 10, buildingCaption)}
+                      </div>
+                    </div>`;
                 }
             });
 
@@ -619,29 +677,23 @@
         if (!vehicles || vehicles.length === 0) return '<div>Keine Fahrzeuge vorhanden</div>';
 
         vehicles.sort((a, b) => a.caption.localeCompare(b.caption));
-
-        // gespeicherte Config laden
         let savedConfig = [];
         try {
             savedConfig = JSON.parse(localStorage.getItem(`fm-config-${tableId}`)) || [];
-            console.info(`[FM][Config] Geladene Config fm-config-${tableId}:`, savedConfig);
         } catch (e) {
             savedConfig = [];
             console.warn(`[FM][Config] Fehler beim Laden der Config fm-config-${tableId}:`, e);
         }
 
-        let html = `<div style="margin-bottom:5px; display:flex; gap:5px;">
-    <button class="btn btn-success btn-xs fm-config-select-all" data-table="${tableId}">Alle anwählen</button>
-    <button class="btn btn-danger btn-xs fm-config-deselect-all" data-table="${tableId}">Alle abwählen</button>
-    <button class="btn btn-primary btn-xs fm-config-toggle" data-table="${tableId}">Abgewählte Fahrzeuge anzeigen</button>
-</div>`; // Buttons **vor** Grid
+        let html =
+            `<div style="margin-bottom:5px; display:flex; gap:5px;">
+                  <button class="btn btn-success btn-xs fm-config-select-all" data-table="${tableId}">Alle anwählen</button>
+                  <button class="btn btn-danger btn-xs fm-config-deselect-all" data-table="${tableId}">Alle abwählen</button>
+                  <button class="btn btn-primary btn-xs fm-config-toggle" data-table="${tableId}">Abgewählte Fahrzeuge anzeigen</button>
+             </div>`;
 
-        html += `<div class="fm-config-grid" id="fm-config-table-${tableId}" style="
-    display: grid;
-    grid-template-columns: repeat(${itemsPerRow}, minmax(120px, 1fr));
-    gap: 4px 8px;
-    width: 100%;
-">`;
+        html +=
+            `<div class="fm-config-grid" id="fm-config-table-${tableId}" style=" display: grid; grid-template-columns: repeat(${itemsPerRow}, minmax(120px, 1fr)); gap: 4px 8px; width: 100%; ">`;
 
         vehicles.forEach((vehicle, idx) => {
             const saved = savedConfig.find(c => (c.typeId !== undefined && String(c.typeId) === String(vehicle.id)) || c.caption === vehicle.caption);
@@ -679,7 +731,7 @@
         </div>`;
         });
 
-        html += `</div>`; // Ende Grid
+        html += `</div>`;
 
         // DOM-Event-Bindings + Debug
         setTimeout(() => {
@@ -698,7 +750,6 @@
                     if (cb.checked) selected += parseInt(input.value, 10) || 0;
                 });
                 header.innerHTML = `${buildingCaption} – ${selected} Fahrzeuge`;
-                console.info(`[FM][Config] Header-Update: ${selected} Fahrzeuge ausgewählt für ${buildingCaption}`);
             }
 
             function saveConfig() {
@@ -715,14 +766,12 @@
                     });
                 });
                 localStorage.setItem(`fm-config-${tableId}`, JSON.stringify(config));
-                console.info(`[FM][Config] Automatisch gespeichert fm-config-${tableId}:`, config);
             }
 
             // Checkboxen & Inputs
             grid.querySelectorAll('.fm-config-select').forEach(cb => {
                 const cell = cb.closest('.fm-config-cell');
                 cb.addEventListener('change', () => {
-                    console.info(`[FM][Config] Checkbox geändert: ${cb.dataset.caption} => ${cb.checked}`);
                     if (!cell) return;
                     cell.style.display = cb.checked ? '' : 'none';
                     updateHeaderCount();
@@ -732,7 +781,6 @@
 
             grid.querySelectorAll('.fm-config-amount').forEach(input => {
                 input.addEventListener('change', () => {
-                    console.info(`[FM][Config] Menge geändert: ${input.previousElementSibling.textContent} => ${input.value}`);
                     updateHeaderCount(); saveConfig();
                 });
                 input.addEventListener('input', () => { updateHeaderCount(); saveConfig(); });
@@ -751,7 +799,6 @@
                         }
                     });
                     toggleBtn.textContent = showingHidden ? 'Abgewählte Fahrzeuge ausblenden' : 'Abgewählte Fahrzeuge anzeigen';
-                    console.info(`[FM][Config] Toggle abgewählte Fahrzeuge: ${showingHidden ? 'anzeigen' : 'ausblenden'}`);
                 });
             }
 
@@ -760,7 +807,6 @@
             const btnDeselectAll = grid.parentElement.querySelector('.fm-config-deselect-all');
 
             btnSelectAll?.addEventListener('click', () => {
-                console.info(`[FM][Config] Alle Fahrzeuge anwählen`);
                 grid.querySelectorAll('.fm-config-cell').forEach(cell => {
                     const cb = cell.querySelector('.fm-config-select');
                     if (!cb) return;
@@ -772,7 +818,6 @@
             });
 
             btnDeselectAll?.addEventListener('click', () => {
-                console.info(`[FM][Config] Alle Fahrzeuge abwählen`);
                 grid.querySelectorAll('.fm-config-cell').forEach(cell => {
                     const cb = cell.querySelector('.fm-config-select');
                     if (!cb) return;
@@ -795,8 +840,8 @@
         return html;
     }
 
+    // Ermittelt, welche Fahrzeuge einer Wache fehlen.
     function getMissingVehiclesForBuilding(building, vehicleMap, vehicleTypeMap) {
-        console.group(`[FM][Debug][Missing] Wache: "${building.caption}"`);
 
         // Fahrzeuge auf der Wache
         const vehiclesOnBuilding = vehicleMap[building.id] || [];
@@ -821,7 +866,6 @@
             console.warn(`[FM][Debug] Fehler beim Laden der Config für ${building.caption}`, e);
             config = [];
         }
-        console.info('📦 Geladene Config:', config.map(c => ({caption: c.caption, typeId: c.typeId, checked: c.checked, amount: c.amount})));
 
         const missing = [];
         const missingVehicleIds = [];
@@ -830,20 +874,17 @@
 
         config.forEach(c => {
             if (!c.checked) {
-                console.info(`⛔ Überspringe "${c.caption}" (nicht ausgewählt)`);
                 return;
             }
 
             const requestedAmount = parseInt(c.amount, 10) || 1;
             let typeId = c.typeId != null ? String(c.typeId) : null;
 
-            // fallback über caption, falls typeId fehlt
             if (!typeId) {
                 const vtEntry = Object.entries(vehicleTypeMap).find(
                     ([id, v]) => (v.caption || '').trim() === (c.caption || '').trim()
                 );
                 if (vtEntry) typeId = String(vtEntry[0]);
-                console.info(`🔍 Fallback über Caption für "${c.caption}" → TypId: ${typeId}`);
             }
 
             if (!typeId) {
@@ -855,7 +896,6 @@
             const diff = Math.max(requestedAmount - ist, 0);
 
             if (diff <= 0) {
-                console.info(`✅ Typ ${typeId} ("${c.caption}") ausreichend vorhanden (${ist}/${requestedAmount})`);
                 return;
             }
 
@@ -867,8 +907,6 @@
 
             for (let i = 0; i < diff; i++) missingVehicleIds.push(parseInt(typeId, 10));
             missing.push(diff > 1 ? `${diff}x ${c.caption}` : c.caption);
-
-            console.info(`❌ Fehlend: ${diff}x "${c.caption}"`);
         });
 
         console.info('🏁 Endgültig fehlen:', missing.length ? missing.join(', ') : 'Keine');
@@ -882,83 +920,109 @@
         };
     }
 
-    // Expose updateSelectedCosts globally in case listeners need it
-    window.fm_updateSelectedCosts = updateSelectedCosts;
-
+    // Funktiion zum Kauf der fehlenden Fahrzeuge
     async function buyVehicles(rows, currency, confirmBeforeBuy = true) {
         if (!rows || rows.length === 0) return;
 
-        // Alle Fahrzeug-IDs sammeln
-        const allVehicleIds = [];
-        const buildingMap = {}; // für Anzeige im Overlay
+        const buyPlanMap = {};
         rows.forEach(row => {
             const vehicleIds = JSON.parse(row.dataset.missingVehicleIds || '[]');
-            if (vehicleIds.length > 0) {
-                allVehicleIds.push(...vehicleIds.map(id => ({buildingId: parseInt(row.dataset.buildingId,10), vehicleId: id})));
-                buildingMap[row.dataset.buildingId] = row.closest('tr').cells[2]?.textContent || `Wache ${row.dataset.buildingId}`;
+            const buildingId = Number(row.dataset.buildingId);
+            vehicleIds.forEach(vehicleTypeId => {
+                const key = `${buildingId}-${vehicleTypeId}`;
+                buyPlanMap[key] = (buyPlanMap[key] || 0) + 1;
+            });
+        });
+
+        let freshVehiclesData = [];
+        try {
+            freshVehiclesData = await fetch('/api/vehicles').then(r=>r.json());
+        } catch(e) {
+            alert("Fehler beim Nachladen der aktuellen Fahrzeugliste. Der Kauf wird abgebrochen.");
+            return;
+        }
+        const freshVehicleMap = {};
+        freshVehiclesData.forEach(v => {
+            if (!freshVehicleMap[v.building_id]) freshVehicleMap[v.building_id] = [];
+            freshVehicleMap[v.building_id].push(v);
+        });
+
+        // Bau finale Kauf-Liste: Pro Typ/Wache wirklich nur Differenz!
+        const filteredBuyList = [];
+        Object.entries(buyPlanMap).forEach(([key, wanted]) => {
+            const [buildingId, vehicleTypeId] = key.split('-').map(Number);
+            if (wanted > 0) {
+                for (let i = 0; i < wanted; ++i) {
+                    filteredBuyList.push({buildingId, vehicleId: vehicleTypeId});
+                }
             }
         });
 
-        if (allVehicleIds.length === 0) {
-            console.info("✅ Keine Fahrzeuge zu kaufen.");
+        if (filteredBuyList.length === 0) {
+            alert("Keine Fahrzeuge mehr zu kaufen – die gewünschte Anzahl ist schon vorhanden!");
             return;
         }
 
         // --- Gesamtkosten berechnen ---
         let totalCost = 0;
-        allVehicleIds.forEach(v => {
+        filteredBuyList.forEach(v => {
             const vt = vehicleTypeMapGlobal[v.vehicleId];
             if (!vt) return;
-            totalCost += currency === 'credits' ? vt.credits : vt.coins;
+            totalCost += currency === 'Credits' ? vt.credits : vt.coins;
         });
 
-        const available = currency === 'credits' ? currentCredits : currentCoins;
+        const available = currency === 'Credits' ? currentCredits : currentCoins;
         if (totalCost > available) {
             alert(`❌ Nicht genug ${currency}!\nBenötigt: ${totalCost.toLocaleString()} ${currency}\nVorhanden: ${available.toLocaleString()} ${currency}`);
             return;
         }
 
-        // --- Bestätigung nur bei Sammelkauf ---
-        if (confirmBeforeBuy && !confirm(`Sollen wirklich ${allVehicleIds.length} Fahrzeuge (${totalCost.toLocaleString()} ${currency}) gekauft werden?`)) {
+        if (confirmBeforeBuy && !confirm(`Möchtest du wirklich ${filteredBuyList.length} Fahrzeuge für ${totalCost.toLocaleString()} ${currency} kaufen?`)) {
             return;
         }
 
-        // --- Fortschrittsanzeige im Modal-Header ---
+        // Fortschrittsanzeige im Modal-Header
         const progressContainer = document.getElementById('fm-progress-container');
         const progressText = document.getElementById('fm-progress-text');
         const progressBar = document.getElementById('fm-progress-bar');
         progressContainer.style.display = 'block';
         progressText.style.display = 'block';
         progressBar.style.width = '0%';
-        progressText.textContent = `0 / ${allVehicleIds.length} Fahrzeuge gekauft`;
+        progressText.textContent = `0 / ${filteredBuyList.length} Fahrzeuge gekauft`;
 
-        // --- Kauf durchführen ---
-        for (let i = 0; i < allVehicleIds.length; i++) {
-            const { buildingId, vehicleId } = allVehicleIds[i];
+        // Hole Gebäudenamen für Logging
+        const buildingsById = {};
+        (buildingDataGlobal||[]).forEach(b => buildingsById[b.id] = b.caption);
+
+        let boughtCount = 0;
+        for (let i = 0; i < filteredBuyList.length; i++) {
+            const { buildingId, vehicleId } = filteredBuyList[i];
+            const vehicleName = vehicleTypeMapGlobal?.[vehicleId]?.caption || `Typ ${vehicleId}`;
+            const buildingName = buildingsById?.[buildingId] || buildingId;
             const url = `/buildings/${buildingId}/vehicle/${buildingId}/${vehicleId}/${currency}?building=${buildingId}`;
+
+            console.info(`[Kauf] Starte Kauf: Typ ${vehicleId} (${vehicleName}) auf Wache ${buildingId} (${buildingName})`);
 
             try {
                 const res = await fetch(url, { method: 'GET' });
                 if (res.ok) {
-                    console.info(`✅ Fahrzeugtyp ${vehicleId} auf Wache ${buildingId} gekauft`);
+                    boughtCount++;
+                    console.info(`[Kauf] Erfolgreich gekauft: Typ ${vehicleId} (${vehicleName}) auf Wache ${buildingId} (${buildingName})`);
                 } else {
                     let text = '';
                     try { text = await res.text(); } catch {}
-                    console.warn(`⚠️ Fehler beim Kauf von Typ ${vehicleId} auf Wache ${buildingId} (Status ${res.status})`, text.slice(0,200));
+                    console.warn(`[Kauf] Fehler beim Kauf von Typ ${vehicleId} (${vehicleName}) auf Wache ${buildingId} (${buildingName}) (Status ${res.status})`, text.slice(0, 200));
                 }
             } catch (err) {
-                console.error(`❌ Kauf fehlgeschlagen für Typ ${vehicleId} auf Wache ${buildingId}:`, err);
+                console.error(`[Kauf] Kauf fehlgeschlagen für Typ ${vehicleId} (${vehicleName}) auf Wache ${buildingId} (${buildingName}):`, err);
             }
 
-            // Fortschritt aktualisieren
-            progressText.textContent = `${i + 1} / ${allVehicleIds.length} Fahrzeuge gekauft`;
-            progressBar.style.width = `${Math.round(((i+1)/allVehicleIds.length)*100)}%`;
-
-            // nur bei Sammelkauf Pause einfügen
+            progressText.textContent = `${i + 1} / ${filteredBuyList.length} Fahrzeuge gekauft`;
+            progressBar.style.width = `${Math.round(((i+1)/filteredBuyList.length)*100)}%`;
             if (confirmBeforeBuy) await new Promise(r => setTimeout(r, 1000));
         }
 
-        progressText.textContent = `✅ Kauf abgeschlossen (${allVehicleIds.length} Fahrzeuge)`;
+        progressText.textContent = `✅ Kauf abgeschlossen (${boughtCount} Fahrzeuge)`;
         progressBar.style.width = `100%`;
 
         setTimeout(() => {
@@ -966,11 +1030,12 @@
             progressBar.style.width = '0%';
         }, 2000);
 
+        console.info(`[Kauf] Zusammenfassung: ${boughtCount} Fahrzeuge erfolgreich gekauft.`);
+
         // Ansicht aktualisieren
         await loadBuildingsFromAPI();
+        updateSelectedCosts();
     }
-
-    // --- Eventlistener anpassen ---
 
     // Einzelkauf (kein Confirm)
     document.addEventListener('click', async e => {
@@ -999,4 +1064,6 @@
         }
     });
 
+    // Expose updateSelectedCosts globally in case listeners need it
+    window.fm_updateSelectedCosts = updateSelectedCosts;
 })();
